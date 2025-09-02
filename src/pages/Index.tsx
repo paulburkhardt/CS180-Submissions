@@ -5,6 +5,15 @@ import { ImagePlaceholder } from '@/components/ImagePlaceholder';
 import { Camera, Users, Building, Clapperboard } from 'lucide-react';
 import mountainHero from '@/assets/mountain-hero.jpg';
 import bearIcon from '@/assets/bear-icon.png';
+//import images 
+import distorted from '@/assets/distorted.jpeg';
+import zoomed from '@/assets/zoomed.jpeg';
+import ex2_1_no_zoom from '@/assets/ex2_1_no_zoom.jpeg';
+import ex2_1_zoom from '@/assets/ex2_1_zoom.jpeg';
+import ex2_2_no_zoom from '@/assets/ex2_2_no_zoom.jpeg';
+import ex2_2_zoom from '@/assets/ex2_2_zoom.jpeg';
+import ex3 from '@/assets/ex3.gif';
+import ex3_2 from '@/assets/ex3_2.gif';
 
 const Index = () => {
 
@@ -66,7 +75,7 @@ const Index = () => {
                 <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <img 
-              src="/distorted.jpeg" 
+              src={distorted} 
               alt="Close-up Portrait (No Zoom)" 
               className="w-full h-auto rounded-lg shadow-md"
             />
@@ -74,7 +83,7 @@ const Index = () => {
           </div>
           <div className="space-y-2">
             <img 
-              src="/zoomed.jpeg" 
+              src={zoomed} 
               alt="Zoomed Portrait (With Zoom)" 
               className="w-full h-auto rounded-lg shadow-md"
             />
@@ -93,7 +102,7 @@ const Index = () => {
         <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
             <img 
-              src="/ex2_1_no_zoom.jpeg" 
+              src={ex2_1_no_zoom} 
               alt="No Zoom" 
               className="w-full h-auto rounded-lg shadow-md"
             />
@@ -101,7 +110,7 @@ const Index = () => {
           </div>
           <div className="space-y-2">
             <img 
-              src="/ex2_1_zoom.jpeg" 
+              src={ex2_1_zoom} 
               alt="Zoomed (Compressed)" 
               className="w-full h-auto rounded-lg shadow-md"
             />
@@ -114,7 +123,7 @@ const Index = () => {
          
           <div className="space-y-2">
             <img 
-              src="/ex2_2_no_zoom.jpeg" 
+              src={ex2_2_no_zoom} 
               alt="No Zoom" 
               className="w-full h-auto rounded-lg shadow-md"
             />
@@ -122,7 +131,7 @@ const Index = () => {
           </div>
           <div className="space-y-2">
             <img 
-              src="/ex2_2_zoom.jpeg" 
+              src={ex2_2_zoom} 
               alt="Zoomed (Compressed)" 
               className="w-full h-auto rounded-lg shadow-md"
             />
@@ -142,7 +151,7 @@ const Index = () => {
         <div className="grid grid-cols-2 gap-6 max-w-4xl mx-auto">
           <div className="space-y-2">
             <img 
-              src="/ex3.gif" 
+              src={ex3} 
               alt="Dolly Zoom Effect (Vertigo Effect) - Example 1" 
               className="w-full h-auto rounded-lg shadow-md"
             />
@@ -150,7 +159,7 @@ const Index = () => {
           </div>
           <div className="space-y-2">
             <img 
-              src="/ex3_2.gif" 
+              src={ex3_2} 
               alt="Dolly Zoom Effect (Vertigo Effect) - Example 2" 
               className="w-full h-auto rounded-lg shadow-md"
             />
