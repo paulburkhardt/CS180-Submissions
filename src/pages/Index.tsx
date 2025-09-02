@@ -3,8 +3,8 @@ import { AssignmentSection } from '@/components/AssignmentSectionNew';
 import { ScrollReveal } from '@/components/ScrollReveal';
 import { ImagePlaceholder } from '@/components/ImagePlaceholder';
 import { Camera, Users, Building, Clapperboard } from 'lucide-react';
-import mountainHero from '@/assets/mountain-hero.jpg';
-import bearIcon from '@/assets/bear-icon.png';
+import mountainHero from '@/assets/mountain-hero-with-bears.jpg';
+import bearIcon from '@/assets/bear-icon-transparent.png';
 
 const Index = () => {
 
