@@ -37,11 +37,7 @@ const Index = () => {
               A Photography Journey Through Kings Canyon National Park
             </p>
             
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
-              <p className="text-lg">
-                <strong>Due Date:</strong> Tuesday, September 2nd, 2025 at 11:59PM
-              </p>
-            </div>
+           
           </ScrollReveal>
         </div>
       </section>
@@ -62,14 +58,28 @@ const Index = () => {
       {/* Part 1: Selfie */}
       <AssignmentSection
         title="Part 1"
-        subtitle="Selfie: The Wrong Way vs. The Right Way"
-        description="Take a picture of your friend (or yourself) from close up. You get a typical distorted selfie image. Now step back several feet from your subject, zoom in, and take a second picture. Try to get the face in the second photo to be the same size as in the first photo. If you've done things right, the second portrait should look much better than the first one. Think about why this is."
+        subtitle="Selfie: The Wrong Way vs. The Right Way "
+        description="The close-up selfie appears distorted because of perspective distortion, when the camera is too close, facial features nearest to the lens (like the nose) appear disproportionately large compared to features further away (like the ears). This creates an unflattering, warped appearance. The zoomed portrait looks much better because stepping back and using zoom maintains proper facial proportions. The longer focal length compresses the depth, making all facial features appear more naturally sized relative to each other."
         icon={<Users className="h-8 w-8" />}
         className="bg-secondary/30"
       >
-        <div className="grid grid-cols-2 gap-4">
-          <ImagePlaceholder label="Close-up Portrait (Wrong Way)" />
-          <ImagePlaceholder label="Zoomed Portrait (Right Way)" />
+                <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <img 
+              src="/distorted.jpeg" 
+              alt="Close-up Portrait (No Zoom)" 
+              className="w-full h-auto rounded-lg shadow-md"
+            />
+            <p className="text-sm text-center text-muted-foreground">Close-up Portrait (No Zoom)</p>
+          </div>
+          <div className="space-y-2">
+            <img 
+              src="/zoomed.jpeg" 
+              alt="Zoomed Portrait (With Zoom)" 
+              className="w-full h-auto rounded-lg shadow-md"
+            />
+            <p className="text-sm text-center text-muted-foreground">Zoomed Portrait (With Zoom)</p>
+          </div>
         </div>
       </AssignmentSection>
 
@@ -77,17 +87,46 @@ const Index = () => {
       <AssignmentSection
         title="Part 2"
         subtitle="Architectural Perspective Compression"
-        description="Let's repeat the same procedure in reverse, for an urban scene. Pick a nice view down a long street (or a walking path on campus), zoom in, and take a photo. Now, walk down the street in the direction of your first shot, and take a second photo without zoom, such that the scene in the two photos appears approximately the same size. The first picture should look flattened, or compressed, compared to the second."
+        description="The zoomed street view appears flattened or compressed because longer focal lengths compress the perception of depth. When you zoom in from a distance, the telephoto effect makes objects at different distances appear closer together than they actually are. This compression effect minimizes the apparent size differences between foreground and background elements, creating a 'stacked' appearance. In contrast, the wide-angle shot taken from closer maintains natural depth perception, where nearby objects appear larger and distant objects smaller, preserving the three-dimensional relationship between elements in the scene."
         icon={<Building className="h-8 w-8" />}
       >
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <ImagePlaceholder label="Zoomed Street View (Compressed)" />
-            <ImagePlaceholder label="Wide Street View (Natural)" />
+        <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+            <img 
+              src="/ex2_1_no_zoom.jpeg" 
+              alt="No Zoom" 
+              className="w-full h-auto rounded-lg shadow-md"
+            />
+            <p className="text-sm text-center text-muted-foreground">No Zoom</p>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <ImagePlaceholder label="Alternative Angle 1" />
-            <ImagePlaceholder label="Alternative Angle 2" />
+          <div className="space-y-2">
+            <img 
+              src="/ex2_1_zoom.jpeg" 
+              alt="Zoomed (Compressed)" 
+              className="w-full h-auto rounded-lg shadow-md"
+            />
+            <p className="text-sm text-center text-muted-foreground">Zoomed (Compressed)</p>
+          </div>
+         
+        </div>
+        
+        <div className="grid grid-cols-2 gap-4 mt-4">
+         
+          <div className="space-y-2">
+            <img 
+              src="/ex2_2_no_zoom.jpeg" 
+              alt="No Zoom" 
+              className="w-full h-auto rounded-lg shadow-md"
+            />
+            <p className="text-sm text-center text-muted-foreground">No Zoom</p>
+          </div>
+          <div className="space-y-2">
+            <img 
+              src="/ex2_2_zoom.jpeg" 
+              alt="Zoomed (Compressed)" 
+              className="w-full h-auto rounded-lg shadow-md"
+            />
+            <p className="text-sm text-center text-muted-foreground">Zoomed (Compressed)</p>
           </div>
         </div>
       </AssignmentSection>
@@ -96,13 +135,27 @@ const Index = () => {
       <AssignmentSection
         title="Part 3"
         subtitle="The Dolly Zoom (Vertigo Effect)"
-        description="The idea is to simultaneously move the camera back while also zooming in. First, come up with a good setting for the shot (e.g., a scene with stuffed animals is one popular choice). Now take a few (4-8 or even more!) still photos while you move the camera back and zoom in, keeping the resulting image roughly the same size. Combine your stills into an animated GIF file—you have a dolly zoom!"
+        description="The dolly zoom creates a disorienting 'vertigo' effect by simultaneously moving the camera backward while zooming in (or forward while zooming out). This technique keeps the main subject the same size in frame while dramatically changing the background perspective. As you move back and zoom in, the background appears to 'stretch away' due to the telephoto compression effect, distant objects seem to get farther apart and the depth of field flattens. This contradicts our brain's expectation of how perspective should change with distance, creating the unsettling, dreamlike sensation famously used in films like Hitchcock's 'Vertigo' and Spielberg's 'Jaws'."
         icon={<Clapperboard className="h-8 w-8" />}
         className="bg-secondary/30"
       >
-        <div className="grid grid-cols-2 gap-4">
-          <ImagePlaceholder label="Dolly Zoom GIF/Video 1" isVideo />
-          <ImagePlaceholder label="Dolly Zoom GIF/Video 2" isVideo />
+        <div className="grid grid-cols-2 gap-6 max-w-4xl mx-auto">
+          <div className="space-y-2">
+            <img 
+              src="/ex3.gif" 
+              alt="Dolly Zoom Effect (Vertigo Effect) - Example 1" 
+              className="w-full h-auto rounded-lg shadow-md"
+            />
+            <p className="text-sm text-center text-muted-foreground">Dolly Zoom Effect - Example 1</p>
+          </div>
+          <div className="space-y-2">
+            <img 
+              src="/ex3_2.gif" 
+              alt="Dolly Zoom Effect (Vertigo Effect) - Example 2" 
+              className="w-full h-auto rounded-lg shadow-md"
+            />
+            <p className="text-sm text-center text-muted-foreground">Dolly Zoom Effect - Example 2</p>
+          </div>
         </div>
       </AssignmentSection>
 
@@ -111,7 +164,7 @@ const Index = () => {
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center space-x-4 mb-4">
             <img src={bearIcon} alt="Bear" className="h-8 w-8 opacity-80" />
-            <h3 className="text-xl font-semibold">Kings Canyon Photography Assignment</h3>
+            <h3 className="text-xl font-semibold">CS180 Assignment 0</h3>
           </div>
           <p className="text-primary-foreground/80">
             Capturing the beauty of perspective and focal length in nature's grandest classroom
