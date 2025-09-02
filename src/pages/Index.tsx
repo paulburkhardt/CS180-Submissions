@@ -1,26 +1,12 @@
-import React, { useState } from 'react';
-import { AssignmentSection } from '@/components/AssignmentSection';
+import React from 'react';
+import { AssignmentSection } from '@/components/AssignmentSectionNew';
 import { ScrollReveal } from '@/components/ScrollReveal';
+import { ImagePlaceholder } from '@/components/ImagePlaceholder';
 import { Camera, Users, Building, Clapperboard } from 'lucide-react';
 import mountainHero from '@/assets/mountain-hero.jpg';
 import bearIcon from '@/assets/bear-icon.png';
 
 const Index = () => {
-  const [part1Files, setPart1Files] = useState<File[]>([]);
-  const [part2Files, setPart2Files] = useState<File[]>([]);
-  const [part3Files, setPart3Files] = useState<File[]>([]);
-
-  const handlePart1Upload = (files: File[]) => {
-    setPart1Files(prev => [...prev, ...files]);
-  };
-
-  const handlePart2Upload = (files: File[]) => {
-    setPart2Files(prev => [...prev, ...files]);
-  };
-
-  const handlePart3Upload = (files: File[]) => {
-    setPart3Files(prev => [...prev, ...files]);
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -78,38 +64,47 @@ const Index = () => {
         title="Part 1"
         subtitle="Selfie: The Wrong Way vs. The Right Way"
         description="Take a picture of your friend (or yourself) from close up. You get a typical distorted selfie image. Now step back several feet from your subject, zoom in, and take a second picture. Try to get the face in the second photo to be the same size as in the first photo. If you've done things right, the second portrait should look much better than the first one. Think about why this is."
-        uploadTitle="Upload Your Portrait Comparison"
-        uploadDescription="Upload 1-2 photos showing the close-up vs. zoomed comparison"
-        onFileUpload={handlePart1Upload}
-        uploadedFiles={part1Files}
         icon={<Users className="h-8 w-8" />}
         className="bg-secondary/30"
-      />
+      >
+        <div className="grid grid-cols-2 gap-4">
+          <ImagePlaceholder label="Close-up Portrait (Wrong Way)" />
+          <ImagePlaceholder label="Zoomed Portrait (Right Way)" />
+        </div>
+      </AssignmentSection>
 
       {/* Part 2: Architectural Perspective */}
       <AssignmentSection
         title="Part 2"
         subtitle="Architectural Perspective Compression"
         description="Let's repeat the same procedure in reverse, for an urban scene. Pick a nice view down a long street (or a walking path on campus), zoom in, and take a photo. Now, walk down the street in the direction of your first shot, and take a second photo without zoom, such that the scene in the two photos appears approximately the same size. The first picture should look flattened, or compressed, compared to the second."
-        uploadTitle="Upload Your Perspective Study"
-        uploadDescription="Upload 1-2 photos showing the compressed vs. natural perspective"
-        onFileUpload={handlePart2Upload}
-        uploadedFiles={part2Files}
         icon={<Building className="h-8 w-8" />}
-      />
+      >
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <ImagePlaceholder label="Zoomed Street View (Compressed)" />
+            <ImagePlaceholder label="Wide Street View (Natural)" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <ImagePlaceholder label="Alternative Angle 1" />
+            <ImagePlaceholder label="Alternative Angle 2" />
+          </div>
+        </div>
+      </AssignmentSection>
 
       {/* Part 3: Dolly Zoom */}
       <AssignmentSection
         title="Part 3"
         subtitle="The Dolly Zoom (Vertigo Effect)"
         description="The idea is to simultaneously move the camera back while also zooming in. First, come up with a good setting for the shot (e.g., a scene with stuffed animals is one popular choice). Now take a few (4-8 or even more!) still photos while you move the camera back and zoom in, keeping the resulting image roughly the same size. Combine your stills into an animated GIF file—you have a dolly zoom!"
-        uploadTitle="Upload Your Dolly Zoom"
-        uploadDescription="Upload your animated GIF or individual frames from your dolly zoom sequence"
-        onFileUpload={handlePart3Upload}
-        uploadedFiles={part3Files}
         icon={<Clapperboard className="h-8 w-8" />}
         className="bg-secondary/30"
-      />
+      >
+        <div className="grid grid-cols-2 gap-4">
+          <ImagePlaceholder label="Dolly Zoom GIF/Video 1" isVideo />
+          <ImagePlaceholder label="Dolly Zoom GIF/Video 2" isVideo />
+        </div>
+      </AssignmentSection>
 
       {/* Footer */}
       <footer className="bg-primary text-primary-foreground py-12">
