@@ -96,7 +96,7 @@ const Index = () => {
       <AssignmentSection
         title="Part 2"
         subtitle="Architectural Perspective Compression"
-        description="The zoomed street view appears flattened or compressed because longer focal lengths compress the perception of depth. When you zoom in from a distance, the telephoto effect makes objects at different distances appear closer together. This compression effect minimizes the apparent size differences between foreground and background elements, creating a 'stacked' appearance."
+        description="The zoomed photo appears flattened or compressed because longer focal lengths compress the perception of depth. When you zoom in from a distance, the telephoto effect makes objects at different distances appear closer together. This compression effect minimizes the apparent size differences between foreground and background elements, creating a 'stacked' appearance."
         icon={<Building className="h-8 w-8" />}
       >
         <div className="grid grid-cols-2 gap-4">
