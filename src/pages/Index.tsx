@@ -96,7 +96,7 @@ const Index = () => {
       <AssignmentSection
         title="Part 2"
         subtitle="Architectural Perspective Compression"
-        description="The zoomed street view appears flattened or compressed because longer focal lengths compress the perception of depth. When you zoom in from a distance, the telephoto effect makes objects at different distances appear closer together than they actually are. This compression effect minimizes the apparent size differences between foreground and background elements, creating a 'stacked' appearance. In contrast, the wide-angle shot taken from closer maintains natural depth perception, where nearby objects appear larger and distant objects smaller, preserving the three-dimensional relationship between elements in the scene."
+        description="The zoomed street view appears flattened or compressed because longer focal lengths compress the perception of depth. When you zoom in from a distance, the telephoto effect makes objects at different distances appear closer together. This compression effect minimizes the apparent size differences between foreground and background elements, creating a 'stacked' appearance."
         icon={<Building className="h-8 w-8" />}
       >
         <div className="grid grid-cols-2 gap-4">
@@ -144,7 +144,7 @@ const Index = () => {
       <AssignmentSection
         title="Part 3"
         subtitle="The Dolly Zoom (Vertigo Effect)"
-        description="The dolly zoom creates a disorienting 'vertigo' effect by simultaneously moving the camera backward while zooming in (or forward while zooming out). This technique keeps the main subject the same size in frame while dramatically changing the background perspective. As you move back and zoom in, the background appears to 'stretch away' due to the telephoto compression effect, distant objects seem to get farther apart and the depth of field flattens. This contradicts our brain's expectation of how perspective should change with distance, creating the unsettling, dreamlike sensation famously used in films like Hitchcock's 'Vertigo' and Spielberg's 'Jaws'."
+        description="The dolly zoom creates a disorienting 'vertigo' effect by simultaneously moving the camera backward while zooming in (or forward while zooming out). This technique keeps the main subject the same size in frame while dramatically changing the background perspective. As you move back and zoom in, the background appears to 'stretch away' due to the telephoto compression effect, distant objects seem to get farther apart and the depth of field flattens."
         icon={<Clapperboard className="h-8 w-8" />}
         className="bg-secondary/30"
       >
