@@ -144,7 +144,7 @@ const Index = () => {
       <AssignmentSection
         title="Part 3"
         subtitle="The Dolly Zoom (Vertigo Effect)"
-        description="The dolly zoom creates a disorienting 'vertigo' effect by simultaneously moving the camera backward while zooming in (or forward while zooming out). This technique keeps the main subject the same size in frame while dramatically changing the background perspective. As you move back and zoom in, the background appears to 'stretch away' due to the telephoto compression effect, distant objects seem to get farther apart and the depth of field flattens."
+        description="The dolly zoom creates a disorienting 'vertigo' effect by simultaneously moving the camera backward while zooming in (or forward while zooming out). This technique keeps the main subject the same size in frame while dramatically changing the background perspective. As this gives a nice visual effect that is unusual to the human eye, it is used in many movies e.g. to create a sense of disorientation and confusion."
         icon={<Clapperboard className="h-8 w-8" />}
         className="bg-secondary/30"
       >
