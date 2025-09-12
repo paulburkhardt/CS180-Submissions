@@ -72,6 +72,12 @@ import sobelEdgeDetection from '@/assets/project1/edge_detection/sobel.png';
 // Raw glass plate negative
 import rawStripe from '@/assets/project1/raw_stripe.jpg';
 
+// Image Mapping (Better Color Mapping)
+import mappingsVisualization from '@/assets/project1/mappings.png';
+import emirImageMapped from '@/assets/project1/image_mapping/emir.jpeg';
+import camelImageMapped from '@/assets/project1/image_mapping/camel.jpeg';
+import luganoImageMapped from '@/assets/project1/image_mapping/lugano.jpeg';
+
 // Image mapping objects for easy lookup
 const unalignedImages: Record<string, string> = {
   'boy.jpeg': boyUnaligned,
@@ -185,9 +191,27 @@ const getBellsWhistlesImages = (featureName: string) => {
       return [
         {
           name: 'Color Transformation Matrix',
-          before: null,
+          before: mappingsVisualization,
           after: null,
-          hasImage: false
+          hasImage: 'matrix-only'
+        },
+        {
+          name: 'Emir - Color Mapping',
+          before: emirAutoCropped,
+          after: emirImageMapped,
+          hasImage: true
+        },
+        {
+          name: 'Camel - Color Mapping',
+          before: camelAutoCropped,
+          after: camelImageMapped,
+          hasImage: true
+        },
+        {
+          name: 'Lugano - Color Mapping',
+          before: luganoAutoCropped,
+          after: luganoImageMapped,
+          hasImage: true
         }
       ];
     case 'Better Features':
@@ -736,67 +760,82 @@ Both methods are superior to pixel-based alignment because they emphasize struct
                       <div key={techIndex} className="space-y-4">
                         <h5 className="text-lg font-medium text-gray-800 text-center">{technique.name}</h5>
                         <div 
-                          className={`grid grid-cols-1 md:grid-cols-2 gap-8 ${technique.hasImage ? 'cursor-pointer hover:opacity-80 transition-opacity group' : ''}`}
-                          onClick={() => technique.hasImage && setFullscreenBellsWhistles({
+                          className={`${technique.hasImage === 'matrix-only' ? 'flex justify-center' : `grid grid-cols-1 md:grid-cols-2 gap-8 ${technique.hasImage ? 'cursor-pointer hover:opacity-80 transition-opacity group' : ''}`}`}
+                          onClick={() => technique.hasImage === true && setFullscreenBellsWhistles({
                             name: technique.name,
                             featureName: feature.name,
                             before: technique.before,
                             after: technique.after
                           })}
-                          title={technique.hasImage ? "Click to view fullscreen comparison" : undefined}
+                          title={technique.hasImage === true ? "Click to view fullscreen comparison" : undefined}
                         >
-                          <div>
-                            <h4 className="font-medium text-gray-900 mb-4">{feature.name === 'Better Features' ? 'Original Image' : 'Before Enhancement'}</h4>
-                            <div className="aspect-square bg-gray-100 rounded flex items-center justify-center border overflow-hidden relative">
-                              {technique.hasImage ? (
-                                <>
-                                  <img 
-                                    src={technique.before}
-                                    alt={`Before ${technique.name}`}
-                                    className="w-full h-full object-cover rounded"
-                                    onError={(e) => {
-                                      const target = e.currentTarget as HTMLImageElement;
-                                      target.style.display = 'none';
-                                      const parent = target.parentElement;
-                                      if (parent) {
-                                        parent.innerHTML = '<div class="text-center text-gray-500"><p>Image Loading Error</p><p class="text-sm mt-1">Before ' + technique.name + '</p></div>';
-                                      }
-                                    }}
-                                  />
-                                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <Maximize2 className="h-4 w-4 text-gray-600" />
-                                  </div>
-                                </>
-                              ) : (
-                                <div className="text-center text-gray-500">
-                                  <p>Original Image</p>
-                                  <p className="text-sm mt-1">Placeholder for {technique.name}</p>
-                                </div>
-                              )}
+                          {technique.hasImage === 'matrix-only' ? (
+                            <div className="w-full flex flex-col items-center">
+                              <h4 className="font-medium text-gray-900 mb-4 text-center">Color Transformation Matrix</h4>
+                              <div className="bg-gray-100 rounded-lg p-6 flex items-center justify-center border overflow-hidden max-w-4xl w-full">
+                                <img 
+                                  src={technique.before}
+                                  alt="Color Transformation Matrix Visualization"
+                                  className="w-full h-auto object-contain rounded"
+                                />
+                              </div>
                             </div>
-                          </div>
-                          <div>
-                            <h4 className="font-medium text-gray-900 mb-4">{feature.name === 'Better Features' ? 'With Edge Detection' : 'After Enhancement'}</h4>
-                            <div className="aspect-square bg-gray-100 rounded flex items-center justify-center border overflow-hidden relative">
-                              {technique.hasImage ? (
-                                <>
-                                  <img 
-                                    src={technique.after}
-                                    alt={`After ${technique.name}`}
-                                    className="w-full h-full object-cover rounded"
-                                  />
-                                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <Maximize2 className="h-4 w-4 text-gray-600" />
-                                  </div>
-                                </>
-                              ) : (
-                                <div className="text-center text-gray-500">
-                                  <p>Enhanced Image</p>
-                                  <p className="text-sm mt-1">Placeholder for {technique.name}</p>
+                          ) : (
+                            <>
+                              <div>
+                                <h4 className="font-medium text-gray-900 mb-4">{feature.name === 'Better Features' ? 'Original Image' : 'Before Enhancement'}</h4>
+                                <div className="aspect-square bg-gray-100 rounded flex items-center justify-center border overflow-hidden relative">
+                                  {technique.hasImage ? (
+                                    <>
+                                      <img 
+                                        src={technique.before}
+                                        alt={`Before ${technique.name}`}
+                                        className="w-full h-full object-cover rounded"
+                                        onError={(e) => {
+                                          const target = e.currentTarget as HTMLImageElement;
+                                          target.style.display = 'none';
+                                          const parent = target.parentElement;
+                                          if (parent) {
+                                            parent.innerHTML = '<div class="text-center text-gray-500"><p>Image Loading Error</p><p class="text-sm mt-1">Before ' + technique.name + '</p></div>';
+                                          }
+                                        }}
+                                      />
+                                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <Maximize2 className="h-4 w-4 text-gray-600" />
+                                      </div>
+                                    </>
+                                  ) : (
+                                    <div className="text-center text-gray-500">
+                                      <p>Original Image</p>
+                                      <p className="text-sm mt-1">Placeholder for {technique.name}</p>
+                                    </div>
+                                  )}
                                 </div>
-                              )}
-                            </div>
-                          </div>
+                              </div>
+                              <div>
+                                <h4 className="font-medium text-gray-900 mb-4">{feature.name === 'Better Features' ? 'With Edge Detection' : 'After Enhancement'}</h4>
+                                <div className="aspect-square bg-gray-100 rounded flex items-center justify-center border overflow-hidden relative">
+                                  {technique.hasImage ? (
+                                    <>
+                                      <img 
+                                        src={technique.after}
+                                        alt={`After ${technique.name}`}
+                                        className="w-full h-full object-cover rounded"
+                                      />
+                                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <Maximize2 className="h-4 w-4 text-gray-600" />
+                                      </div>
+                                    </>
+                                  ) : (
+                                    <div className="text-center text-gray-500">
+                                      <p>Enhanced Image</p>
+                                      <p className="text-sm mt-1">Placeholder for {technique.name}</p>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </>
+                          )}
                         </div>
                       </div>
                     ))}
