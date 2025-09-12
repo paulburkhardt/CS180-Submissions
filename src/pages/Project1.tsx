@@ -133,19 +133,22 @@ const getBellsWhistlesImages = (featureName: string) => {
           name: 'Camel - Gamma Correction',
           before: camelAutoCropped,
           after: camelAutoContrast,
-          hasImage: true
+          hasImage: true,
+          gammaInfo: 'γ = 1.78, original mean = 0.68'
         },
         {
           name: 'Emir - Gamma Correction',
           before: emirAutoCropped,
           after: emirAutoContrast,
-          hasImage: true
+          hasImage: true,
+          gammaInfo: 'γ = 1.07, original mean = 0.52'
         },
         {
           name: 'Lugano - Gamma Correction',
           before: luganoAutoCropped,
           after: luganoAutoContrast,
-          hasImage: true
+          hasImage: true,
+          gammaInfo: 'γ = 1.46, original mean = 0.62'
         }
       ];
     case 'Automatic White Balance':
@@ -334,7 +337,7 @@ I developed a more robust approach using **edge detection**:
 
 3. **Border Detection**: Check predefined margins on all sides for boundaries that exceed a specified threshold and crop them off
 
-This approach robustly crops most border artifacts, though not perfectly in all cases.`
+This approach robustly crops most border artifacts, though not perfectly in all cases as it is still dependent on some manual thresholding (see Emir at the top and left).`
     },
     {
       name: "Automatic Contrasting", 
@@ -408,7 +411,10 @@ I applied this mapping to other images as well, and the results consistently enh
 
 **Gradient-based Alignment**:
 • Computes **gradients** of each image along horizontal and vertical directions to capture intensity changes
-• Combines gradients into a **gradient magnitude image**: √(Gₓ² + Gᵧ²)
+• **Mathematical computation**: 
+  - Horizontal gradient: Gₓ(x,y) = I(x+1,y) - I(x-1,y)
+  - Vertical gradient: Gᵧ(x,y) = I(x,y+1) - I(x,y-1)
+  - Gradient magnitude: |∇I| = √(Gₓ² + Gᵧ²)
 • Highlights areas of strong contrast regardless of absolute brightness
 • Uses **normalized cross-correlation (NCC)** between gradient magnitude maps for alignment
 
@@ -877,7 +883,24 @@ As my alignment was already quite good with the standard approach, I couldn't se
       {/* Bells & Whistles Results */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4 max-w-4xl">
-          <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">Bells & Whistles Implementation</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Bells & Whistles Implementation</h2>
+          
+          {/* Processing Order Note */}
+          <div className="mb-12 p-6 bg-blue-50 border-l-4 border-blue-400 rounded-lg">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-blue-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-lg font-medium text-blue-800">Processing Pipeline Order</h3>
+                <p className="mt-2 text-blue-700">
+                  Both automatic contrasting and white balancing are performed <strong>after auto-cropping</strong>, as borders would introduce noise to these algorithms and affect the statistical calculations used for gamma correction and color balance.
+                </p>
+              </div>
+            </div>
+          </div>
           
           <div className="space-y-16">
             {bellsWhistles.map((feature, index) => (
@@ -919,7 +942,12 @@ As my alignment was already quite good with the standard approach, I couldn't se
                   <div className="space-y-8">
                     {getBellsWhistlesImages(feature.name).map((technique, techIndex) => (
                       <div key={techIndex} className="space-y-4">
-                        <h5 className="text-lg font-medium text-gray-800 text-center">{technique.name}</h5>
+                        <div className="text-center">
+                          <h5 className="text-lg font-medium text-gray-800">{technique.name}</h5>
+                          {technique.gammaInfo && (
+                            <p className="text-sm text-gray-600 mt-1">{technique.gammaInfo}</p>
+                          )}
+                        </div>
                         <div 
                           className={`${technique.hasImage === 'matrix-only' ? 'flex justify-center' : `grid grid-cols-1 md:grid-cols-2 gap-8 ${technique.hasImage ? 'cursor-pointer hover:opacity-80 transition-opacity group' : ''}`}`}
                           onClick={() => technique.hasImage === true && setFullscreenBellsWhistles({
