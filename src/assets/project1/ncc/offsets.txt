@@ -1,0 +1,58 @@
+siren.tif: blue_to_green: x: 6, y: -49, red_to_green: x: -19, y: 47
+Run with similarity function: ncc, auto_crop: False, search_window: 20, border_crop: 0.15
+
+monastery.jpg: blue_to_green: x: -2, y: 3, red_to_green: x: 1, y: 6
+tobolsk.jpg: blue_to_green: x: -3, y: -3, red_to_green: x: 1, y: 4
+cathedral.jpg: blue_to_green: x: -2, y: -5, red_to_green: x: 1, y: 7
+emir.tif: blue_to_green: x: -24, y: -49, red_to_green: x: 17, y: 57
+italil.tif: blue_to_green: x: -21, y: -38, red_to_green: x: 15, y: 38
+Run with similarity function: ncc, auto_crop: False, search_window: 20, border_crop: 0.15
+
+monastery.jpg: blue_to_green: x: -2, y: 3, red_to_green: x: 1, y: 6
+tobolsk.jpg: blue_to_green: x: -3, y: -3, red_to_green: x: 1, y: 4
+cathedral.jpg: blue_to_green: x: -2, y: -5, red_to_green: x: 1, y: 7
+emir.tif: blue_to_green: x: -24, y: -49, red_to_green: x: 17, y: 57
+italil.tif: blue_to_green: x: -21, y: -38, red_to_green: x: 15, y: 38
+Run with similarity function: ncc, auto_crop: False, search_window: 20, border_crop: 0.15
+
+monastery.jpg: blue_to_green: x: -2, y: 3, red_to_green: x: 1, y: 6
+tobolsk.jpg: blue_to_green: x: -3, y: -3, red_to_green: x: 1, y: 4
+cathedral.jpg: blue_to_green: x: -2, y: -5, red_to_green: x: 1, y: 7
+emir.tif: blue_to_green: x: -24, y: -49, red_to_green: x: 17, y: 57
+italil.tif: blue_to_green: x: -21, y: -38, red_to_green: x: 15, y: 38
+church.tif: blue_to_green: x: -4, y: -25, red_to_green: x: -8, y: 33
+three_generations.tif: blue_to_green: x: -13, y: -52, red_to_green: x: -3, y: 59
+lugano.tif: blue_to_green: x: 16, y: -41, red_to_green: x: -13, y: 52
+melons.tif: blue_to_green: x: -10, y: -81, red_to_green: x: 3, y: 96
+lastochikino.tif: blue_to_green: x: 2, y: 2, red_to_green: x: -7, y: 78
+icon.tif: blue_to_green: x: -17, y: -41, red_to_green: x: 5, y: 48
+--------------------------------------------------
+
+Run with similarity function: ncc, auto_crop: False, search_window: 20, border_crop: 0.15
+
+--------------------------------------------------
+
+Run with similarity function: ncc, auto_crop: False, search_window: 20, border_crop: 0.15
+
+monastery.jpg: blue_to_green: x: -2, y: 3, red_to_green: x: 1, y: 6
+tobolsk.jpg: blue_to_green: x: -3, y: -3, red_to_green: x: 1, y: 4
+cathedral.jpg: blue_to_green: x: -2, y: -5, red_to_green: x: 1, y: 7
+emir.tif: blue_to_green: x: -24, y: -49, red_to_green: x: 17, y: 57
+italil.tif: blue_to_green: x: -21, y: -38, red_to_green: x: 15, y: 38
+church.tif: blue_to_green: x: -4, y: -25, red_to_green: x: -8, y: 33
+three_generations.tif: blue_to_green: x: -13, y: -52, red_to_green: x: -3, y: 59
+lugano.tif: blue_to_green: x: 16, y: -41, red_to_green: x: -13, y: 52
+melons.tif: blue_to_green: x: -10, y: -81, red_to_green: x: 3, y: 96
+lastochikino.tif: blue_to_green: x: 2, y: 2, red_to_green: x: -7, y: 78
+icon.tif: blue_to_green: x: -17, y: -41, red_to_green: x: 5, y: 48
+siren.tif: blue_to_green: x: 6, y: -49, red_to_green: x: -19, y: 47
+self_portrait.tif: blue_to_green: x: -29, y: -78, red_to_green: x: 8, y: 98
+harvesters.tif: blue_to_green: x: -17, y: -59, red_to_green: x: -3, y: 65
+--------------------------------------------------
+
+Run with similarity function: ncc, auto_crop: False, search_window: 20, border_crop: 0.15
+
+camel.tif: blue_to_green: x: -21, y: -56, red_to_green: x: 7, y: 60
+boy.tif: blue_to_green: x: 12, y: -39, red_to_green: x: 2, y: 57
+water.tif: blue_to_green: x: 7, y: -15, red_to_green: x: -9, y: 67
+trad_dress.tif: blue_to_green: x: -39, y: -48, red_to_green: x: 15, y: 59
