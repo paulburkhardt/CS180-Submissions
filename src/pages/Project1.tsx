@@ -270,6 +270,7 @@ interface BellsWhistlesImageData {
 const Project1 = () => {
   const [fullscreenImage, setFullscreenImage] = useState<ImageData | null>(null);
   const [fullscreenBellsWhistles, setFullscreenBellsWhistles] = useState<BellsWhistlesImageData | null>(null);
+  const [fullscreenMappings, setFullscreenMappings] = useState<string | null>(null);
 
   // Handle Escape key to close fullscreen modal
   useEffect(() => {
@@ -281,11 +282,14 @@ const Project1 = () => {
         if (fullscreenBellsWhistles) {
           setFullscreenBellsWhistles(null);
         }
+        if (fullscreenMappings) {
+          setFullscreenMappings(null);
+        }
       }
     };
 
     // Add event listener when any fullscreen is open
-    if (fullscreenImage || fullscreenBellsWhistles) {
+    if (fullscreenImage || fullscreenBellsWhistles || fullscreenMappings) {
       document.addEventListener('keydown', handleEscapeKey);
     }
 
@@ -293,7 +297,7 @@ const Project1 = () => {
     return () => {
       document.removeEventListener('keydown', handleEscapeKey);
     };
-  }, [fullscreenImage, fullscreenBellsWhistles]);
+  }, [fullscreenImage, fullscreenBellsWhistles, fullscreenMappings]);
 
   // Naive method results (smaller .jpg images)
   const naiveImages = [
@@ -448,7 +452,7 @@ const Project1 = () => {
 
 **Issue**: Assuming red, green, and blue glass plates map directly to R, G, B channels in modern color space produces unnatural colors.
 
-**Cause**: Historical filters had **different spectral sensitivities** and **overlapping responses** compared to modern digital sensors.
+**Cause**: Historical filters likely had **different spectral sensitivities** and **overlapping responses** compared to modern digital sensors. Early 20th century glass filter technology may have resulted in broader spectral bandwidths with potential cross-talk between channels.
 
 ## Empirical Optimization Approach
 
@@ -461,15 +465,17 @@ const Project1 = () => {
 
 **Mathematical Transformation**:
 
-- **Red channel (R)**: **100%** red plate + **0%** green + **0%** blue
-- **Green channel (G)**: **0%** red + **95%** green plate + **5%** blue plate
-- **Blue channel (B)**: **0%** red + **5%** green plate + **95%** blue plate
+- **Red channel (R)**: **80%** red plate + **20%** green plate + **0%** blue plate
+- **Green channel (G)**: **20%** red plate + **80%** green plate + **0%** blue plate
+- **Blue channel (B)**: **0%** red plate + **5%** green plate + **95%** blue plate
 
 ### Technical Interpretation
 
-**Red Channel**: Direct mapping from red plate (no spectral overlap correction needed)
+**Red & Green Channel Cross-Talk**: The significant cross-channel contributions (20% each way) between red and green plates may compensate for potential **spectral overlap** in the original filter system. This bidirectional mixing suggests that the historical filters might not have had perfectly isolated spectral responses.
 
-**Green & Blue Channels**: Mostly derived from corresponding plates with **small cross-channel contributions** (5%) to compensate for spectral overlap in original filters.
+**Blue Channel Behavior**: The blue channel remains mostly isolated (95% from blue plate, 5% from green), which could indicate that the blue filter had less spectral overlap with other channels, though this is based on empirical optimization rather than known filter specifications.
+
+**Empirical Justification**: This mapping was optimized through visual comparison and produces more natural-looking results than direct RGB mapping, suggesting it better approximates whatever spectral characteristics the original filter system actually had.
 
 ## Results & Validation
 
@@ -1072,23 +1078,32 @@ const Project1 = () => {
                           )}
                         </div>
                         <div 
-                          className={`${technique.hasImage === 'matrix-only' ? 'flex justify-center' : `grid grid-cols-1 md:grid-cols-2 gap-8 ${technique.hasImage ? 'cursor-pointer hover:opacity-80 transition-opacity group' : ''}`}`}
-                          onClick={() => technique.hasImage === true && setFullscreenBellsWhistles({
-                            name: technique.name,
-                            featureName: feature.name,
-                            before: technique.before,
-                            after: technique.after
-                          })}
-                          title={technique.hasImage === true ? "Click to view fullscreen comparison" : undefined}
+                          className={`${technique.hasImage === 'matrix-only' ? 'flex justify-center cursor-pointer hover:opacity-80 transition-opacity group' : `grid grid-cols-1 md:grid-cols-2 gap-8 ${technique.hasImage ? 'cursor-pointer hover:opacity-80 transition-opacity group' : ''}`}`}
+                          onClick={() => {
+                            if (technique.hasImage === true) {
+                              setFullscreenBellsWhistles({
+                                name: technique.name,
+                                featureName: feature.name,
+                                before: technique.before,
+                                after: technique.after
+                              });
+                            } else if (technique.hasImage === 'matrix-only') {
+                              setFullscreenMappings(technique.before);
+                            }
+                          }}
+                          title={technique.hasImage === true ? "Click to view fullscreen comparison" : technique.hasImage === 'matrix-only' ? "Click to view fullscreen" : undefined}
                         >
                           {technique.hasImage === 'matrix-only' ? (
                             <div className="w-full flex flex-col items-center">
-                              <div className="bg-gray-100 rounded-lg p-6 flex items-center justify-center border overflow-hidden max-w-4xl w-full">
+                              <div className="bg-gray-100 rounded-lg p-6 flex items-center justify-center border overflow-hidden max-w-4xl w-full relative">
                                 <img 
                                   src={technique.before}
                                   alt="Color Transformation Matrix Visualization"
                                   className="w-full h-auto object-contain rounded"
                                 />
+                                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <Maximize2 className="h-4 w-4 text-gray-600" />
+                                </div>
                               </div>
                             </div>
                           ) : (
@@ -1358,6 +1373,67 @@ const Project1 = () => {
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-70 rounded-lg p-4 text-white">
               <h4 className="font-medium text-center">{fullscreenBellsWhistles.featureName}</h4>
               <p className="text-sm text-center text-gray-300 mt-1">{fullscreenBellsWhistles.name}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mappings Fullscreen Modal */}
+      {fullscreenMappings && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4"
+          onClick={() => setFullscreenMappings(null)}
+        >
+          <div className="relative w-full h-full max-w-7xl max-h-screen">
+            {/* Close button */}
+            <button
+              onClick={() => setFullscreenMappings(null)}
+              className="absolute top-4 right-4 z-10 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full p-2 text-white transition-all"
+              title="Close (Esc)"
+            >
+              <X className="h-6 w-6" />
+            </button>
+
+            {/* Escape key hint */}
+            <div className="absolute top-4 right-16 z-10 bg-black bg-opacity-50 rounded-lg px-3 py-1 text-white text-sm">
+              Press <kbd className="bg-gray-700 px-1 py-0.5 rounded text-xs">Esc</kbd> to close
+            </div>
+
+            {/* Image title */}
+            <div className="absolute top-4 left-4 z-10 bg-black bg-opacity-50 rounded-lg p-3 text-white">
+              <div className="flex flex-col space-y-1">
+                <h3 className="text-lg font-semibold">Color Mapping Transformation Matrix</h3>
+                <span className="text-sm text-gray-300">Better Color Mapping</span>
+              </div>
+            </div>
+
+            {/* Centered image */}
+            <div className="flex items-center justify-center h-full">
+              <div className="bg-gray-800 rounded-lg flex items-center justify-center overflow-hidden max-w-full max-h-full p-4">
+                <img 
+                  src={fullscreenMappings}
+                  alt="Color Transformation Matrix Visualization"
+                  className="max-w-full max-h-full object-contain rounded-lg"
+                  onError={(e) => {
+                    const target = e.currentTarget as HTMLImageElement;
+                    const fallback = target.nextElementSibling as HTMLElement;
+                    target.style.display = 'none';
+                    if (fallback) fallback.style.display = 'flex';
+                  }}
+                />
+                <div className="text-center text-gray-400 hidden">
+                  <p>Mappings Visualization</p>
+                  <p className="text-sm">(Image loading error)</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Description at bottom */}
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-70 rounded-lg p-4 text-white max-w-2xl">
+              <h4 className="font-medium text-center mb-2">Linear Color Transformation Matrix</h4>
+              <p className="text-sm text-center text-gray-300">
+                Optimized mapping from historical glass plate filters to modern RGB color space
+              </p>
             </div>
           </div>
         </div>
