@@ -69,6 +69,9 @@ import luganoAutoWhiteBalance from '@/assets/project1/auto_white_balance/lugano.
 import gradientEdgeDetection from '@/assets/project1/edge_detection/gradient.png';
 import sobelEdgeDetection from '@/assets/project1/edge_detection/sobel.png';
 
+// Sobel masks visualization
+import sobelMasks from '@/assets/project1/sobmasks.gif';
+
 // Raw glass plate negative
 import rawStripe from '@/assets/project1/raw_stripe.jpg';
 
@@ -190,7 +193,7 @@ const getBellsWhistlesImages = (featureName: string) => {
     case 'Better Color Mapping':
       return [
         {
-          name: 'Color Transformation Matrix',
+          name: 'Color Mapping Comparison',
           before: mappingsVisualization,
           after: null,
           hasImage: 'matrix-only'
@@ -286,11 +289,15 @@ const Project1 = () => {
     };
   }, [fullscreenImage, fullscreenBellsWhistles]);
 
-  // Example images with displacement vectors (aligned blue and red to green)
-  const exampleImages = [
+  // Naive method results (smaller .jpg images)
+  const naiveImages = [
     { name: "cathedral.jpg", displacement: { r: "(1, 7)", g: "(0, 0)", b: "(-2, -5)" }, success: true, method: "naive" },
     { name: "monastery.jpg", displacement: { r: "(1, 6)", g: "(0, 0)", b: "(-2, 3)" }, success: true, method: "naive" },
-    { name: "tobolsk.jpg", displacement: { r: "(1, 4)", g: "(0, 0)", b: "(-3, -3)" }, success: true, method: "naive" },
+    { name: "tobolsk.jpg", displacement: { r: "(1, 4)", g: "(0, 0)", b: "(-3, -3)" }, success: true, method: "naive" }
+  ];
+
+  // Pyramid method results (larger .tif images)
+  const pyramidImages = [
     { name: "church.jpeg", displacement: { r: "(-8, 33)", g: "(0, 0)", b: "(-4, -25)" }, success: true, method: "pyramid" },
     { name: "emir.jpeg", displacement: { r: "(17, 57)", g: "(0, 0)", b: "(-24, -49)" }, success: true, method: "pyramid" },
     { name: "harvesters.jpeg", displacement: { r: "(-3, 65)", g: "(0, 0)", b: "(-17, -59)" }, success: true, method: "pyramid" },
@@ -315,75 +322,105 @@ const Project1 = () => {
   const bellsWhistles = [
     {
       name: "Automatic Cropping",
-      description: "Intelligent border detection and removal using pixel intensity analysis",
+      description: "Edge detection-based border removal using Sobel filtering",
       implemented: true,
-      details: `I initially attempted edge detection using variance, but this approach didn't yield reliable results. Instead, I developed a method that analyzes the percentage of white/black pixels in columns and rows from all sides of the image. The algorithm crops away borders when the percentage exceeds a specific threshold. 
+      details: `To make the pictures prettier, I needed to detect and remove borders automatically rather than using a fixed margin. I initially tried approaches using variance in rows/columns and checking for percentage of "black" or "white" pixels, but these weren't stable enough.
 
-A key challenge emerged when integrating this with the alignment algorithm - the cropped images had mismatched dimensions. I solved this by implementing a helper function that crops all channels to the maximum border cutoff, ensuring consistent dimensions across RGB channels.`,
-      problems: "Requires careful hyperparameter tuning. Sometimes crops too aggressively or too conservatively depending on the image content."
+I developed a more robust approach using **edge detection**:
+
+1. **Preprocessing**: Convert image to grayscale and enhance contrast by stretching the dynamic range (ignoring darkest/brightest 2% of pixels, then spreading the rest across 0-255 range)
+
+2. **Sobel Edge Detection**: Apply a Sobel filter using OpenCV (kernel size 3) to detect edges
+
+3. **Border Detection**: Check predefined margins on all sides for boundaries that exceed a specified threshold and crop them off
+
+This approach robustly crops most border artifacts, though not perfectly in all cases.`
     },
     {
       name: "Automatic Contrasting", 
-      description: "Multi-stage contrast enhancement using linear normalization, gamma correction, and histogram equalization",
+      description: "Gamma correction for natural brightness and contrast adjustment",
       implemented: true,
-      details: `I implemented a three-stage contrast enhancement pipeline:
+      details: `For automatic contrasting, I implemented **gamma correction** as it adjusts an image's brightness and contrast to match how human eyes perceive light, making details in both dark and bright areas more visible and natural-looking.
 
-1. **Linear Normalization**: Rescaled all pixels so the darkest pixel becomes 0 and the brightest becomes 1. However, this linear approach had minimal visual impact.
+The process works as follows:
 
-2. **Gamma Correction**: Applied non-linear transformation to correct for human brightness perception and display characteristics.
+1. **Compute mean brightness** of the image
+2. **Calculate optimal gamma** so that mean_brightness^gamma ≈ target_mean (typically 0.5)
+3. **Apply transformation**: Each pixel value is raised to the power of gamma: I_out = I_in^γ
 
-3. **Histogram Equalization**: This proved most effective, significantly improving contrast by redistributing pixel intensities across the full dynamic range.`,
-      problems: "Results are image-dependent. Works excellently on images like cathedral.jpg but produces unnatural-looking results on others like tobolsk.jpg."
+**Gamma behavior**:
+- γ < 1: Brightens the image (enhances dark areas)  
+- γ > 1: Darkens the image (enhances bright areas)
+- γ values are clipped to [0.3, 3.0] to prevent extreme transformations
+
+The formula for gamma calculation: γ = log(target_mean) / log(current_mean)
+
+This approach significantly improved contrast across the test images, making them more visually appealing and natural-looking.`
     },
     {
       name: "Automatic White Balance",
       description: "Hybrid approach combining Robust Gray World and White Patch assumptions",
       implemented: true,
-      details: `I attempted multiple white balance strategies:
+      details: `For white balancing, I first tried implementing the basic **Gray World assumption**, which assumes that under normal lighting conditions the average color of a scene should be neutral gray (R ≈ G ≈ B). If one channel is dominant (e.g., the image looks too blue), this method compensates by scaling each channel so their averages are balanced. However, this didn't yield promising results.
 
-Initially tried the simple Gray World assumption, but results were overly white and unnatural.
+I then opted for a more advanced approach combining two methods:
 
-Then implemented a sophisticated hybrid approach:
-1. **Robust Gray World Assumption**: Uses 10th-90th percentile pixel values instead of mean to avoid outliers (dust, scratches, blown highlights)
-2. **White Patch Assumption**: Identifies brightest 5% of pixels as potential white/neutral regions
-3. **Combination Strategy**: Weighted average (70% gray world, 30% white patch) to calculate scaling factors
+**Robust Gray World Assumption**:
+- Computes per-channel averages using only the middle 10-90% intensity range
+- Makes the method less sensitive to dust, scratches, or extreme highlights
+- Provides stable color balance estimation
 
-This hybrid method was designed specifically for historical glass plate negatives with uneven illumination and color casts.`,
-      problems: "Despite the sophisticated approach, results still appear overly white. The method needs further refinement for these historical images."
+**White Patch Assumption**:
+- Assumes that the brightest pixels in an image should be white
+- Identifies the brightest regions (likely neutral areas) to estimate scaling factors
+- Uses these to further refine the color correction
+
+**Combined Method**:
+- Blends both methods using weighted averaging
+- Achieves more stable and natural white balance even under uneven illumination and color casts
+- Implementation relies on NumPy for percentile calculations, masking, averaging, and scaling
+
+This hybrid approach was specifically designed to handle the unique characteristics of historical glass plate negatives, resulting in more natural white tones and realistic images.`
     },
     {
       name: "Better Color Mapping",
-      description: "Empirically-derived color transformation matrix based on ground truth comparison",
+      description: "Linear combination mapping to better approximate original filter spectral responses",
       implemented: true,
-      details: `I developed a custom color mapping by comparing my aligned results with a professionally restored version of the Emir image from the Library of Congress. Using a tool with interactive sliders, I empirically determined optimal color transformation coefficients:
+      details: `There's no reason to assume that the red, green, and blue lenses used by **Prokudin-Gorskii** correspond directly to the R, G, and B channels in modern RGB color space. Therefore, I experimented with different near-identity mapping combinations to better approximate the spectral responses of the original filters.
 
-• **RGB Red** = 0.88 × RedPlate + 0.00 × GreenPlate + 0.09 × BluePlate
-• **RGB Green** = 0.00 × RedPlate + 1.00 × GreenPlate + 0.00 × BluePlate  
-• **RGB Blue** = 0.00 × RedPlate + 0.08 × GreenPlate + 0.81 × BluePlate
+To evaluate these mappings, I applied them to *emir.tif* and plotted the results side by side to judge which appeared most realistic.
 
-This transformation accounts for the fact that Prokudin-Gorskii's glass plate filters didn't capture pure RGB channels but had spectral overlap and different sensitivities.`,
-      problems: "The transformation was optimized for the Emir image and may not generalize perfectly to all images in the collection."
+The color mapping that produced the most natural-looking result can be described as a **linear combination of the three plates**:
+
+• **Red channel (R)**: 100% from the red plate, with no contribution from green or blue
+• **Green channel (G)**: 95% from the green plate and 5% from the blue plate  
+• **Blue channel (B)**: 95% from the blue plate and 5% from the green plate
+
+This means that the **red plate maps directly to the red channel**, while the green and blue channels are mostly derived from their corresponding plates but include small contributions from adjacent plates. These slight cross-channel adjustments compensate for overlaps in the spectral responses of Prokudin-Gorskii's original filters, producing more accurate and natural color reproduction.
+
+I applied this mapping to other images as well, and the results consistently enhanced their color fidelity, confirming that this adjustment generalizes beyond a single example.`
     },
     {
       name: "Better Features",
-      description: "Gradient-based and edge-based alignment for improved robustness",
+      description: "Gradient-based and Sobel-based alignment avoiding direct RGB comparison",
       implemented: true,
-      details: `I implemented two advanced feature-based alignment methods:
+      details: `To make the alignment more robust, I implemented a **gradient- and Sobel-based approach** that avoids directly comparing RGB values. Instead of relying on raw color intensities, the method focuses on structural features.
 
 **Gradient-based Alignment**:
-• Computes image gradients using np.gradient() to capture intensity changes in x and y directions
-• Calculates gradient magnitude to capture edge strength regardless of direction  
-• Uses normalized cross-correlation on gradient magnitudes for alignment scoring
-• More robust to illumination changes than raw pixel values
+• Computes **gradients** of each image along horizontal and vertical directions to capture intensity changes
+• Combines gradients into a **gradient magnitude image**: √(Gₓ² + Gᵧ²)
+• Highlights areas of strong contrast regardless of absolute brightness
+• Uses **normalized cross-correlation (NCC)** between gradient magnitude maps for alignment
 
-**Edge-based Alignment**:
-• Detects edges using Canny edge detector with thresholds (100, 200)
-• Creates binary edge maps highlighting significant intensity transitions
-• Uses normalized cross-correlation on edge maps for alignment scoring
-• Invariant to uniform lighting changes, focusing on structural information
+**Sobel-based Alignment**:
+• Uses the **Sobel operator** to detect horizontal and vertical edges
+• Produces edge maps for each image highlighting structural features
+• Performs alignment by calculating NCC between corresponding edge maps
+• Focuses on edges and textures rather than raw pixel colors
 
-Both methods are superior to pixel-based alignment because they emphasize structural features rather than absolute intensity values - crucial for aligning RGB channels with different exposures or color casts.`,
-      problems: "Requires careful threshold tuning for the Canny edge detector. Performance depends on the amount of edge content in the images."
+Both approaches make alignment more robust to variations in brightness, contrast, or color shifts by emphasizing structural information over absolute pixel values. This is particularly important for aligning RGB channels that may have different exposures or color characteristics.
+
+As my alignment was already quite good with the standard approach, I couldn't see meaningful improvement in alignment quality, but the edge maps provide valuable insight into how the alignment algorithm identifies and matches structural features between channels.`
     }
   ];
 
@@ -468,7 +505,7 @@ Both methods are superior to pixel-based alignment because they emphasize struct
                   />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Original Glass Plate</h3>
-                <p className="text-sm text-gray-600">Three RGB channels stacked vertically</p>
+                <p className="text-sm text-gray-600">Three BGR channels stacked vertically</p>
               </div>
               
               {/* Arrow */}
@@ -518,125 +555,241 @@ Both methods are superior to pixel-based alignment because they emphasize struct
           
           <div className="space-y-12">
             <div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">1. Full Image with Border Cropping</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">1. Naive Exhaustive Search</h3>
               <p className="text-gray-700 mb-4">
-                I started by using the entire image for alignment to ensure sufficient visual information for reliable correspondences between RGB channels. 
-                To mitigate border artifacts while preserving visual content, I implemented a border cropping strategy - 
-                removing 15% of the image from each side before computing alignment. I tested both Normalized Cross-Correlation (NCC) 
-                and Euclidean distance as similarity metrics, with a ±15 pixel search window.
+                My first approach was straightforward: keep one image channel fixed (the green channel) and exhaustively slide the other channels over it within a specified window (±15 pixels). At each shifted position, I calculated the displacement using similarity metrics.
               </p>
+              
+              <div className="bg-white p-6 rounded-lg border mb-6">
+                <h4 className="text-lg font-semibold text-gray-900 mb-4">Similarity Metrics</h4>
+                
+                <div className="space-y-6">
+                  <div>
+                    <h5 className="font-medium text-gray-900 mb-2">Euclidean Distance</h5>
+                    <div className="bg-gray-50 p-4 rounded-lg mb-3">
+                      <div className="text-center font-mono text-lg">
+                        d(I₁, I₂) = √(∑(I₁(x,y) - I₂(x,y))²)
+                      </div>
+                    </div>
+                    <p className="text-gray-600 text-sm">
+                      This metric measures the pixel-wise difference between two images. Lower values indicate better alignment, 
+                      as the squared differences between corresponding pixels are minimized.
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <h5 className="font-medium text-gray-900 mb-2">Normalized Cross-Correlation (NCC)</h5>
+                    <div className="bg-gray-50 p-4 rounded-lg mb-3">
+                      <div className="text-center font-mono text-sm">
+                        NCC(I₁, I₂) = ∑[(I₁(x,y) - μ₁)(I₂(x,y) - μ₂)] / √[∑(I₁(x,y) - μ₁)² ∑(I₂(x,y) - μ₂)²]
+                      </div>
+                    </div>
+                    <p className="text-gray-600 text-sm">
+                      NCC measures the correlation between two images after normalizing for their means (μ₁, μ₂). 
+                      Values range from -1 to 1, with 1 indicating perfect positive correlation (best alignment).
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <p className="text-gray-700 mb-4">
+                To avoid border artifacts affecting the distance calculation, I removed a fixed percentage (15%) of the border before computing displacement.
+              </p>
+              
               <p className="text-gray-600 mb-4">
-                <strong>Results:</strong> This approach worked remarkably well for the smaller .jpg test images, producing clean alignments 
-                with reasonable computation times. However, when applied to the high-resolution .tif images, two critical problems emerged:
+                <strong>Results:</strong> This naive approach worked perfectly for smaller .jpg images in reasonable time, successfully recovering the color photographs. However, for larger .tif images, the ±15 pixel radius was too small, and expanding it would make computation prohibitively slow.
               </p>
-              <ul className="text-gray-600 list-disc list-inside space-y-1">
-                <li><strong>Performance:</strong> Processing time ballooned to nearly a minute per image</li>
-                <li><strong>Quality:</strong> The ±15 pixel search window was insufficient for the larger displacements in high-res images</li>
-              </ul>
             </div>
 
             <div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">2. Final Solution: Multi-Scale Image Pyramid</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">2. Multi-Scale Image Pyramid Solution</h3>
               <p className="text-gray-700 mb-4">
-                To address both the performance and quality issues, I implemented a coarse-to-fine image pyramid approach. 
-                The algorithm uses a 3-level pyramid where each level halves the resolution of the previous one. Starting at the 
-                coarsest (smallest) scale, it performs alignment with the full ±15 pixel search window, then propagates and refines 
-                this estimate at each finer scale with progressively smaller search windows (minimum ±3 pixels).
+                To handle larger images efficiently, I implemented a multi-scale pyramid that downsamples the image at each level using bilinear interpolation.
               </p>
+              
+              <div className="bg-white p-6 rounded-lg border mb-6">
+                <h4 className="text-lg font-semibold text-gray-900 mb-4">Bilinear Interpolation Process</h4>
+                <p className="text-gray-700 mb-3">
+                  The downsampling works by interpolating between neighboring pixels in two steps:
+                </p>
+                <ol className="list-decimal list-inside space-y-2 text-gray-700">
+                  <li><strong>X-direction interpolation:</strong> Interpolate between the two top points and the two bottom points horizontally</li>
+                  <li><strong>Y-direction interpolation:</strong> Interpolate between the results from step 1 vertically</li>
+                </ol>
+              </div>
+              
               <p className="text-gray-700 mb-4">
-                This multi-scale strategy is computationally efficient because most of the heavy searching happens on small, 
-                low-resolution images, while the fine-scale refinements require only local adjustments.
+                The alignment process starts on the coarsest (most downsampled) image and progressively refines the alignment at each finer level. At each step, the search window is halved, with ±3 pixels as the minimum window size.
               </p>
-              <p className="text-gray-600">
-                <strong>Performance gains:</strong> Reduced processing time to approximately 45 seconds for large .tif images<br/>
-                <strong>Quality improvements:</strong> Achieved excellent alignments across most test images, including challenging cases like the Emir<br/>
-                <strong>Edge cases:</strong> For particularly misaligned images (melons.tif and self_portrait.tif), I expanded the initial search window to ±20 pixels
+              
+              <p className="text-gray-700 mb-4">
+                Using a 3-level pyramid, NCC as the similarity function, and a ±15 pixel search window, I successfully aligned all .tif images. Only melons.tif and self_portrait.tif required expanding the search window to ±20 pixels, after which all images achieved excellent alignment in under 1 minute average runtime.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Results Section */}
+      {/* Results Section - Naive Method */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4 max-w-6xl">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4 text-center">Results on Example Images</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-4 text-center">Results</h2>
           <p className="text-gray-600 text-center mb-12">Blue and Red channels aligned to Green (reference)</p>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {exampleImages.map((img, index) => (
-              <div key={index} className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900">{img.name}</h3>
-                  <span className={`px-2 py-1 text-xs rounded ${
-                    img.method === 'naive' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
-                  }`}>
-                    {img.method === 'naive' ? 'naive' : 'Pyramid'}
-                  </span>
-                </div>
-                
-                {/* Image display */}
-                <div 
-                  className="grid grid-cols-2 gap-3 cursor-pointer hover:opacity-80 transition-opacity group"
-                  onClick={() => setFullscreenImage(img)}
-                  title="Click to view fullscreen comparison"
-                >
-                  <div className="aspect-square bg-gray-100 rounded flex items-center justify-center border relative overflow-hidden">
-                    <img 
-                      src={unalignedImages[img.name]}
-                      alt={`Unaligned ${img.name}`}
-                      className="w-full h-full object-cover rounded"
-                      onError={(e) => {
-                        // Fallback to placeholder if image doesn't exist
-                        const target = e.currentTarget as HTMLImageElement;
-                        const fallback = target.nextElementSibling as HTMLElement;
-                        target.style.display = 'none';
-                        if (fallback) fallback.style.display = 'flex';
-                      }}
-                    />
-                    <div className="text-center text-gray-500 text-sm hidden">
-                      <p>Unaligned</p>
-                      <p className="text-xs">(Image pending)</p>
+          <div className="mb-16">
+            <h3 className="text-2xl font-semibold text-gray-900 mb-6 text-center">1. Naive Exhaustive Search Results</h3>
+            <p className="text-gray-600 text-center mb-8">Smaller .jpg images successfully aligned with ±15 pixel window</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {naiveImages.map((img, index) => (
+                <div key={index} className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-lg font-semibold text-gray-900">{img.name}</h4>
+                    <span className="px-2 py-1 text-xs rounded bg-blue-100 text-blue-800">
+                      Naive
+                    </span>
+                  </div>
+                  
+                  {/* Image display */}
+                  <div 
+                    className="grid grid-cols-2 gap-3 cursor-pointer hover:opacity-80 transition-opacity group"
+                    onClick={() => setFullscreenImage(img)}
+                    title="Click to view fullscreen comparison"
+                  >
+                    <div className="aspect-square bg-gray-100 rounded flex items-center justify-center border relative overflow-hidden">
+                      <img 
+                        src={unalignedImages[img.name]}
+                        alt={`Unaligned ${img.name}`}
+                        className="w-full h-full object-cover rounded"
+                        onError={(e) => {
+                          // Fallback to placeholder if image doesn't exist
+                          const target = e.currentTarget as HTMLImageElement;
+                          const fallback = target.nextElementSibling as HTMLElement;
+                          target.style.display = 'none';
+                          if (fallback) fallback.style.display = 'flex';
+                        }}
+                      />
+                      <div className="text-center text-gray-500 text-sm hidden">
+                        <p>Unaligned</p>
+                        <p className="text-xs">(Image pending)</p>
+                      </div>
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Maximize2 className="h-4 w-4 text-gray-600" />
+                      </div>
                     </div>
-                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Maximize2 className="h-4 w-4 text-gray-600" />
+                    <div className="aspect-square bg-gray-100 rounded flex items-center justify-center border relative">
+                      <img 
+                        src={alignedImages[img.name]}
+                        alt={`Aligned ${img.name}`}
+                        className="w-full h-full object-cover rounded"
+                        onError={(e) => {
+                          // Fallback to placeholder if image doesn't exist
+                          const target = e.currentTarget as HTMLImageElement;
+                          const fallback = target.nextElementSibling as HTMLElement;
+                          target.style.display = 'none';
+                          if (fallback) fallback.style.display = 'flex';
+                        }}
+                      />
+                      <div className="text-center text-gray-500 text-sm hidden">
+                        <p>Aligned</p>
+                        <p className="text-xs">(Image pending)</p>
+                      </div>
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Maximize2 className="h-4 w-4 text-gray-600" />
+                      </div>
                     </div>
                   </div>
-                  <div className="aspect-square bg-gray-100 rounded flex items-center justify-center border relative">
-                    {/* Try to load the aligned image if it exists */}
-                    <img 
-                      src={alignedImages[img.name]}
-                      alt={`Aligned ${img.name}`}
-                      className="w-full h-full object-cover rounded"
-                      onError={(e) => {
-                        // Fallback to placeholder if image doesn't exist
-                        const target = e.currentTarget as HTMLImageElement;
-                        const fallback = target.nextElementSibling as HTMLElement;
-                        target.style.display = 'none';
-                        if (fallback) fallback.style.display = 'flex';
-                      }}
-                    />
-                    <div className="text-center text-gray-500 text-sm hidden">
-                      <p>Aligned</p>
-                      <p className="text-xs">(Image pending)</p>
-                    </div>
-                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Maximize2 className="h-4 w-4 text-gray-600" />
+                  
+                  {/* Displacement vectors */}
+                  <div className="text-sm">
+                    <p className="font-medium text-gray-900 mb-2">Displacement Vectors (NCC):</p>
+                    <div className="space-y-1 font-mono text-xs">
+                      <div>Red: {img.displacement.r}</div>
+                      <div>Green: {img.displacement.g}</div>
+                      <div>Blue: {img.displacement.b}</div>
                     </div>
                   </div>
                 </div>
-                
-                {/* Displacement vectors */}
-                <div className="text-sm">
-                  <p className="font-medium text-gray-900 mb-2">Displacement Vectors (NCC):</p>
-                  <div className="space-y-1 font-mono text-xs">
-                    <div>Red: {img.displacement.r}</div>
-                    <div>Green: {img.displacement.g}</div>
-                    <div>Blue: {img.displacement.b}</div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-2xl font-semibold text-gray-900 mb-6 text-center">2. Multi-Scale Pyramid Results</h3>
+            <p className="text-gray-600 text-center mb-8">Larger .tif images aligned using image pyramid approach</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {pyramidImages.map((img, index) => (
+                <div key={index} className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-lg font-semibold text-gray-900">{img.name}</h4>
+                    <span className="px-2 py-1 text-xs rounded bg-green-100 text-green-800">
+                      Pyramid
+                    </span>
+                  </div>
+                  
+                  {/* Image display */}
+                  <div 
+                    className="grid grid-cols-2 gap-3 cursor-pointer hover:opacity-80 transition-opacity group"
+                    onClick={() => setFullscreenImage(img)}
+                    title="Click to view fullscreen comparison"
+                  >
+                    <div className="aspect-square bg-gray-100 rounded flex items-center justify-center border relative overflow-hidden">
+                      <img 
+                        src={unalignedImages[img.name]}
+                        alt={`Unaligned ${img.name}`}
+                        className="w-full h-full object-cover rounded"
+                        onError={(e) => {
+                          // Fallback to placeholder if image doesn't exist
+                          const target = e.currentTarget as HTMLImageElement;
+                          const fallback = target.nextElementSibling as HTMLElement;
+                          target.style.display = 'none';
+                          if (fallback) fallback.style.display = 'flex';
+                        }}
+                      />
+                      <div className="text-center text-gray-500 text-sm hidden">
+                        <p>Unaligned</p>
+                        <p className="text-xs">(Image pending)</p>
+                      </div>
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Maximize2 className="h-4 w-4 text-gray-600" />
+                      </div>
+                    </div>
+                    <div className="aspect-square bg-gray-100 rounded flex items-center justify-center border relative">
+                      <img 
+                        src={alignedImages[img.name]}
+                        alt={`Aligned ${img.name}`}
+                        className="w-full h-full object-cover rounded"
+                        onError={(e) => {
+                          // Fallback to placeholder if image doesn't exist
+                          const target = e.currentTarget as HTMLImageElement;
+                          const fallback = target.nextElementSibling as HTMLElement;
+                          target.style.display = 'none';
+                          if (fallback) fallback.style.display = 'flex';
+                        }}
+                      />
+                      <div className="text-center text-gray-500 text-sm hidden">
+                        <p>Aligned</p>
+                        <p className="text-xs">(Image pending)</p>
+                      </div>
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Maximize2 className="h-4 w-4 text-gray-600" />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Displacement vectors */}
+                  <div className="text-sm">
+                    <p className="font-medium text-gray-900 mb-2">Displacement Vectors (NCC):</p>
+                    <div className="space-y-1 font-mono text-xs">
+                      <div>Red: {img.displacement.r}</div>
+                      <div>Green: {img.displacement.g}</div>
+                      <div>Blue: {img.displacement.b}</div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -744,11 +897,19 @@ Both methods are superior to pixel-based alignment because they emphasize struct
                       <ReactMarkdown>{feature.details}</ReactMarkdown>
                     </div>
                     
-                    {feature.problems && (
-                      <div className="mt-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded">
-                        <p className="text-yellow-800">
-                          <strong>Challenges:</strong> {feature.problems}
-                        </p>
+                    {feature.name === "Automatic Cropping" && (
+                      <div className="mt-6 flex justify-center">
+                        <div className="bg-white p-4 rounded-lg border max-w-md">
+                          <h5 className="font-medium text-gray-900 mb-3 text-center">Sobel Filter Visualization</h5>
+                          <img 
+                            src={sobelMasks}
+                            alt="Sobel filter kernels and edge detection process"
+                            className="w-full h-auto rounded"
+                          />
+                          <p className="text-sm text-gray-600 mt-2 text-center">
+                            Sobel operator kernels for horizontal and vertical edge detection
+                          </p>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -771,7 +932,6 @@ Both methods are superior to pixel-based alignment because they emphasize struct
                         >
                           {technique.hasImage === 'matrix-only' ? (
                             <div className="w-full flex flex-col items-center">
-                              <h4 className="font-medium text-gray-900 mb-4 text-center">Color Transformation Matrix</h4>
                               <div className="bg-gray-100 rounded-lg p-6 flex items-center justify-center border overflow-hidden max-w-4xl w-full">
                                 <img 
                                   src={technique.before}
