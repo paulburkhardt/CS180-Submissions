@@ -72,6 +72,9 @@ import sobelEdgeDetection from '@/assets/project1/edge_detection/sobel.png';
 // Sobel masks visualization
 import sobelMasks from '@/assets/project1/sobmasks.gif';
 
+// Image pyramid visualization
+import imagePyramid from '@/assets/project1/Image_pyramid.png';
+
 // Raw glass plate negative
 import rawStripe from '@/assets/project1/raw_stripe.jpg';
 
@@ -700,6 +703,23 @@ const Project1 = () => {
                 To handle larger images efficiently, I implemented a multi-scale pyramid that downsamples the image at each level using bilinear interpolation.
               </p>
               
+              {/* Image Pyramid Visualization */}
+              <div className="mb-6 flex justify-center">
+                <div className="bg-white p-4 rounded-lg border max-w-md">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3 text-center">Image Pyramid Structure</h4>
+                  <img 
+                    src={imagePyramid}
+                    alt="Visual representation of an image pyramid with multiple resolution levels"
+                    className="w-full h-auto rounded"
+                  />
+                  <p className="text-sm text-gray-600 mt-2 text-center">
+                    Multi-scale representation showing progressive downsampling from high to low resolution
+                    <br />
+                    <span className="text-xs italic">Source: <a href="https://en.wikipedia.org/wiki/Pyramid_(image_processing)" className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">Wikipedia - Pyramid (image processing)</a></span>
+                  </p>
+                </div>
+              </div>
+              
               <div className="bg-white p-6 rounded-lg border mb-6">
                 <h4 className="text-lg font-semibold text-gray-900 mb-4">Bilinear Interpolation Process</h4>
                 <p className="text-gray-700 mb-3">
@@ -712,8 +732,17 @@ const Project1 = () => {
               </div>
               
               <p className="text-gray-700 mb-4">
-                The alignment process starts on the coarsest (most downsampled) image and progressively refines the alignment at each finer level. At each step, the search window is halved, with ±3 pixels as the minimum window size.
+                The alignment process starts on the coarsest (most downsampled) image at the top of the pyramid and progressively refines the alignment at each finer level as we move down. At each step, the search window is halved, with ±3 pixels as the minimum window size. This coarse-to-fine strategy dramatically reduces computational complexity while maintaining alignment accuracy.
               </p>
+              
+              <div className="bg-blue-50 p-4 rounded-lg mb-4">
+                <h5 className="font-medium text-blue-900 mb-2">Pyramid Alignment Strategy</h5>
+                <ul className="text-sm text-blue-800 space-y-1">
+                  <li><strong>Level 3 (Coarsest):</strong> Fast alignment on heavily downsampled image</li>
+                  <li><strong>Level 2:</strong> Refine alignment using previous level's result as starting point</li>
+                  <li><strong>Level 1 (Finest):</strong> Final precision alignment on full-resolution image</li>
+                </ul>
+              </div>
               
               <p className="text-gray-700 mb-4">
                 Using a 3-level pyramid, NCC as the similarity function, and a ±15 pixel search window, I successfully aligned all .tif images. Only melons.tif and self_portrait.tif required expanding the search window to ±20 pixels, after which all images achieved excellent alignment in under 1 minute average runtime.
