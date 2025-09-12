@@ -327,106 +327,193 @@ const Project1 = () => {
       name: "Automatic Cropping",
       description: "Edge detection-based border removal using Sobel filtering",
       implemented: true,
-      details: `To make the pictures prettier, I needed to detect and remove borders automatically rather than using a fixed margin. I initially tried approaches using variance in rows/columns and checking for percentage of "black" or "white" pixels, but these weren't stable enough.
+      details: `To make the pictures prettier, I needed to detect and remove borders automatically rather than using a fixed margin. Initial approaches using variance analysis and pixel intensity thresholds proved unstable.
 
-I developed a more robust approach using **edge detection**:
+## Edge Detection Approach
 
-1. **Preprocessing**: Convert image to grayscale and enhance contrast by stretching the dynamic range (ignoring darkest/brightest 2% of pixels, then spreading the rest across 0-255 range)
+**Core Concept**: Use edge detection to identify border boundaries more reliably than pixel-based methods.
 
-2. **Sobel Edge Detection**: Apply a Sobel filter using OpenCV (kernel size 3) to detect edges
+**Implementation Pipeline**:
 
-3. **Border Detection**: Check predefined margins on all sides for boundaries that exceed a specified threshold and crop them off
+### Step 1: Image Preprocessing
+- **Convert to grayscale** for uniform edge detection
+- **Enhance contrast** by stretching dynamic range (ignore darkest/brightest 2% of pixels)
+- **Normalize intensity** across 0-255 range to make edges more prominent
 
-This approach robustly crops most border artifacts, though not perfectly in all cases as it is still dependent on some manual thresholding (see Emir at the top and left).`
+### Step 2: Sobel Edge Detection
+- **Apply Sobel filter** using OpenCV with kernel size 3
+- **Detect horizontal and vertical edges** simultaneously
+- **Generate edge magnitude map** highlighting boundary transitions
+
+### Step 3: Border Detection & Cropping
+- **Scan predefined margins** on all four sides of the image
+- **Identify boundaries** where edge strength exceeds specified threshold
+- **Crop automatically** based on detected border locations
+
+## Results & Limitations
+
+**Performance**: This approach robustly crops most border artifacts across the dataset.
+
+**Limitations**: Still dependent on manual threshold tuning. Some images like Emir show remaining artifacts at top and left edges where the threshold wasn't optimal for those specific border characteristics.`
     },
     {
       name: "Automatic Contrasting", 
       description: "Gamma correction for natural brightness and contrast adjustment",
       implemented: true,
-      details: `For automatic contrasting, I implemented **gamma correction** as it adjusts an image's brightness and contrast to match how human eyes perceive light, making details in both dark and bright areas more visible and natural-looking.
+      details: `For automatic contrasting, I implemented **gamma correction** to adjust brightness and contrast matching human visual perception, making details in both dark and bright areas more visible and natural-looking.
 
-The process works as follows:
+## Gamma Correction Method
 
-1. **Compute mean brightness** of the image
-2. **Calculate optimal gamma** so that mean_brightness^gamma ≈ target_mean (typically 0.5)
-3. **Apply transformation**: Each pixel value is raised to the power of gamma: I_out = I_in^γ
+**Core Concept**: Non-linear transformation that corrects for human brightness perception and display characteristics.
 
-**Gamma behavior**:
-- γ < 1: Brightens the image (enhances dark areas)  
-- γ > 1: Darkens the image (enhances bright areas)
-- γ values are clipped to [0.3, 3.0] to prevent extreme transformations
+### Implementation Process
 
-The formula for gamma calculation: γ = log(target_mean) / log(current_mean)
+**Step 1: Analyze Image Brightness**
+- Compute mean brightness of the input image
+- Determine target mean brightness (typically 0.5 for balanced exposure)
 
-This approach significantly improved contrast across the test images, making them more visually appealing and natural-looking.`
+**Step 2: Calculate Optimal Gamma**
+- **Formula**: γ = log(target_mean) / log(current_mean)
+- **Constraint**: γ values clipped to [0.3, 3.0] to prevent extreme transformations
+
+**Step 3: Apply Transformation**
+- **Pixel transformation**: I_out = I_in^γ
+- **Gamma behavior**:
+  - γ < 1: Brightens image (enhances dark areas)
+  - γ > 1: Darkens image (enhances bright areas)
+
+## Results on Test Images
+
+**Applied after auto-cropping to avoid border noise:**
+
+- **Emir**: γ = 1.07, original mean = 0.52 (slight darkening)
+- **Camel**: γ = 1.78, original mean = 0.68 (significant darkening)
+- **Lugano**: γ = 1.46, original mean = 0.62 (moderate darkening)
+
+**Outcome**: Significantly improved contrast across all test images, making them more visually appealing and natural-looking.`
     },
     {
       name: "Automatic White Balance",
       description: "Hybrid approach combining Robust Gray World and White Patch assumptions",
       implemented: true,
-      details: `For white balancing, I first tried implementing the basic **Gray World assumption**, which assumes that under normal lighting conditions the average color of a scene should be neutral gray (R ≈ G ≈ B). If one channel is dominant (e.g., the image looks too blue), this method compensates by scaling each channel so their averages are balanced. However, this didn't yield promising results.
+      details: `For white balancing, I initially tried the basic **Gray World assumption** but achieved better results with a hybrid approach specifically designed for historical glass plate negatives.
 
-I then opted for a more advanced approach combining two methods:
+## Initial Approach: Basic Gray World
 
-**Robust Gray World Assumption**:
-- Computes per-channel averages using only the middle 10-90% intensity range
-- Makes the method less sensitive to dust, scratches, or extreme highlights
-- Provides stable color balance estimation
+**Concept**: Assumes average scene color should be neutral gray (R ≈ G ≈ B) under normal lighting.
 
-**White Patch Assumption**:
-- Assumes that the brightest pixels in an image should be white
-- Identifies the brightest regions (likely neutral areas) to estimate scaling factors
-- Uses these to further refine the color correction
+**Method**: Scale each channel so their averages are balanced.
 
-**Combined Method**:
-- Blends both methods using weighted averaging
-- Achieves more stable and natural white balance even under uneven illumination and color casts
-- Implementation relies on NumPy for percentile calculations, masking, averaging, and scaling
+**Result**: Didn't yield promising results for historical images.
 
-This hybrid approach was specifically designed to handle the unique characteristics of historical glass plate negatives, resulting in more natural white tones and realistic images.`
+## Advanced Hybrid Approach
+
+**Core Concept**: Combine robust statistical methods to handle uneven illumination and color casts in historical negatives.
+
+### Method 1: Robust Gray World Assumption
+
+**Statistical Robustness**:
+- Computes per-channel averages using only **middle 10-90% intensity range**
+- **Excludes outliers** like dust, scratches, or blown highlights
+- Provides **stable color balance estimation** resistant to artifacts
+
+### Method 2: White Patch Assumption
+
+**Brightness-Based Correction**:
+- Assumes **brightest pixels should be white**
+- Identifies brightest regions (likely neutral areas) as reference points
+- Estimates **scaling factors** for color correction refinement
+
+### Combined Implementation
+
+**Weighted Integration**:
+- **Blends both methods** using weighted averaging
+- **NumPy implementation** for percentile calculations, masking, and scaling
+- Achieves stable white balance under **uneven illumination and color casts**
+
+## Results
+
+**Performance**: This hybrid approach was specifically designed for historical glass plate negatives, consistently producing more natural white tones and realistic color reproduction across the dataset.`
     },
     {
       name: "Better Color Mapping",
       description: "Linear combination mapping to better approximate original filter spectral responses",
       implemented: true,
-      details: `There's no reason to assume that the red, green, and blue lenses used by **Prokudin-Gorskii** correspond directly to the R, G, and B channels in modern RGB color space. Therefore, I experimented with different near-identity mapping combinations to better approximate the spectral responses of the original filters.
+      details: `Historical glass plate filters don't correspond directly to modern RGB channels. I developed a custom color mapping to better approximate the spectral responses of **Prokudin-Gorskii's** original filters.
 
-To evaluate these mappings, I applied them to *emir.tif* and plotted the results side by side to judge which appeared most realistic.
+## Problem with Direct RGB Mapping
 
-The color mapping that produced the most natural-looking result can be described as a **linear combination of the three plates**:
+**Issue**: Assuming red, green, and blue glass plates map directly to R, G, B channels in modern color space produces unnatural colors.
 
-• **Red channel (R)**: 100% from the red plate, with no contribution from green or blue
-• **Green channel (G)**: 95% from the green plate and 5% from the blue plate  
-• **Blue channel (B)**: 95% from the blue plate and 5% from the green plate
+**Cause**: Historical filters had **different spectral sensitivities** and **overlapping responses** compared to modern digital sensors.
 
-This means that the **red plate maps directly to the red channel**, while the green and blue channels are mostly derived from their corresponding plates but include small contributions from adjacent plates. These slight cross-channel adjustments compensate for overlaps in the spectral responses of Prokudin-Gorskii's original filters, producing more accurate and natural color reproduction.
+## Empirical Optimization Approach
 
-I applied this mapping to other images as well, and the results consistently enhanced their color fidelity, confirming that this adjustment generalizes beyond a single example.`
+### Evaluation Method
+- **Test image**: Used *emir.tif* as reference for visual comparison
+- **Comparison technique**: Applied different mappings and evaluated side-by-side
+- **Selection criteria**: Chose mapping that produced most realistic appearance
+
+### Optimal Linear Combination
+
+**Mathematical Transformation**:
+
+- **Red channel (R)**: **100%** red plate + **0%** green + **0%** blue
+- **Green channel (G)**: **0%** red + **95%** green plate + **5%** blue plate
+- **Blue channel (B)**: **0%** red + **5%** green plate + **95%** blue plate
+
+### Technical Interpretation
+
+**Red Channel**: Direct mapping from red plate (no spectral overlap correction needed)
+
+**Green & Blue Channels**: Mostly derived from corresponding plates with **small cross-channel contributions** (5%) to compensate for spectral overlap in original filters.
+
+## Results & Validation
+
+**Performance**: Applied this mapping to additional images beyond the test case.
+
+**Outcome**: Results consistently enhanced color fidelity across the dataset, confirming that this transformation **generalizes well** and produces more accurate historical color reproduction.`
     },
     {
       name: "Better Features",
       description: "Gradient-based and Sobel-based alignment avoiding direct RGB comparison",
       implemented: true,
-      details: `To make the alignment more robust, I implemented a **gradient- and Sobel-based approach** that avoids directly comparing RGB values. Instead of relying on raw color intensities, the method focuses on structural features.
+      details: `To make the alignment more robust, I implemented **gradient- and Sobel-based approaches** that avoid directly comparing RGB values. Instead of relying on raw color intensities, these methods focus on structural features that are more invariant to lighting changes.
 
-**Gradient-based Alignment**:
-• Computes **gradients** of each image along horizontal and vertical directions to capture intensity changes
-• **Mathematical computation**: 
-  - Horizontal gradient: Gₓ(x,y) = I(x+1,y) - I(x-1,y)
-  - Vertical gradient: Gᵧ(x,y) = I(x,y+1) - I(x,y-1)
-  - Gradient magnitude: |∇I| = √(Gₓ² + Gᵧ²)
-• Highlights areas of strong contrast regardless of absolute brightness
-• Uses **normalized cross-correlation (NCC)** between gradient magnitude maps for alignment
+## Method 1: Gradient-Based Alignment
 
-**Sobel-based Alignment**:
-• Uses the **Sobel operator** to detect horizontal and vertical edges
-• Produces edge maps for each image highlighting structural features
-• Performs alignment by calculating NCC between corresponding edge maps
-• Focuses on edges and textures rather than raw pixel colors
+**Core Concept**: Captures intensity changes to identify structural features regardless of absolute brightness levels.
 
-Both approaches make alignment more robust to variations in brightness, contrast, or color shifts by emphasizing structural information over absolute pixel values. This is particularly important for aligning RGB channels that may have different exposures or color characteristics.
+**Implementation Steps**:
+1. **Compute gradients** along horizontal and vertical directions for each image
+2. **Calculate gradient magnitude** to capture edge strength in all directions
+3. **Perform alignment** using normalized cross-correlation on gradient maps
 
-As my alignment was already quite good with the standard approach, I couldn't see meaningful improvement in alignment quality, but the edge maps provide valuable insight into how the alignment algorithm identifies and matches structural features between channels.`
+**Mathematical Foundation**:
+- Horizontal gradient: **Gₓ(x,y) = I(x+1,y) - I(x-1,y)**
+- Vertical gradient: **Gᵧ(x,y) = I(x,y+1) - I(x,y-1)**  
+- Gradient magnitude: **|∇I| = √(Gₓ² + Gᵧ²)**
+
+**Advantages**: More robust to illumination changes than raw pixel values, emphasizes structural content.
+
+## Method 2: Sobel-Based Alignment
+
+**Core Concept**: Uses the Sobel operator to create binary edge maps that highlight structural transitions.
+
+**Implementation Steps**:
+1. **Apply Sobel operator** to detect horizontal and vertical edges
+2. **Generate edge maps** highlighting significant intensity transitions
+3. **Perform alignment** using NCC between corresponding edge maps
+
+**Advantages**: Invariant to uniform lighting changes, focuses purely on structural information, reduces noise from gradual intensity variations.
+
+## Results & Analysis
+
+**Performance**: Both methods are theoretically more robust than pixel-based alignment, especially for channels with different exposures or color characteristics.
+
+**Practical Outcome**: Since my standard NCC alignment was already performing well, I couldn't observe meaningful improvement in alignment quality. However, the edge maps provide valuable **insight into the alignment process**, showing exactly which structural features the algorithm uses to match between channels.
+
+**Use Case**: These methods would be particularly beneficial for images with challenging lighting conditions, significant color casts, or when aligning channels with very different exposure levels.`
     }
   ];
 
@@ -917,7 +1004,14 @@ As my alignment was already quite good with the standard approach, I couldn't se
                   <div className="bg-gray-50 p-6 rounded-lg">
                     <h4 className="font-semibold text-gray-900 mb-3">Implementation Details</h4>
                     <div className="text-gray-700 leading-relaxed prose prose-gray max-w-none">
-                      <ReactMarkdown>{feature.details}</ReactMarkdown>
+                      <ReactMarkdown 
+                        components={{
+                          h2: ({children}) => <h4 className="text-lg font-semibold text-gray-900 mt-6 mb-3">{children}</h4>,
+                          h3: ({children}) => <h5 className="text-base font-medium text-gray-800 mt-4 mb-2">{children}</h5>
+                        }}
+                      >
+                        {feature.details}
+                      </ReactMarkdown>
                     </div>
                     
                     {feature.name === "Automatic Cropping" && (
