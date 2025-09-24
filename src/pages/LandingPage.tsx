@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ScrollReveal } from '@/components/ScrollReveal';
-import { Camera, BookOpen, ArrowRight, Palette } from 'lucide-react';
+import { Camera, BookOpen, ArrowRight, Palette, Filter } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import mountainHero from '@/assets/mountain-hero.jpg';
@@ -24,6 +24,14 @@ const LandingPage = () => {
       description: 'Colorizing the Prokudin-Gorskii photo collection using computational photography and image alignment techniques.',
       path: '/project-1',
       icon: <Palette className="h-6 w-6" />,
+    },
+    {
+      id: 'project-2',
+      title: 'Project 2',
+      subtitle: 'Fun with Filters and Frequencies',
+      description: 'Exploring 2D convolutions, filtering, hybrid images, and multi-resolution blending techniques for creative visual effects.',
+      path: '/project-2',
+      icon: <Filter className="h-6 w-6" />,
     }
     // Future projects can be added here
   ];
