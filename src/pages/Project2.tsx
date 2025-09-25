@@ -980,21 +980,21 @@ gaussian_2d = gaussian_1d * gaussian_1d.T`}</code></pre>
                       
                       {showGaussianWidget && (
                         <div className="gaussian-widget-container">
-                          <div className="rounded-lg p-6 border" style={{background: 'linear-gradient(to bottom right, rgba(38, 89, 39, 0.1), rgba(0, 88, 60, 0.1))', borderColor: '#00564D'}}>
-                            <h1 className="text-center text-gray-700 mb-2 text-xl font-semibold">Gaussian Kernel Size Formula</h1>
+                          <div className="rounded-lg p-6 border" style={{backgroundColor: '#fefcf8', borderColor: '#e8e6e0'}}>
+                            <h1 className="text-center mb-2 text-xl font-semibold" style={{color: '#555'}}>Gaussian Kernel Size Formula</h1>
                             
-                            <div className="p-5 rounded-lg text-center my-5 border-2" style={{backgroundColor: 'rgba(0, 86, 77, 0.2)', borderColor: '#00564D'}}>
-                              <div className="text-3xl font-bold text-gray-700 mb-2" style={{fontFamily: '"Times New Roman", serif'}}>
+                            <div className="p-5 rounded-lg text-center my-5 border-2" style={{backgroundColor: '#f0eee8', borderColor: '#d5d2ca'}}>
+                              <div className="text-3xl font-bold mb-2" style={{fontFamily: '"Times New Roman", serif', color: '#444'}}>
                                 <span id="gaussianFormulaDisplay">k = 6σ + 1</span>
                               </div>
-                              <div className="text-sm text-gray-600 italic">
+                              <div className="text-sm italic" style={{color: '#666'}}>
                                 <span id="gaussianFormulaExplanation">Kernel size = 6 × sigma + 1 (center pixel)</span>
                               </div>
                             </div>
                             
                             <div className="grid grid-cols-2 gap-4 my-5">
-                              <div className="p-4 rounded-lg text-center" style={{backgroundColor: 'rgba(0, 82, 88, 0.3)'}}>
-                                <label htmlFor="gaussianSigmaSlider" className="block mb-2 text-gray-700">Adjust σ (sigma): </label>
+                              <div className="p-4 rounded-lg text-center" style={{backgroundColor: '#ebe9e3'}}>
+                                <label htmlFor="gaussianSigmaSlider" className="block mb-2" style={{color: '#666'}}>Adjust σ (sigma): </label>
                                 <input 
                                   type="range" 
                                   id="gaussianSigmaSlider" 
@@ -1003,12 +1003,16 @@ gaussian_2d = gaussian_1d * gaussian_1d.T`}</code></pre>
                                   max="3" 
                                   step="0.1" 
                                   defaultValue="1"
+                                  style={{
+                                    accentColor: '#265927',
+                                    background: `linear-gradient(to right, #265927 0%, #265927 var(--value, 0%), #ddd var(--value, 0%), #ddd 100%)`
+                                  }}
                                 />
-                                <div id="gaussianSigmaValue" className="mt-2 text-gray-700">σ = 1.0</div>
+                                <div id="gaussianSigmaValue" className="mt-2" style={{color: '#444'}}>σ = 1.0</div>
                               </div>
                               
-                              <div className="p-4 rounded-lg text-center" style={{backgroundColor: 'rgba(0, 82, 88, 0.3)'}}>
-                                <label htmlFor="gaussianKSlider" className="block mb-2 text-gray-700">Adjust k (kernel size): </label>
+                              <div className="p-4 rounded-lg text-center" style={{backgroundColor: '#ebe9e3'}}>
+                                <label htmlFor="gaussianKSlider" className="block mb-2" style={{color: '#666'}}>Adjust k (kernel size): </label>
                                 <input 
                                   type="range" 
                                   id="gaussianKSlider" 
@@ -1017,8 +1021,12 @@ gaussian_2d = gaussian_1d * gaussian_1d.T`}</code></pre>
                                   max="15" 
                                   step="2" 
                                   defaultValue="7"
+                                  style={{
+                                    accentColor: '#265927',
+                                    background: `linear-gradient(to right, #265927 0%, #265927 var(--value, 0%), #ddd var(--value, 0%), #ddd 100%)`
+                                  }}
                                 />
-                                <div id="gaussianKValue" className="mt-2 text-gray-700">k = 7</div>
+                                <div id="gaussianKValue" className="mt-2" style={{color: '#444'}}>k = 7</div>
                               </div>
                             </div>
                             
@@ -1035,25 +1043,25 @@ gaussian_2d = gaussian_1d * gaussian_1d.T`}</code></pre>
                             </div>
                             
                             <div className="grid grid-cols-4 gap-3 my-5">
-                              <div className="p-3 rounded-lg text-center border" style={{backgroundColor: 'rgba(0, 86, 77, 0.2)', borderColor: '#00564D'}}>
-                                <div className="text-xs text-gray-600 mb-1">σ (Sigma)</div>
-                                <div id="gaussianCurrentSigma" className="text-xl font-bold text-gray-800">1.0</div>
+                              <div className="p-3 rounded-lg text-center border" style={{backgroundColor: '#e8e6e0', borderColor: '#d0cdc6'}}>
+                                <div className="text-xs mb-1" style={{color: '#666'}}>σ (Sigma)</div>
+                                <div id="gaussianCurrentSigma" className="text-xl font-bold" style={{color: '#333'}}>1.0</div>
                               </div>
-                              <div className="p-3 rounded-lg text-center border" style={{backgroundColor: 'rgba(0, 86, 77, 0.2)', borderColor: '#00564D'}}>
-                                <div className="text-xs text-gray-600 mb-1">k (Size)</div>
-                                <div id="gaussianKernelSize" className="text-xl font-bold text-gray-800">7</div>
+                              <div className="p-3 rounded-lg text-center border" style={{backgroundColor: '#e8e6e0', borderColor: '#d0cdc6'}}>
+                                <div className="text-xs mb-1" style={{color: '#666'}}>k (Size)</div>
+                                <div id="gaussianKernelSize" className="text-xl font-bold" style={{color: '#333'}}>7</div>
                               </div>
-                              <div className="p-3 rounded-lg text-center border" style={{backgroundColor: 'rgba(0, 86, 77, 0.2)', borderColor: '#00564D'}}>
-                                <div className="text-xs text-gray-600 mb-1">Coverage σ</div>
-                                <div id="gaussianSigmaCoverage" className="text-xl font-bold text-gray-800">3.0</div>
+                              <div className="p-3 rounded-lg text-center border" style={{backgroundColor: '#e8e6e0', borderColor: '#d0cdc6'}}>
+                                <div className="text-xs mb-1" style={{color: '#666'}}>Coverage σ</div>
+                                <div id="gaussianSigmaCoverage" className="text-xl font-bold" style={{color: '#333'}}>3.0</div>
                               </div>
-                              <div className="p-3 rounded-lg text-center border" style={{backgroundColor: 'rgba(0, 86, 77, 0.2)', borderColor: '#00564D'}}>
-                                <div className="text-xs text-gray-600 mb-1">% Coverage</div>
-                                <div id="gaussianCoverage" className="text-xl font-bold text-gray-800">99.7%</div>
+                              <div className="p-3 rounded-lg text-center border" style={{backgroundColor: '#e8e6e0', borderColor: '#d0cdc6'}}>
+                                <div className="text-xs mb-1" style={{color: '#666'}}>% Coverage</div>
+                                <div id="gaussianCoverage" className="text-xl font-bold" style={{color: '#333'}}>99.7%</div>
                               </div>
                             </div>
                             
-                            <div className="bg-white p-3 rounded-lg my-5 border border-gray-300">
+                            <div className="p-3 rounded-lg my-5 border" style={{backgroundColor: 'white', borderColor: '#d0cdc6'}}>
                               <canvas id="gaussianCanvas" width="650" height="300" className="w-full max-w-full"></canvas>
                             </div>
                             
@@ -1061,19 +1069,19 @@ gaussian_2d = gaussian_1d * gaussian_1d.T`}</code></pre>
                               {/* Kernel visualization will be generated here */}
                             </div>
                             
-                            <div className="p-4 rounded-lg my-5 border-l-4" style={{backgroundColor: 'rgba(38, 89, 39, 0.1)', borderLeftColor: '#00583C'}}>
-                              <h3 className="text-gray-700 font-semibold mb-3">Understanding Kernel Size vs Coverage</h3>
+                            <div className="p-4 rounded-lg my-5 border-l-4" style={{backgroundColor: '#f5f3ed', borderLeftColor: '#d0cdc6'}}>
+                              <h3 className="font-semibold mb-3" style={{color: '#555'}}>Understanding Kernel Size vs Coverage</h3>
                               <ul className="list-none p-0 space-y-2">
-                                <li className="text-sm">• <span className="px-2 py-1 rounded" style={{backgroundColor: 'rgba(0, 82, 88, 0.3)'}}>Standard k = 6σ + 1</span>: Provides exactly ±3σ coverage (99.7% of distribution)</li>
-                                <li className="text-sm">• <span className="px-2 py-1 rounded" style={{backgroundColor: 'rgba(0, 82, 88, 0.3)'}}>Smaller kernels</span>: Faster computation but may miss important Gaussian tails</li>
-                                <li className="text-sm">• <span className="px-2 py-1 rounded" style={{backgroundColor: 'rgba(0, 82, 88, 0.3)'}}>Larger kernels</span>: Better coverage but increased computational cost</li>
-                                <li className="text-sm">• <span className="px-2 py-1 rounded" style={{backgroundColor: 'rgba(0, 82, 88, 0.3)'}}>Odd sizes only</span>: Ensures symmetric kernel with clear center pixel</li>
-                                <li className="text-sm">• <span className="px-2 py-1 rounded" style={{backgroundColor: 'rgba(0, 82, 88, 0.3)'}}>Coverage σ</span>: Shows how many standard deviations the kernel spans</li>
+                                <li className="text-sm" style={{color: '#444'}}>• <span className="px-2 py-1 rounded" style={{backgroundColor: '#d0cdc6'}}>Standard k = 6σ + 1</span>: Provides exactly ±3σ coverage (99.7% of distribution)</li>
+                                <li className="text-sm" style={{color: '#444'}}>• <span className="px-2 py-1 rounded" style={{backgroundColor: '#d0cdc6'}}>Smaller kernels</span>: Faster computation but may miss important Gaussian tails</li>
+                                <li className="text-sm" style={{color: '#444'}}>• <span className="px-2 py-1 rounded" style={{backgroundColor: '#d0cdc6'}}>Larger kernels</span>: Better coverage but increased computational cost</li>
+                                <li className="text-sm" style={{color: '#444'}}>• <span className="px-2 py-1 rounded" style={{backgroundColor: '#d0cdc6'}}>Odd sizes only</span>: Ensures symmetric kernel with clear center pixel</li>
+                                <li className="text-sm" style={{color: '#444'}}>• <span className="px-2 py-1 rounded" style={{backgroundColor: '#d0cdc6'}}>Coverage σ</span>: Shows how many standard deviations the kernel spans</li>
                               </ul>
                             </div>
                             
-                            <div className="bg-slate-50 p-3 rounded-lg mt-5 border border-slate-200">
-                              <p className="text-xs text-gray-500 text-center">
+                            <div className="p-3 rounded-lg mt-5 border" style={{backgroundColor: '#f5f3ed', borderColor: '#e8e6e0'}}>
+                              <p className="text-xs text-center" style={{color: '#777'}}>
                                 Interactive widget created with assistance from <a href="https://claude.ai" target="_blank" rel="noopener noreferrer" className="underline" style={{color: '#265927'}} onMouseEnter={(e) => e.currentTarget.style.color = '#00583C'} onMouseLeave={(e) => e.currentTarget.style.color = '#265927'}>Anthropic's Claude Chat</a>
                               </p>
                             </div>
