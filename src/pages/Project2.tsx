@@ -190,8 +190,8 @@ const Project2 = () => {
       ctx.moveTo(minus3sigma, 250);
       
       for (let x = -3 * sigma; x <= 3 * sigma; x += 0.1) {
-        const canvasX = centerX + x * scaleX / sigma;
-        const y = gaussian(x / sigma, 1) * sigma;
+        const canvasX = centerX + x * scaleX;
+        const y = gaussian(x, sigma);
         const canvasY = 250 - y * scaleY;
         ctx.lineTo(canvasX, canvasY);
       }
