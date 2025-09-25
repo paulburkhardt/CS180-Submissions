@@ -78,27 +78,58 @@ const Project2 = () => {
     if (!showGaussianWidget) return;
 
     const updateGaussianVisualization = () => {
-      const slider = document.getElementById('gaussianSigmaSlider') as HTMLInputElement;
-      if (!slider) return;
+      const sigmaSlider = document.getElementById('gaussianSigmaSlider') as HTMLInputElement;
+      const kSlider = document.getElementById('gaussianKSlider') as HTMLInputElement;
+      if (!sigmaSlider || !kSlider) return;
 
-      const sigma = parseFloat(slider.value);
-      let kernelSize = Math.round(6 * sigma + 1);
+      const sigma = parseFloat(sigmaSlider.value);
+      let kernelSize = parseInt(kSlider.value);
       
       // Ensure kernel size is always odd
       if (kernelSize % 2 === 0) {
         kernelSize += 1;
+        kSlider.value = kernelSize.toString();
+      }
+      
+      // Calculate actual sigma coverage based on kernel size
+      const sigmaCoverage = (kernelSize - 1) / 2 / sigma;
+      
+      // Calculate percentage coverage using error function approximation
+      const calculateCoverage = (sigmas: number) => {
+        // Using approximation: erf(x) ≈ 1 - exp(-1.26 * x^1.4) for coverage calculation
+        // Coverage = erf(sigmas/√2) * 100
+        const erfApprox = 1 - Math.exp(-1.26 * Math.pow(sigmas / Math.sqrt(2), 1.4));
+        return Math.min(99.9, Math.max(0, erfApprox * 100));
+      };
+      
+      const percentageCoverage = calculateCoverage(sigmaCoverage);
+      
+      // Update formula display
+      const formulaDisplayEl = document.getElementById('gaussianFormulaDisplay');
+      const formulaExplanationEl = document.getElementById('gaussianFormulaExplanation');
+      
+      if (Math.abs(kernelSize - (6 * sigma + 1)) < 0.1) {
+        if (formulaDisplayEl) formulaDisplayEl.textContent = 'k = 6σ + 1';
+        if (formulaExplanationEl) formulaExplanationEl.textContent = 'Standard formula (3σ coverage)';
+      } else {
+        if (formulaDisplayEl) formulaDisplayEl.textContent = `k = ${kernelSize}`;
+        if (formulaExplanationEl) formulaExplanationEl.textContent = `Custom kernel size (${sigmaCoverage.toFixed(1)}σ coverage)`;
       }
       
       // Update display values
       const sigmaValueEl = document.getElementById('gaussianSigmaValue');
+      const kValueEl = document.getElementById('gaussianKValue');
       const currentSigmaEl = document.getElementById('gaussianCurrentSigma');
       const kernelSizeEl = document.getElementById('gaussianKernelSize');
+      const sigmaCoverageEl = document.getElementById('gaussianSigmaCoverage');
       const coverageEl = document.getElementById('gaussianCoverage');
       
       if (sigmaValueEl) sigmaValueEl.textContent = `σ = ${sigma.toFixed(1)}`;
+      if (kValueEl) kValueEl.textContent = `k = ${kernelSize}`;
       if (currentSigmaEl) currentSigmaEl.textContent = sigma.toFixed(1);
       if (kernelSizeEl) kernelSizeEl.textContent = kernelSize.toString();
-      if (coverageEl) coverageEl.textContent = '99.7%';
+      if (sigmaCoverageEl) sigmaCoverageEl.textContent = sigmaCoverage.toFixed(1);
+      if (coverageEl) coverageEl.textContent = `${percentageCoverage.toFixed(1)}%`;
       
       // Update canvas
       const canvas = document.getElementById('gaussianCanvas') as HTMLCanvasElement;
@@ -153,23 +184,25 @@ const Project2 = () => {
       }
       ctx.stroke();
       
-      // Draw 3-sigma boundaries
+      // Draw kernel boundaries based on actual kernel size
+      const kernelRadius = (kernelSize - 1) / 2;
+      const minusBoundary = centerX - kernelRadius * scaleX;
+      const plusBoundary = centerX + kernelRadius * scaleX;
+      
       ctx.strokeStyle = '#999';
       ctx.lineWidth = 1;
       ctx.setLineDash([5, 5]);
       
-      // -3σ line
-      const minus3sigma = centerX - 3 * sigma * scaleX;
+      // Left boundary line
       ctx.beginPath();
-      ctx.moveTo(minus3sigma, 50);
-      ctx.lineTo(minus3sigma, 250);
+      ctx.moveTo(minusBoundary, 50);
+      ctx.lineTo(minusBoundary, 250);
       ctx.stroke();
       
-      // +3σ line
-      const plus3sigma = centerX + 3 * sigma * scaleX;
+      // Right boundary line
       ctx.beginPath();
-      ctx.moveTo(plus3sigma, 50);
-      ctx.lineTo(plus3sigma, 250);
+      ctx.moveTo(plusBoundary, 50);
+      ctx.lineTo(plusBoundary, 250);
       ctx.stroke();
       
       ctx.setLineDash([]);
@@ -179,24 +212,27 @@ const Project2 = () => {
       ctx.font = '12px Arial';
       ctx.textAlign = 'center';
       
-      ctx.fillText('-3σ', minus3sigma, 270);
+      const sigmaCoverageValue = sigmaCoverage.toFixed(1);
+      ctx.fillText(`-${sigmaCoverageValue}σ`, minusBoundary, 270);
       ctx.fillText('0', centerX, 270);
-      ctx.fillText('+3σ', plus3sigma, 270);
+      ctx.fillText(`+${sigmaCoverageValue}σ`, plusBoundary, 270);
       ctx.fillText(`Kernel size: ${kernelSize}×${kernelSize}`, centerX, 30);
       
-      // Shade the 3-sigma region
+      // Shade the kernel coverage region
       ctx.fillStyle = 'rgba(200, 200, 200, 0.3)';
       ctx.beginPath();
-      ctx.moveTo(minus3sigma, 250);
+      ctx.moveTo(minusBoundary, 250);
       
-      for (let x = -3 * sigma; x <= 3 * sigma; x += 0.1) {
+      const minX = -kernelRadius;
+      const maxX = kernelRadius;
+      for (let x = minX; x <= maxX; x += 0.1) {
         const canvasX = centerX + x * scaleX;
         const y = gaussian(x, sigma);
         const canvasY = 250 - y * scaleY;
         ctx.lineTo(canvasX, canvasY);
       }
       
-      ctx.lineTo(plus3sigma, 250);
+      ctx.lineTo(plusBoundary, 250);
       ctx.closePath();
       ctx.fill();
       
@@ -282,18 +318,51 @@ const Project2 = () => {
       grid.appendChild(gridContainer);
     };
 
-    // Set up slider event listener
-    const slider = document.getElementById('gaussianSigmaSlider') as HTMLInputElement;
-    if (slider) {
-      slider.addEventListener('input', updateGaussianVisualization);
+    // Reset to formula function
+    const resetToFormula = () => {
+      const sigmaSlider = document.getElementById('gaussianSigmaSlider') as HTMLInputElement;
+      const kSlider = document.getElementById('gaussianKSlider') as HTMLInputElement;
+      
+      if (sigmaSlider && kSlider) {
+        const sigma = parseFloat(sigmaSlider.value);
+        let formulaK = Math.round(6 * sigma + 1);
+        
+        // Ensure kernel size is always odd
+        if (formulaK % 2 === 0) {
+          formulaK += 1;
+        }
+        
+        // Clamp to slider range
+        formulaK = Math.max(3, Math.min(15, formulaK));
+        
+        kSlider.value = formulaK.toString();
+        updateGaussianVisualization();
+      }
+    };
+
+    // Set up event listeners
+    const sigmaSlider = document.getElementById('gaussianSigmaSlider') as HTMLInputElement;
+    const kSlider = document.getElementById('gaussianKSlider') as HTMLInputElement;
+    const resetBtn = document.getElementById('resetToFormulaBtn') as HTMLButtonElement;
+    
+    if (sigmaSlider && kSlider && resetBtn) {
+      sigmaSlider.addEventListener('input', updateGaussianVisualization);
+      kSlider.addEventListener('input', updateGaussianVisualization);
+      resetBtn.addEventListener('click', resetToFormula);
       // Initial visualization
       setTimeout(updateGaussianVisualization, 100);
     }
 
     // Cleanup function
     return () => {
-      if (slider) {
-        slider.removeEventListener('input', updateGaussianVisualization);
+      if (sigmaSlider) {
+        sigmaSlider.removeEventListener('input', updateGaussianVisualization);
+      }
+      if (kSlider) {
+        kSlider.removeEventListener('input', updateGaussianVisualization);
+      }
+      if (resetBtn) {
+        resetBtn.removeEventListener('click', resetToFormula);
       }
     };
   }, [showGaussianWidget]);
@@ -915,36 +984,72 @@ gaussian_2d = gaussian_1d * gaussian_1d.T`}</code></pre>
                             <h1 className="text-center text-gray-700 mb-2 text-xl font-semibold">Gaussian Kernel Size Formula</h1>
                             
                             <div className="p-5 rounded-lg text-center my-5 border-2" style={{backgroundColor: 'rgba(0, 86, 77, 0.2)', borderColor: '#00564D'}}>
-                              <div className="text-3xl font-bold text-gray-700 mb-2" style={{fontFamily: '"Times New Roman", serif'}}>k = 6σ + 1</div>
-                              <div className="text-sm text-gray-600 italic">Kernel size = 6 × sigma + 1 (center pixel)</div>
+                              <div className="text-3xl font-bold text-gray-700 mb-2" style={{fontFamily: '"Times New Roman", serif'}}>
+                                <span id="gaussianFormulaDisplay">k = 6σ + 1</span>
+                              </div>
+                              <div className="text-sm text-gray-600 italic">
+                                <span id="gaussianFormulaExplanation">Kernel size = 6 × sigma + 1 (center pixel)</span>
+                              </div>
                             </div>
                             
-                            <div className="p-4 rounded-lg my-5 text-center" style={{backgroundColor: 'rgba(0, 82, 88, 0.3)'}}>
-                              <label htmlFor="gaussianSigmaSlider" className="block mb-2 text-gray-700">Adjust σ (sigma): </label>
-                              <input 
-                                type="range" 
-                                id="gaussianSigmaSlider" 
-                                className="w-72 mx-2" 
-                                min="0.5" 
-                                max="3" 
-                                step="0.1" 
-                                defaultValue="1"
-                              />
-                              <div id="gaussianSigmaValue" className="mt-2 text-gray-700">σ = 1.0</div>
+                            <div className="grid grid-cols-2 gap-4 my-5">
+                              <div className="p-4 rounded-lg text-center" style={{backgroundColor: 'rgba(0, 82, 88, 0.3)'}}>
+                                <label htmlFor="gaussianSigmaSlider" className="block mb-2 text-gray-700">Adjust σ (sigma): </label>
+                                <input 
+                                  type="range" 
+                                  id="gaussianSigmaSlider" 
+                                  className="w-full mx-2" 
+                                  min="0.5" 
+                                  max="3" 
+                                  step="0.1" 
+                                  defaultValue="1"
+                                />
+                                <div id="gaussianSigmaValue" className="mt-2 text-gray-700">σ = 1.0</div>
+                              </div>
+                              
+                              <div className="p-4 rounded-lg text-center" style={{backgroundColor: 'rgba(0, 82, 88, 0.3)'}}>
+                                <label htmlFor="gaussianKSlider" className="block mb-2 text-gray-700">Adjust k (kernel size): </label>
+                                <input 
+                                  type="range" 
+                                  id="gaussianKSlider" 
+                                  className="w-full mx-2" 
+                                  min="3" 
+                                  max="15" 
+                                  step="2" 
+                                  defaultValue="7"
+                                />
+                                <div id="gaussianKValue" className="mt-2 text-gray-700">k = 7</div>
+                              </div>
                             </div>
                             
-                            <div className="grid grid-cols-3 gap-4 my-5">
-                              <div className="p-4 rounded-lg text-center border" style={{backgroundColor: 'rgba(0, 86, 77, 0.2)', borderColor: '#00564D'}}>
-                                <div className="text-sm text-gray-600 mb-1">σ (Sigma)</div>
-                                <div id="gaussianCurrentSigma" className="text-2xl font-bold text-gray-800">1.0</div>
+                            <div className="flex justify-center mb-5">
+                              <button
+                                id="resetToFormulaBtn"
+                                className="px-4 py-2 text-white rounded-lg transition-colors text-sm"
+                                style={{backgroundColor: '#265927'}}
+                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#00583C'}
+                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#265927'}
+                              >
+                                Reset to Formula (k = 6σ + 1)
+                              </button>
+                            </div>
+                            
+                            <div className="grid grid-cols-4 gap-3 my-5">
+                              <div className="p-3 rounded-lg text-center border" style={{backgroundColor: 'rgba(0, 86, 77, 0.2)', borderColor: '#00564D'}}>
+                                <div className="text-xs text-gray-600 mb-1">σ (Sigma)</div>
+                                <div id="gaussianCurrentSigma" className="text-xl font-bold text-gray-800">1.0</div>
                               </div>
-                              <div className="p-4 rounded-lg text-center border" style={{backgroundColor: 'rgba(0, 86, 77, 0.2)', borderColor: '#00564D'}}>
-                                <div className="text-sm text-gray-600 mb-1">6σ + 1</div>
-                                <div id="gaussianKernelSize" className="text-2xl font-bold text-gray-800">7</div>
+                              <div className="p-3 rounded-lg text-center border" style={{backgroundColor: 'rgba(0, 86, 77, 0.2)', borderColor: '#00564D'}}>
+                                <div className="text-xs text-gray-600 mb-1">k (Size)</div>
+                                <div id="gaussianKernelSize" className="text-xl font-bold text-gray-800">7</div>
                               </div>
-                              <div className="p-4 rounded-lg text-center border" style={{backgroundColor: 'rgba(0, 86, 77, 0.2)', borderColor: '#00564D'}}>
-                                <div className="text-sm text-gray-600 mb-1">Coverage</div>
-                                <div id="gaussianCoverage" className="text-2xl font-bold text-gray-800">99.7%</div>
+                              <div className="p-3 rounded-lg text-center border" style={{backgroundColor: 'rgba(0, 86, 77, 0.2)', borderColor: '#00564D'}}>
+                                <div className="text-xs text-gray-600 mb-1">Coverage σ</div>
+                                <div id="gaussianSigmaCoverage" className="text-xl font-bold text-gray-800">3.0</div>
+                              </div>
+                              <div className="p-3 rounded-lg text-center border" style={{backgroundColor: 'rgba(0, 86, 77, 0.2)', borderColor: '#00564D'}}>
+                                <div className="text-xs text-gray-600 mb-1">% Coverage</div>
+                                <div id="gaussianCoverage" className="text-xl font-bold text-gray-800">99.7%</div>
                               </div>
                             </div>
                             
@@ -957,13 +1062,13 @@ gaussian_2d = gaussian_1d * gaussian_1d.T`}</code></pre>
                             </div>
                             
                             <div className="p-4 rounded-lg my-5 border-l-4" style={{backgroundColor: 'rgba(38, 89, 39, 0.1)', borderLeftColor: '#00583C'}}>
-                              <h3 className="text-gray-700 font-semibold mb-3">Why k = 6σ + 1?</h3>
+                              <h3 className="text-gray-700 font-semibold mb-3">Understanding Kernel Size vs Coverage</h3>
                               <ul className="list-none p-0 space-y-2">
-                                <li className="text-sm">• <span className="px-2 py-1 rounded" style={{backgroundColor: 'rgba(0, 82, 88, 0.3)'}}>±3σ coverage</span>: Captures 99.7% of Gaussian distribution</li>
-                                <li className="text-sm">• <span className="px-2 py-1 rounded" style={{backgroundColor: 'rgba(0, 82, 88, 0.3)'}}>Always odd size</span>: Ensures symmetric kernel with clear center</li>
-                                <li className="text-sm">• <span className="px-2 py-1 rounded" style={{backgroundColor: 'rgba(0, 82, 88, 0.3)'}}>Square kernel</span>: Equal dimensions for uniform filtering</li>
-                                <li className="text-sm">• <span className="px-2 py-1 rounded" style={{backgroundColor: 'rgba(0, 82, 88, 0.3)'}}>Center pixel</span>: +1 accounts for the center position</li>
-                                <li className="text-sm">• <span className="px-2 py-1 rounded" style={{backgroundColor: 'rgba(0, 82, 88, 0.3)'}}>Efficiency</span>: Minimal kernel size while maintaining quality</li>
+                                <li className="text-sm">• <span className="px-2 py-1 rounded" style={{backgroundColor: 'rgba(0, 82, 88, 0.3)'}}>Standard k = 6σ + 1</span>: Provides exactly ±3σ coverage (99.7% of distribution)</li>
+                                <li className="text-sm">• <span className="px-2 py-1 rounded" style={{backgroundColor: 'rgba(0, 82, 88, 0.3)'}}>Smaller kernels</span>: Faster computation but may miss important Gaussian tails</li>
+                                <li className="text-sm">• <span className="px-2 py-1 rounded" style={{backgroundColor: 'rgba(0, 82, 88, 0.3)'}}>Larger kernels</span>: Better coverage but increased computational cost</li>
+                                <li className="text-sm">• <span className="px-2 py-1 rounded" style={{backgroundColor: 'rgba(0, 82, 88, 0.3)'}}>Odd sizes only</span>: Ensures symmetric kernel with clear center pixel</li>
+                                <li className="text-sm">• <span className="px-2 py-1 rounded" style={{backgroundColor: 'rgba(0, 82, 88, 0.3)'}}>Coverage σ</span>: Shows how many standard deviations the kernel spans</li>
                               </ul>
                             </div>
                             
