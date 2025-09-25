@@ -30,6 +30,7 @@ import dogComparison13 from '@/assets/project2/1.3_DoG_comaprison.png';
 const Project2 = () => {
   const [activeSection, setActiveSection] = useState('');
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
+  const [showGaussianWidget, setShowGaussianWidget] = useState(true);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -71,6 +72,231 @@ const Project2 = () => {
       document.removeEventListener('keydown', handleEscapeKey);
     };
   }, [fullscreenImage]);
+
+  // Gaussian widget functionality
+  useEffect(() => {
+    if (!showGaussianWidget) return;
+
+    const updateGaussianVisualization = () => {
+      const slider = document.getElementById('gaussianSigmaSlider') as HTMLInputElement;
+      if (!slider) return;
+
+      const sigma = parseFloat(slider.value);
+      let kernelSize = Math.round(6 * sigma + 1);
+      
+      // Ensure kernel size is always odd
+      if (kernelSize % 2 === 0) {
+        kernelSize += 1;
+      }
+      
+      // Update display values
+      const sigmaValueEl = document.getElementById('gaussianSigmaValue');
+      const currentSigmaEl = document.getElementById('gaussianCurrentSigma');
+      const kernelSizeEl = document.getElementById('gaussianKernelSize');
+      const coverageEl = document.getElementById('gaussianCoverage');
+      
+      if (sigmaValueEl) sigmaValueEl.textContent = `σ = ${sigma.toFixed(1)}`;
+      if (currentSigmaEl) currentSigmaEl.textContent = sigma.toFixed(1);
+      if (kernelSizeEl) kernelSizeEl.textContent = kernelSize.toString();
+      if (coverageEl) coverageEl.textContent = '99.7%';
+      
+      // Update canvas
+      const canvas = document.getElementById('gaussianCanvas') as HTMLCanvasElement;
+      if (!canvas) return;
+      
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      
+      const gaussian = (x: number, sigma: number) => {
+        return (1 / (sigma * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * (x / sigma) ** 2);
+      };
+      
+      // Clear and redraw canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw axes
+      ctx.strokeStyle = '#999';
+      ctx.lineWidth = 1;
+      
+      // X-axis
+      ctx.beginPath();
+      ctx.moveTo(50, 250);
+      ctx.lineTo(600, 250);
+      ctx.stroke();
+      
+      // Y-axis
+      ctx.beginPath();
+      ctx.moveTo(325, 50);
+      ctx.lineTo(325, 280);
+      ctx.stroke();
+      
+      // Draw Gaussian curve
+      ctx.strokeStyle = '#666';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      
+      const centerX = 325;
+      const scaleX = 60; // pixels per sigma
+      const maxY = gaussian(0, sigma);
+      const scaleY = 150 / maxY;
+      
+      for (let x = -5; x <= 5; x += 0.1) {
+        const canvasX = centerX + x * scaleX;
+        const y = gaussian(x, sigma);
+        const canvasY = 250 - y * scaleY;
+        
+        if (x === -5) {
+          ctx.moveTo(canvasX, canvasY);
+        } else {
+          ctx.lineTo(canvasX, canvasY);
+        }
+      }
+      ctx.stroke();
+      
+      // Draw 3-sigma boundaries
+      ctx.strokeStyle = '#999';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([5, 5]);
+      
+      // -3σ line
+      const minus3sigma = centerX - 3 * sigma * scaleX;
+      ctx.beginPath();
+      ctx.moveTo(minus3sigma, 50);
+      ctx.lineTo(minus3sigma, 250);
+      ctx.stroke();
+      
+      // +3σ line
+      const plus3sigma = centerX + 3 * sigma * scaleX;
+      ctx.beginPath();
+      ctx.moveTo(plus3sigma, 50);
+      ctx.lineTo(plus3sigma, 250);
+      ctx.stroke();
+      
+      ctx.setLineDash([]);
+      
+      // Labels
+      ctx.fillStyle = '#666';
+      ctx.font = '12px Arial';
+      ctx.textAlign = 'center';
+      
+      ctx.fillText('-3σ', minus3sigma, 270);
+      ctx.fillText('0', centerX, 270);
+      ctx.fillText('+3σ', plus3sigma, 270);
+      ctx.fillText(`Kernel size: ${kernelSize}×${kernelSize}`, centerX, 30);
+      
+      // Shade the 3-sigma region
+      ctx.fillStyle = 'rgba(200, 200, 200, 0.3)';
+      ctx.beginPath();
+      ctx.moveTo(minus3sigma, 250);
+      
+      for (let x = -3 * sigma; x <= 3 * sigma; x += 0.1) {
+        const canvasX = centerX + x * scaleX / sigma;
+        const y = gaussian(x / sigma, 1) * sigma;
+        const canvasY = 250 - y * scaleY;
+        ctx.lineTo(canvasX, canvasY);
+      }
+      
+      ctx.lineTo(plus3sigma, 250);
+      ctx.closePath();
+      ctx.fill();
+      
+      // Update kernel grid
+      updateKernelGrid(kernelSize, sigma);
+    };
+
+    const updateKernelGrid = (kernelSize: number, sigma: number) => {
+      const grid = document.getElementById('gaussianKernelGrid');
+      if (!grid) return;
+      
+      grid.innerHTML = '';
+      
+      const gaussian = (x: number, sigma: number) => {
+        return (1 / (sigma * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * (x / sigma) ** 2);
+      };
+      
+      // Calculate appropriate cell size based on kernel size to prevent overflow
+      const maxKernelWidth = 600;
+      let cellSize = Math.min(35, Math.floor(maxKernelWidth / kernelSize));
+      cellSize = Math.max(20, cellSize);
+      
+      const fontSize = Math.max(8, Math.floor(cellSize / 4));
+      const center = Math.floor(kernelSize / 2);
+      
+      // Create grid container
+      const gridContainer = document.createElement('div');
+      gridContainer.style.display = 'grid';
+      gridContainer.style.gridTemplateColumns = `repeat(${kernelSize}, ${cellSize}px)`;
+      gridContainer.style.gridTemplateRows = `repeat(${kernelSize}, ${cellSize}px)`;
+      gridContainer.style.gap = '1px';
+      gridContainer.style.justifyContent = 'center';
+      
+      for (let i = 0; i < kernelSize; i++) {
+        for (let j = 0; j < kernelSize; j++) {
+          const cell = document.createElement('div');
+          cell.style.width = `${cellSize}px`;
+          cell.style.height = `${cellSize}px`;
+          cell.style.fontSize = `${fontSize}px`;
+          cell.style.margin = '1px';
+          cell.style.display = 'flex';
+          cell.style.alignItems = 'center';
+          cell.style.justifyContent = 'center';
+          cell.style.fontWeight = 'bold';
+          cell.style.borderRadius = '3px';
+          cell.style.color = '#333';
+          cell.style.border = '1px solid #999';
+          
+          // Calculate distance from center
+          const dx = j - center;
+          const dy = i - center;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          
+          // Calculate Gaussian value
+          const value = gaussian(distance, sigma);
+          const normalizedValue = value / gaussian(0, sigma);
+          
+          // Color based on value
+          const intensity = Math.floor(255 - normalizedValue * 200);
+          cell.style.backgroundColor = `rgb(${intensity}, ${intensity}, ${intensity})`;
+          
+          // Show value
+          if (normalizedValue > 0.01) {
+            if (cellSize > 25) {
+              cell.textContent = normalizedValue.toFixed(2);
+            } else {
+              cell.textContent = (Math.round(normalizedValue * 10) / 10).toString();
+            }
+          } else {
+            cell.textContent = '0';
+            cell.style.color = '#999';
+          }
+          
+          // Highlight center
+          if (i === center && j === center) {
+            cell.style.border = '2px solid #666';
+          }
+          
+          gridContainer.appendChild(cell);
+        }
+      }
+      
+      grid.appendChild(gridContainer);
+    };
+
+    // Set up slider event listener
+    const slider = document.getElementById('gaussianSigmaSlider') as HTMLInputElement;
+    if (slider) {
+      slider.addEventListener('input', updateGaussianVisualization);
+      // Initial visualization
+      setTimeout(updateGaussianVisualization, 100);
+    }
+
+    // Cleanup function
+    return () => {
+      if (slider) {
+        slider.removeEventListener('input', updateGaussianVisualization);
+      }
+    };
+  }, [showGaussianWidget]);
 
   const navigationItems = [
     { id: 'overview', title: 'Overview', icon: <Eye className="h-4 w-4" /> },
@@ -594,20 +820,19 @@ const Project2 = () => {
                   <h5 className="text-lg font-semibold text-gray-900 mb-3">Threshold Selection Analysis</h5>
                   
                   <p className="text-gray-700 mb-4">
-                    After systematic testing across the range [0.15, 0.20, 0.25, 0.30, 0.35, 0.40], I selected <strong>0.3</strong> based on specific visual criteria:
+                    After systematic testing across the range [0.15, 0.20, 0.25, 0.30, 0.35, 0.40], I selected <strong>0.25</strong> based on specific visual criteria:
                   </p>
                   
                   <div className="bg-white p-6 rounded-lg border mb-6">
                     <ul className="space-y-2 text-gray-700">
                       <li>• <strong>Thresholds 0.15-0.2:</strong> Include excessive background texture noise, particularly in the grass and foliage areas, making it difficult to distinguish meaningful edges from surface patterns</li>
-                      <li>• <strong>Threshold 0.25:</strong> Still captures some texture noise but begins to clean up the background</li>
-                      <li>• <strong>Threshold 0.3:</strong> <strong>Optimal balance</strong> - preserves the photographer's silhouette, camera body details, and tripod structure while eliminating most texture artifacts in the background</li>
-                      <li>• <strong>Thresholds 0.35-0.4:</strong> Begin losing important structural details like the camera housing edges and some tripod components</li>
+                      <li>• <strong>Threshold 0.25:</strong> <strong>Good balance</strong> - preserves the photographer's silhouette, camera body details, and tripod structure while substantially reducing texture artifacts in the background</li>
+                      <li>• <strong>Thresholds 0.3-0.4:</strong> Begin to over-suppress edges, losing some important structural details like finer camera housing edges and the man's coat</li>
                     </ul>
                   </div>
                   
                   <p className="text-gray-700 mb-4">
-                    The 0.3 threshold successfully separates <strong>structural edges</strong> (object boundaries, geometric features) from <strong>texture edges</strong> (surface patterns, noise), which aligns with the goal of robust edge detection.
+                    The 0.25 threshold successfully separates <strong>structural edges</strong> (object boundaries, geometric features) from <strong>texture edges</strong> (surface patterns, noise) while maintaining more detail than higher thresholds, which aligns with the goal of comprehensive yet robust edge detection.
                   </p>
                 </div>
               </div>
@@ -659,64 +884,103 @@ const Project2 = () => {
                   </p>
                   
                   <div className="bg-gray-50 p-4 rounded-lg mb-4 overflow-x-auto">
-                    <pre className="text-sm"><code>{`gaussian_1d = cv2.getGaussianKernel(5, 1)
+                    <pre className="text-sm"><code>{`gaussian_1d = cv2.getGaussianKernel(k, sigma)
 gaussian_2d = gaussian_1d * gaussian_1d.T`}</code></pre>
                   </div>
                   
                   <p className="text-gray-700 mb-4">
-                    This gives a symmetric, separable kernel (3×3 and 5×5 shown in the images).
+                    The kernel size formula k = 6σ + 1 ensures adequate coverage of the Gaussian distribution. This formula provides 3σ coverage on each side of the center (6σ total) plus the center pixel. For σ = 1, this gives a 7×7 kernel that captures approximately 99.7% of the Gaussian's mass, ensuring effective smoothing while keeping the kernel computationally manageable.
                   </p>
                   
-                  <h5 className="text-lg font-semibold text-gray-900 mb-3">Why Separability Matters</h5>
                   
-                  <p className="text-gray-700 mb-4">
-                    Gaussian filters are <strong>separable</strong>, meaning a 2D Gaussian can be decomposed into two 1D operations:
-                  </p>
                   
-                  <div className="bg-white p-6 rounded-lg border mb-6">
-                    <div className="text-center font-mono text-lg">
-                      G(x,y) = G(x) · G(y)
-                    </div>
-                  </div>
-                  
-                  <p className="text-gray-700 mb-4">
-                    This provides significant computational advantages:
-                  </p>
-                  
-                  <div className="bg-white p-6 rounded-lg border mb-6">
-                    <ul className="space-y-2 text-gray-700">
-                      <li><strong>Direct 2D convolution:</strong> O(k²) operations per pixel for a k×k kernel</li>
-                      <li><strong>Separable approach:</strong> O(2k) operations per pixel (two 1D convolutions)</li>
-                    </ul>
-                  </div>
-                  
-                  <p className="text-gray-700 mb-4">
-                    For a 5×5 Gaussian: 25 operations vs. 10 operations per pixel - a 2.5× speedup. This advantage grows quadratically with kernel size, making separable convolution essential for large Gaussian kernels in practice.
-                  </p>
-                  
-                  <p className="text-gray-700 mb-4">
-                    The outer product <code className="bg-gray-200 px-2 py-1 rounded">gaussian_1d * gaussian_1d.T</code> reconstructs the full 2D kernel for visualization and direct comparison, but production implementations typically use the separable approach.
-                  </p>
-                  
-                  <div className="mb-6 flex justify-center">
-                    <div 
-                      className="bg-white p-4 rounded-lg border max-w-full cursor-pointer hover:opacity-80 transition-opacity group"
-                      onClick={() => setFullscreenImage(gaussianFilter13)}
-                      title="Click to view fullscreen"
-                    >
-                      <div className="relative">
-                        <img 
-                          src={gaussianFilter13}
-                          alt="Gaussian filter kernels showing 3x3 and 5x5 matrices with their corresponding weights"
-                          className="w-full h-auto rounded"
-                        />
-                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Maximize2 className="h-4 w-4 text-gray-600" />
-                        </div>
+                  <div className="mb-6">
+                    <div className="bg-white p-6 rounded-lg border">
+                      <div className="flex items-center justify-between mb-4">
+                        <h5 className="text-lg font-semibold text-gray-900">Interactive Gaussian Kernel Visualization</h5>
+                        <button
+                          onClick={() => setShowGaussianWidget(!showGaussianWidget)}
+                          className="px-4 py-2 text-white rounded-lg transition-colors text-sm"
+                          style={{backgroundColor: '#265927'}}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#00583C'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#265927'}
+                        >
+                          {showGaussianWidget ? 'Hide Widget' : 'Show Interactive Widget'}
+                        </button>
                       </div>
-                      <p className="text-sm text-gray-600 mt-2 text-center">
-                        Gaussian filter kernels: 3×3 and 5×5 matrices showing the bell-curve distribution of weights
-                      </p>
+                      
+                      {showGaussianWidget && (
+                        <div className="gaussian-widget-container">
+                          <div className="rounded-lg p-6 border" style={{background: 'linear-gradient(to bottom right, rgba(38, 89, 39, 0.1), rgba(0, 88, 60, 0.1))', borderColor: '#00564D'}}>
+                            <h1 className="text-center text-gray-700 mb-2 text-xl font-semibold">Gaussian Kernel Size Formula</h1>
+                            
+                            <div className="p-5 rounded-lg text-center my-5 border-2" style={{backgroundColor: 'rgba(0, 86, 77, 0.2)', borderColor: '#00564D'}}>
+                              <div className="text-3xl font-bold text-gray-700 mb-2" style={{fontFamily: '"Times New Roman", serif'}}>k = 6σ + 1</div>
+                              <div className="text-sm text-gray-600 italic">Kernel size = 6 × sigma + 1 (center pixel)</div>
+                            </div>
+                            
+                            <div className="p-4 rounded-lg my-5 text-center" style={{backgroundColor: 'rgba(0, 82, 88, 0.3)'}}>
+                              <label htmlFor="gaussianSigmaSlider" className="block mb-2 text-gray-700">Adjust σ (sigma): </label>
+                              <input 
+                                type="range" 
+                                id="gaussianSigmaSlider" 
+                                className="w-72 mx-2" 
+                                min="0.5" 
+                                max="3" 
+                                step="0.1" 
+                                defaultValue="1"
+                              />
+                              <div id="gaussianSigmaValue" className="mt-2 text-gray-700">σ = 1.0</div>
+                            </div>
+                            
+                            <div className="grid grid-cols-3 gap-4 my-5">
+                              <div className="p-4 rounded-lg text-center border" style={{backgroundColor: 'rgba(0, 86, 77, 0.2)', borderColor: '#00564D'}}>
+                                <div className="text-sm text-gray-600 mb-1">σ (Sigma)</div>
+                                <div id="gaussianCurrentSigma" className="text-2xl font-bold text-gray-800">1.0</div>
+                              </div>
+                              <div className="p-4 rounded-lg text-center border" style={{backgroundColor: 'rgba(0, 86, 77, 0.2)', borderColor: '#00564D'}}>
+                                <div className="text-sm text-gray-600 mb-1">6σ + 1</div>
+                                <div id="gaussianKernelSize" className="text-2xl font-bold text-gray-800">7</div>
+                              </div>
+                              <div className="p-4 rounded-lg text-center border" style={{backgroundColor: 'rgba(0, 86, 77, 0.2)', borderColor: '#00564D'}}>
+                                <div className="text-sm text-gray-600 mb-1">Coverage</div>
+                                <div id="gaussianCoverage" className="text-2xl font-bold text-gray-800">99.7%</div>
+                              </div>
+                            </div>
+                            
+                            <div className="bg-white p-3 rounded-lg my-5 border border-gray-300">
+                              <canvas id="gaussianCanvas" width="650" height="300" className="w-full max-w-full"></canvas>
+                            </div>
+                            
+                            <div id="gaussianKernelGrid" className="flex justify-center my-5 overflow-x-auto">
+                              {/* Kernel visualization will be generated here */}
+                            </div>
+                            
+                            <div className="p-4 rounded-lg my-5 border-l-4" style={{backgroundColor: 'rgba(38, 89, 39, 0.1)', borderLeftColor: '#00583C'}}>
+                              <h3 className="text-gray-700 font-semibold mb-3">Why k = 6σ + 1?</h3>
+                              <ul className="list-none p-0 space-y-2">
+                                <li className="text-sm">• <span className="px-2 py-1 rounded" style={{backgroundColor: 'rgba(0, 82, 88, 0.3)'}}>±3σ coverage</span>: Captures 99.7% of Gaussian distribution</li>
+                                <li className="text-sm">• <span className="px-2 py-1 rounded" style={{backgroundColor: 'rgba(0, 82, 88, 0.3)'}}>Always odd size</span>: Ensures symmetric kernel with clear center</li>
+                                <li className="text-sm">• <span className="px-2 py-1 rounded" style={{backgroundColor: 'rgba(0, 82, 88, 0.3)'}}>Square kernel</span>: Equal dimensions for uniform filtering</li>
+                                <li className="text-sm">• <span className="px-2 py-1 rounded" style={{backgroundColor: 'rgba(0, 82, 88, 0.3)'}}>Center pixel</span>: +1 accounts for the center position</li>
+                                <li className="text-sm">• <span className="px-2 py-1 rounded" style={{backgroundColor: 'rgba(0, 82, 88, 0.3)'}}>Efficiency</span>: Minimal kernel size while maintaining quality</li>
+                              </ul>
+                            </div>
+                            
+                            <div className="bg-slate-50 p-3 rounded-lg mt-5 border border-slate-200">
+                              <p className="text-xs text-gray-500 text-center">
+                                Interactive widget created with assistance from <a href="https://claude.ai" target="_blank" rel="noopener noreferrer" className="underline" style={{color: '#265927'}} onMouseEnter={(e) => e.currentTarget.style.color = '#00583C'} onMouseLeave={(e) => e.currentTarget.style.color = '#265927'}>Anthropic's Claude Chat</a>
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {!showGaussianWidget && (
+                        <div className="text-center py-8 text-gray-500">
+                          <p>Click "Show Interactive Widget" to explore the Gaussian kernel size formula k = 6σ + 1</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                   
