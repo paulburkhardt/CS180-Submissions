@@ -1759,7 +1759,7 @@ gaussian_2d = gaussian_1d * gaussian_1d.T`}</code></pre>
               <h3 className="text-xl font-semibold text-gray-900 mb-4">Part 2.3: Gaussian and Laplacian Stacks</h3>
               
               <p className="text-gray-700 mb-4">
-                To better understand image decomposition, I implemented <strong>Gaussian and Laplacian stacks</strong>. Unlike pyramids, stacks do not downsample, so all levels stay the same size as the original image.
+                To better understand image decomposition, I implemented Gaussian and Laplacian stacks. Unlike pyramids, stacks do not downsample, so all levels stay the same size as the original image.
               </p>
 
               <div className="space-y-8">
@@ -1813,6 +1813,45 @@ gaussian_2d = gaussian_1d * gaussian_1d.T`}</code></pre>
                     Each Laplacian level captures the <strong>frequency band</strong> that was removed when going from one Gaussian level to the next, effectively creating a <strong>bandpass filter</strong> representation of the image.
                   </p>
                 </div>
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Step Mask Implementation</h4>
+                  
+                  <p className="text-gray-700 mb-4">
+                    To blend the apple and orange images, I created a vertical step mask that transitions smoothly from one image to the other. The mask implementation uses a gradual transition zone to avoid harsh boundaries.
+                  </p>
+                  
+                  
+                  
+                  <p className="text-gray-700 mb-4">
+                    The mask starts with value 1 on the left half (selecting the apple) and 0 on the right half (selecting the orange). The key is the <strong>smooth transition zone</strong> in the center, where the mask values gradually change from 1 to 0 using a linear interpolation, serving as a "step function". This creates a seamless blend between the two images rather than a sharp vertical line.
+                  </p>
+                </div>
+
+                
+                
+                  
+                  <div className="mb-6 flex justify-center">
+                    <div 
+                      className="bg-white p-4 rounded-lg border max-w-full cursor-pointer hover:opacity-80 transition-opacity group"
+                      onClick={() => setFullscreenImage('/src/assets/project2/2.3_blending_mask.png')}
+                      title="Click to view fullscreen"
+                    >
+                      <div className="relative">
+                        <img 
+                          src="/src/assets/project2/2.3_blending_mask.png"
+                          alt="Step mask with smooth transition zone for blending apple and orange images"
+                          className="w-full h-auto rounded"
+                        />
+                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Maximize2 className="h-4 w-4 text-gray-600" />
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-2 text-center">
+                        Blend mask with 0.05 transition zone around the middle
+                      </p>
+                    </div>
+                  </div>
+                
 
                 <div>
                   <h4 className="text-lg font-semibold text-gray-900 mb-4">Stack Analysis: Apple, Orange, and Oraple</h4>
