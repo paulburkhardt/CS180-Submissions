@@ -35,6 +35,7 @@ import fourierYoungOld22 from '@/assets/project2/2.2_fourrier_young_old.png';
 import oldYoung22 from '@/assets/project2/2.2_old_young.png';
 import derekCat22 from '@/assets/project2/2.2_derek_cat.png';
 import dogDude22 from '@/assets/project2/2.2_dog_dude.png';
+import twoLions22 from '@/assets/project2/2.2_two_lions.png';
 
 const Project2 = () => {
   const [activeSection, setActiveSection] = useState('');
@@ -1721,6 +1722,28 @@ gaussian_2d = gaussian_1d * gaussian_1d.T`}</code></pre>
                         </div>
                         <p className="text-sm text-gray-600 mt-2 text-center">
                           Young + Old Me hybrid image
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-6 flex justify-center">
+                      <div 
+                        className="bg-white p-4 rounded-lg border max-w-full cursor-pointer hover:opacity-80 transition-opacity group"
+                        onClick={() => setFullscreenImage(twoLions22)}
+                        title="Click to view fullscreen"
+                      >
+                        <div className="relative">
+                          <img 
+                            src={twoLions22}
+                            alt="Mehmet and lion hybrid image experiment"
+                            className="w-full h-auto rounded"
+                          />
+                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Maximize2 className="h-4 w-4 text-gray-600" />
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-2 text-center">
+                          My friend Mehmet and his spirit animal
                         </p>
                       </div>
                     </div>
