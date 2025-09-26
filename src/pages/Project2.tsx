@@ -36,6 +36,7 @@ import oldYoung22 from '@/assets/project2/2.2_old_young.png';
 import derekCat22 from '@/assets/project2/2.2_derek_cat.png';
 import dogDude22 from '@/assets/project2/2.2_dog_dude.png';
 import twoLions22 from '@/assets/project2/2.2_two_lions.png';
+import stacks23 from '@/assets/project2/2.3_stacks.png';
 
 const Project2 = () => {
   const [activeSection, setActiveSection] = useState('');
@@ -386,6 +387,7 @@ const Project2 = () => {
     { id: 'part2', title: 'Part 2: Frequencies', icon: <Filter className="h-4 w-4" /> },
     { id: 'part2-1', title: '2.1: Image Sharpening', icon: <Sparkles className="h-4 w-4" /> },
     { id: 'part2-2', title: '2.2: Hybrid Images', icon: <Eye className="h-4 w-4" /> },
+    { id: 'part2-3', title: '2.3: Gaussian & Laplacian Stacks', icon: <Grid className="h-4 w-4" /> },
   ];
 
   return (
@@ -1748,6 +1750,99 @@ gaussian_2d = gaussian_1d * gaussian_1d.T`}</code></pre>
                       </div>
                     </div>
                   </div>
+                  
+                </div>
+              </div>
+            </div>
+
+            <div id="part2-3">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Part 2.3: Gaussian and Laplacian Stacks</h3>
+              
+              <p className="text-gray-700 mb-4">
+                To better understand image decomposition, I implemented <strong>Gaussian and Laplacian stacks</strong>. Unlike pyramids, stacks do not downsample, so all levels stay the same size as the original image.
+              </p>
+
+              <div className="space-y-8">
+
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Gaussian Stack Construction</h4>
+                  
+                  <p className="text-gray-700 mb-4">
+                    The Gaussian stack was built by repeatedly applying a Gaussian blur, producing progressively smoother versions of the image.
+                  </p>
+                  
+                  <p className="text-gray-700 mb-4">
+                    The construction process follows this iterative approach:
+                  </p>
+                  
+                  <div className="bg-white p-6 rounded-lg border mb-6">
+                    <ul className="space-y-2 text-gray-700 font-mono">
+                      <li>• <strong>Level 0:</strong> G<sub>0</sub> = Original Image</li>
+                      <li>• <strong>Level 1:</strong> G<sub>1</sub> = G<sub>0</sub> ∗ G<sub>σ</sub></li>
+                      <li>• <strong>Level 2:</strong> G<sub>2</sub> = G<sub>1</sub> ∗ G<sub>σ</sub></li>
+                      <li>• <strong>Level n:</strong> G<sub>n</sub> = G<sub>n-1</sub> ∗ G<sub>σ</sub></li>
+                    </ul>
+                  </div>
+                  
+                  <p className="text-gray-700 mb-4">
+                    Each level represents the image at a different degree of smoothness, with higher levels containing increasingly coarse features while eliminating fine details.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Laplacian Stack Computation</h4>
+                  
+                  <p className="text-gray-700 mb-4">
+                    The Laplacian stack was then computed as the difference between consecutive Gaussian levels, isolating details at different frequency bands. The final level is simply the coarsest Gaussian image.
+                  </p>
+                  
+                  <p className="text-gray-700 mb-4">
+                    The mathematical formulation is:
+                  </p>
+                  
+                  <div className="bg-white p-6 rounded-lg border mb-6">
+                    <ul className="space-y-2 text-gray-700 font-mono">
+                      <li>• <strong>Level 0:</strong> L<sub>0</sub> = G<sub>0</sub> - G<sub>1</sub></li>
+                      <li>• <strong>Level 1:</strong> L<sub>1</sub> = G<sub>1</sub> - G<sub>2</sub></li>
+                      <li>• <strong>Level n-1:</strong> L<sub>n-1</sub> = G<sub>n-1</sub> - G<sub>n</sub></li>
+                      <li>• <strong>Final level:</strong> L<sub>n</sub> = G<sub>n</sub> (coarsest Gaussian)</li>
+                    </ul>
+                  </div>
+                  
+                  <p className="text-gray-700 mb-4">
+                    Each Laplacian level captures the <strong>frequency band</strong> that was removed when going from one Gaussian level to the next, effectively creating a <strong>bandpass filter</strong> representation of the image.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Stack Analysis: Apple, Orange, and Oraple</h4>
+                  
+                  <p className="text-gray-700 mb-4">
+                    Applied to the apple, orange, and blended "Oraple" images, the stacks clearly show how different frequency components are distributed across levels. I used sigma = 5 for the Gaussian stack and the Laplacian stack in the run below as the outcome came closest to the outcomes in <a href="https://www.dropbox.com/scl/fi/p33rod69w6tf61etn4ijr/SzeliskiBookDraft_20210828.pdf?rlkey=n4w0939o5s5jq09urfb1rl57i&e=1&dl=0" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline">Figure 3.42 in Szelski (Ed 2)</a>.
+                  </p>
+                  
+                  <div className="mb-6 flex justify-center">
+                    <div 
+                      className="bg-white p-4 rounded-lg border max-w-full cursor-pointer hover:opacity-80 transition-opacity group"
+                      onClick={() => setFullscreenImage(stacks23)}
+                      title="Click to view fullscreen"
+                    >
+                      <div className="relative">
+                        <img 
+                          src={stacks23}
+                          alt="Gaussian and Laplacian stacks analysis showing apple, orange, and blended Oraple across different frequency levels"
+                          className="w-full h-auto rounded"
+                        />
+                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Maximize2 className="h-4 w-4 text-gray-600" />
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-2 text-center">
+                        Gaussian and Laplacian stacks for apple, orange, and blended Oraple images
+                      </p>
+                    </div>
+                  </div>
+                  
                   
                 </div>
               </div>
