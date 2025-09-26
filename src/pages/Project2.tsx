@@ -26,6 +26,15 @@ import gaussianFilter13 from '@/assets/project2/1.3_gaussian_filter.jpg';
 import blurredBinGradMag13 from '@/assets/project2/1.3_blurred_bin_grad_mag.png';
 import dogFilter13 from '@/assets/project2/1.3_DoG_filter.png';
 import dogComparison13 from '@/assets/project2/1.3_DoG_comaprison.png';
+import unsharpFilters21 from '@/assets/project2/2.1_unsharp_and_other_filters.png';
+import tajUnsharp21 from '@/assets/project2/2.1_taj_unsharp.png';
+import treesUnsharp21 from '@/assets/project2/2.1_trees_unsharp.png';
+import blurSharpen21 from '@/assets/project2/2.1_blur_and_sharpen.png';
+import oldYoungComp22 from '@/assets/project2/2.2_old_young_comp.png';
+import fourierYoungOld22 from '@/assets/project2/2.2_fourrier_young_old.png';
+import oldYoung22 from '@/assets/project2/2.2_old_young.png';
+import derekCat22 from '@/assets/project2/2.2_derek_cat.png';
+import dogDude22 from '@/assets/project2/2.2_dog_dude.png';
 
 const Project2 = () => {
   const [activeSection, setActiveSection] = useState('');
@@ -373,6 +382,9 @@ const Project2 = () => {
     { id: 'part1-1', title: '1.1: Convolutions', icon: <Grid className="h-4 w-4" /> },
     { id: 'part1-2', title: '1.2: Finite Difference', icon: <Zap className="h-4 w-4" /> },
     { id: 'part1-3', title: '1.3: DoG Filter', icon: <Sparkles className="h-4 w-4" /> },
+    { id: 'part2', title: 'Part 2: Frequencies', icon: <Filter className="h-4 w-4" /> },
+    { id: 'part2-1', title: '2.1: Image Sharpening', icon: <Sparkles className="h-4 w-4" /> },
+    { id: 'part2-2', title: '2.2: Hybrid Images', icon: <Eye className="h-4 w-4" /> },
   ];
 
   return (
@@ -1311,12 +1323,422 @@ gaussian_2d = gaussian_1d * gaussian_1d.T`}</code></pre>
         </div>
       </section>
 
+      {/* Part 2: Fun with Frequencies */}
+      <section id="part2" className="py-16 bg-white">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Part 2: Fun with Frequencies!</h2>
+          
+          <div className="space-y-12">
+            <div>
+              <p className="text-gray-700 mb-4">
+                In this second part, I explore how to enhance images using <strong>frequency-based filtering techniques</strong>. 
+                Moving beyond basic edge detection, we'll see how separating images into low-frequency (smooth) and 
+                high-frequency (detailed) components enables sophisticated image processing operations.
+              </p>
+            </div>
+
+            <div id="part2-1">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Part 2.1: Image "Sharpening"</h3>
+              
+              <p className="text-gray-700 mb-4">
+                In this exercise, I explored how to sharpen images using frequency-based filtering. The idea is to separate an image into its <strong>low-frequency</strong> (smooth, slowly varying content) and <strong>high-frequency</strong> (edges and fine details) components.
+              </p>
+              
+              <p className="text-gray-700 mb-4">
+                The Gaussian filter serves as a low-pass filter: it blurs the image by suppressing high-frequency details. If we subtract this blurred version from the original image, we are left with the high-frequency component. Adding this high-frequency component back to the original enhances edges and makes the image appear "sharper."
+              </p>
+
+              <div className="space-y-8">
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Unsharp Masking: Two-Step vs. Single Convolution</h4>
+                  
+                  <p className="text-gray-700 mb-4">
+                    The sharpening process can be described in two steps:
+                  </p>
+                  
+                  <div className="bg-white p-6 rounded-lg border mb-6">
+                    <ol className="list-decimal list-inside space-y-2 text-gray-700">
+                      <li>Blur the image with a Gaussian filter G<sub>σ</sub>.</li>
+                      <li>Subtract the blurred image from the original to extract high frequencies, then add them back with some scaling factor α.</li>
+                    </ol>
+                  </div>
+                  
+                  <p className="text-gray-700 mb-4">
+                    Formally, this is:
+                  </p>
+                  
+                  <div className="bg-white p-6 rounded-lg border mb-6">
+                    <div className="text-center font-mono text-lg">
+                      I<sub>sharp</sub> = I + α · (I - (I ∗ G<sub>σ</sub>))
+                    </div>
+                  </div>
+                  
+                  <p className="text-gray-700 mb-4">
+                    where:
+                  </p>
+                  
+                  <div className="bg-white p-6 rounded-lg border mb-6">
+                    <ul className="space-y-2 text-gray-700">
+                      <li>• <strong>I</strong> is the original image</li>
+                      <li>• <strong>G<sub>σ</sub></strong> is the Gaussian filter with standard deviation σ</li>
+                      <li>• <strong>α</strong> controls the <strong>amount</strong> of sharpening</li>
+                    </ul>
+                  </div>
+                  
+                  <p className="text-gray-700 mb-4">
+                    This formula can also be expressed as a <strong>single convolution</strong>. If we rewrite it:
+                  </p>
+                  
+                  <div className="bg-white p-6 rounded-lg border mb-6">
+                    <div className="text-center font-mono text-lg">
+                      I<sub>sharp</sub> = I ∗ [(1 + α)δ - αG<sub>σ</sub>]
+                    </div>
+                  </div>
+                  
+                  <p className="text-gray-700 mb-4">
+                    Here, δ is the <strong>identity filter</strong> (all zeros except a 1 in the center). The resulting kernel
+                  </p>
+                  
+                  <div className="bg-white p-6 rounded-lg border mb-6">
+                    <div className="text-center font-mono text-lg">
+                      F<sub>unsharp</sub> = (1 + α)δ - αG<sub>σ</sub>
+                    </div>
+                  </div>
+                  
+                  <p className="text-gray-700 mb-4">
+                    is called the <strong>unsharp mask filter</strong>. This single filter directly produces the sharpened image in one convolution step.
+                  </p>
+                  
+                  <div className="mb-6 flex justify-center">
+                    <div 
+                      className="bg-white p-4 rounded-lg border max-w-full cursor-pointer hover:opacity-80 transition-opacity group"
+                      onClick={() => setFullscreenImage(unsharpFilters21)}
+                      title="Click to view fullscreen"
+                    >
+                      <div className="relative">
+                        <img 
+                          src={unsharpFilters21}
+                          alt="Gaussian, identity, and unsharp filter kernels for sigma=1.0 and amount=1.0"
+                          className="w-full h-auto rounded"
+                        />
+                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Maximize2 className="h-4 w-4 text-gray-600" />
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-2 text-center">
+                        Comparison of Gaussian, identity, and unsharp filter kernels for σ=1.0 and α=1.0
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Sharpening Results with Different Parameters</h4>
+                  
+                  <p className="text-gray-700 mb-4">
+                    I tested the unsharp masking technique on two different images with varying values of α (amount) to demonstrate the effect of the sharpening parameter.
+                  </p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div 
+                      className="bg-white p-4 rounded-lg border cursor-pointer hover:opacity-80 transition-opacity group"
+                      onClick={() => setFullscreenImage(tajUnsharp21)}
+                      title="Click to view fullscreen"
+                    >
+                      <div className="relative">
+                        <img 
+                          src={tajUnsharp21}
+                          alt="Taj Mahal unsharp masking results with different alpha values"
+                          className="w-full h-auto rounded"
+                        />
+                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Maximize2 className="h-4 w-4 text-gray-600" />
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-2 text-center">
+                        Taj Mahal sharpening results with different α values
+                      </p>
+                    </div>
+                    
+                    <div 
+                      className="bg-white p-4 rounded-lg border cursor-pointer hover:opacity-80 transition-opacity group"
+                      onClick={() => setFullscreenImage(treesUnsharp21)}
+                      title="Click to view fullscreen"
+                    >
+                      <div className="relative">
+                        <img 
+                          src={treesUnsharp21}
+                          alt="Trees unsharp masking results with different alpha values"
+                          className="w-full h-auto rounded"
+                        />
+                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Maximize2 className="h-4 w-4 text-gray-600" />
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-2 text-center">
+                        Trees sharpening results with different α values
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <h5 className="text-lg font-semibold text-gray-900 mb-3">Effect of Alpha Parameter</h5>
+                  
+                  <p className="text-gray-700 mb-4">
+                    The results clearly show how different values of α affect the sharpening intensity:
+                  </p>
+                  
+                  <div className="bg-white p-6 rounded-lg border mb-6">
+                    <ul className="space-y-2 text-gray-700">
+                      <li>• <strong>α = 0.5:</strong> Subtle sharpening that enhances edges without creating artifacts</li>
+                      <li>• <strong>α = 1.0:</strong> Moderate sharpening with noticeable edge enhancement</li>
+                      <li>• <strong>α = 2.0:</strong> Strong sharpening that may introduce halos around high-contrast edges</li>
+                    </ul>
+                  </div>
+                  
+                  <p className="text-gray-700 mb-4">
+                    The results clearly show how sharpening reintroduces high frequencies that were suppressed by the Gaussian blur. In practice, the unsharp mask is widely used in photography and image processing because it is simple, effective, and computationally efficient.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Blur and Resharpening Experiment</h4>
+                  
+                  <p className="text-gray-700 mb-4">
+                    As a second experiment, I took a sharp image, blurred it, and then used the unsharp mask filter to attempt restoration (values: α=1, σ=1).
+                  </p>
+                  
+                  <div className="mb-6 flex justify-center">
+                    <div 
+                      className="bg-white p-4 rounded-lg border max-w-full cursor-pointer hover:opacity-80 transition-opacity group"
+                      onClick={() => setFullscreenImage(blurSharpen21)}
+                      title="Click to view fullscreen"
+                    >
+                      <div className="relative">
+                        <img 
+                          src={blurSharpen21}
+                          alt="Comparison of original, blurred, and resharpened images showing information loss"
+                          className="w-full h-auto rounded"
+                        />
+                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Maximize2 className="h-4 w-4 text-gray-600" />
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-2 text-center">
+                        Blur and resharpening experiment: original → blurred → resharpened
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <h5 className="text-lg font-semibold text-gray-900 mb-3">Information Loss in Blur-Sharpen Pipeline</h5>
+                  
+                  <p className="text-gray-700 mb-4">
+                    As you can see, the resharpened image lost some details because the blurring process loses information that the unsharp mask cannot restore. This demonstrates an important principle:
+                  </p>
+                  
+                  <div className="bg-white p-6 rounded-lg border mb-6">
+                    <ul className="space-y-2 text-gray-700">
+                      <li>• <strong>Blurring is irreversible:</strong> Once high-frequency information is removed by Gaussian smoothing, it cannot be perfectly recovered</li>
+                      <li>• <strong>Unsharp masking enhances existing edges:</strong> It amplifies whatever edge information remains after blurring, but cannot recreate lost details</li>
+                    </ul>
+                  </div>
+                  
+                  
+                </div>
+              </div>
+            </div>
+
+            <div id="part2-2">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Part 2.2: Hybrid Images</h3>
+              
+              <p className="text-gray-700 mb-4">
+                In this part I create <a href="https://en.wikipedia.org/wiki/Hybrid_image" className="text-blue-600 hover:text-blue-800 underline" target="_blank" rel="noopener noreferrer">hybrid images</a> using the approach described in the SIGGRAPH 2006 <a href="https://web.archive.org/web/20070315210101/http://cvcl.mit.edu/hybrid/OlivaTorralb_Hybrid_Siggraph06.pdf" className="text-blue-600 hover:text-blue-800 underline" target="_blank" rel="noopener noreferrer">paper</a> by Oliva, Torralba, and Schyns. 
+              </p>
+              
+              <p className="text-gray-700 mb-4">
+                <strong>Hybrid images</strong> are static images that change in interpretation as a function of the viewing distance. The basic idea is that <strong>high frequency tends to dominate perception</strong> when it is available, but, at a distance, only the <strong>low frequency (smooth) part of the signal can be seen</strong>. By blending the high frequency portion of one image with the low-frequency portion of another, you get a hybrid image that leads to different interpretations at different distances.
+              </p>
+
+              <div className="space-y-8">
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">The Hybrid Image Creation Process</h4>
+                  
+                  <p className="text-gray-700 mb-4">
+                    Creating effective hybrid images involves several key steps:
+                  </p>
+                  
+                  <div className="bg-white p-6 rounded-lg border mb-6">
+                    <ol className="list-decimal list-inside space-y-3 text-gray-700">
+                      <li><strong>Image Alignment:</strong> As a first step I aligned the images to ensure key features (eyes, mouth, etc.) correspond spatially between the two source images.</li>
+                      <li><strong>Frequency Filtering:</strong> I used a low pass filter on one image and a high pass filter on the other. I experimented with different sigma values for both filters to control their intensity.</li>
+                      <li><strong>Image Merging:</strong> I merged the images by adding them together and clipping the result to the range [0,1] to ensure valid pixel values.</li>
+                      <li><strong>Parameter Optimization:</strong> Tadaaa! The final hybrid image uses the best sigma values, chosen qualitatively by visual inspection of the results.</li>
+                    </ol>
+                  </div>
+                  
+                  <h5 className="text-lg font-semibold text-gray-900 mb-3">Technical Implementation</h5>
+                  
+                  <p className="text-gray-700 mb-4">
+                    The mathematical foundation involves frequency domain separation:
+                  </p>
+                  
+                  <div className="bg-white p-6 rounded-lg border mb-6">
+                    <ul className="space-y-2 text-gray-700 font-mono">
+                      <li>• <strong>Low-pass component:</strong> I<sub>low</sub> = I<sub>1</sub> ∗ G<sub>σ_low</sub></li>
+                      <li>• <strong>High-pass component:</strong> I<sub>high</sub> = I<sub>2</sub> - (I<sub>2</sub> ∗ G<sub>σ_high</sub>)</li>
+                      <li>• <strong>Hybrid result:</strong> I<sub>hybrid</sub> = I<sub>low</sub> + I<sub>high</sub></li>
+                    </ul>
+                  </div>
+                  
+                  <p className="text-gray-700 mb-4">
+                    Where G<sub>σ</sub> represents Gaussian filters with different standard deviations controlling the frequency cutoffs.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Main Result: Young and Old Me</h4>
+                  
+                  <p className="text-gray-700 mb-4">
+                    This hybrid image merges a picture of me as a kid with a picture of me now. Through experimentation, I found that <strong>σ<sub>low</sub> = 5</strong> and <strong>σ<sub>high</sub> = 5</strong> produced the best combination for this particular image pair.
+                  </p>
+                  
+                  <div className="mb-6 flex justify-center">
+                    <div 
+                      className="bg-white p-4 rounded-lg border max-w-full cursor-pointer hover:opacity-80 transition-opacity group"
+                      onClick={() => setFullscreenImage(oldYoungComp22)}
+                      title="Click to view fullscreen"
+                    >
+                      <div className="relative">
+                        <img 
+                          src={oldYoungComp22}
+                          alt="Sigma comparison analysis for young and old hybrid image showing different parameter combinations"
+                          className="w-full h-auto rounded"
+                        />
+                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Maximize2 className="h-4 w-4 text-gray-600" />
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-2 text-center">
+                        Parameter optimization: Comparison of different σ values for the young/old hybrid image
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <p className="text-gray-700 mb-4">
+                    For this optimal combination, I performed a comprehensive analysis showing the original images, aligned images, low and high-pass filtered components, the final hybrid image, and the Fourier transforms of all respective images.
+                  </p>
+                  
+                  <div className="mb-6 flex justify-center">
+                    <div 
+                      className="bg-white p-4 rounded-lg border max-w-full cursor-pointer hover:opacity-80 transition-opacity group"
+                      onClick={() => setFullscreenImage(fourierYoungOld22)}
+                      title="Click to view fullscreen"
+                    >
+                      <div className="relative">
+                        <img 
+                          src={fourierYoungOld22}
+                          alt="Complete analysis of young/old hybrid image showing originals, filtered components, and Fourier transforms"
+                          className="w-full h-auto rounded"
+                        />
+                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Maximize2 className="h-4 w-4 text-gray-600" />
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-2 text-center">
+                        Complete frequency analysis: Original images, filtered components, hybrid result, and corresponding Fourier transforms
+                      </p>
+                    </div>
+                  </div>
+                  
+                </div>
+
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Additional Hybrid Image Experiments</h4>
+                  
+                  <p className="text-gray-700 mb-4">
+                    Here are some additional hybrid images I experimented with to explore different combinations and effects:
+                  </p>
+                  
+                  <div className="space-y-8">
+                    <div className="mb-6 flex justify-center">
+                      <div 
+                        className="bg-white p-4 rounded-lg border max-w-full cursor-pointer hover:opacity-80 transition-opacity group"
+                        onClick={() => setFullscreenImage(derekCat22)}
+                        title="Click to view fullscreen"
+                      >
+                        <div className="relative">
+                          <img 
+                            src={derekCat22}
+                            alt="Derek and cat hybrid image experiment"
+                            className="w-full h-auto rounded"
+                          />
+                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Maximize2 className="h-4 w-4 text-gray-600" />
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-2 text-center">
+                          Derek + Cat hybrid image
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-6 flex justify-center">
+                      <div 
+                        className="bg-white p-4 rounded-lg border max-w-full cursor-pointer hover:opacity-80 transition-opacity group"
+                        onClick={() => setFullscreenImage(dogDude22)}
+                        title="Click to view fullscreen"
+                      >
+                        <div className="relative">
+                          <img 
+                            src={dogDude22}
+                            alt="Dog and person hybrid image experiment"
+                            className="w-full h-auto rounded"
+                          />
+                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Maximize2 className="h-4 w-4 text-gray-600" />
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-2 text-center">
+                          Dog + Me hybrid image
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-6 flex justify-center">
+                      <div 
+                        className="bg-white p-4 rounded-lg border max-w-full cursor-pointer hover:opacity-80 transition-opacity group"
+                        onClick={() => setFullscreenImage(oldYoung22)}
+                        title="Click to view fullscreen"
+                      >
+                        <div className="relative">
+                          <img 
+                            src={oldYoung22}
+                            alt="Final young and old hybrid image result"
+                            className="w-full h-auto rounded"
+                          />
+                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Maximize2 className="h-4 w-4 text-gray-600" />
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-2 text-center">
+                          Young + Old Me hybrid image
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="bg-gray-800 text-gray-300 py-12">
         <div className="container mx-auto px-4 text-center">
           <h3 className="text-xl font-semibold text-white mb-2">CS180 Project 2</h3>
           <p className="text-gray-400">
-            Fun with Filters and Frequencies! - Exploring 2D convolutions and frequency domain processing
+            Fun with Filters and Frequencies! - From edge detection with convolutions to image enhancement with frequency domain techniques
           </p>
         </div>
       </footer>
