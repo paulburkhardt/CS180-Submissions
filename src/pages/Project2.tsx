@@ -38,10 +38,16 @@ import derekCat22 from '@/assets/project2/2.2_derek_cat.png';
 import dogDude22 from '@/assets/project2/2.2_dog_dude.png';
 import twoLions22 from '@/assets/project2/2.2_two_lions.png';
 import stacks23 from '@/assets/project2/2.3_stacks.png';
+import blendingMask23 from '@/assets/project2/2.3_blending_mask.png';
 import myOrapple24 from '@/assets/project2/2.4_my_orapple.png';
 import verticalSurfboard24 from '@/assets/project2/2.4_vertical_surfboard.png';
 import horizontalSurfboard24 from '@/assets/project2/2.4_horizontal_surfboard.png';
 import watermelonMouth24 from '@/assets/project2/2.4_watermelonwithmouth.png';
+import mouthMask24 from '@/assets/project2/2.4_mouth mask.png';
+import watermelonLaplace24 from '@/assets/project2/2.4_watermelon_laplace.png';
+import mouthLaplace24 from '@/assets/project2/2.4_mouth_laplace.png';
+import maskGaussian24 from '@/assets/project2/2.4_mask_gaussian.png';
+import mergeLaplace24 from '@/assets/project2/2.4_merge_laplace.png';
 
 const Project2 = () => {
   const [activeSection, setActiveSection] = useState('');
@@ -1962,12 +1968,12 @@ gaussian_2d = gaussian_1d * gaussian_1d.T`}</code></pre>
                   <div className="mb-6 flex justify-center">
                     <div 
                       className="bg-white p-4 rounded-lg border max-w-full cursor-pointer hover:opacity-80 transition-opacity group"
-                      onClick={() => setFullscreenImage('/src/assets/project2/2.3_blending_mask.png')}
+                      onClick={() => setFullscreenImage(blendingMask23)}
                       title="Click to view fullscreen"
                     >
                       <div className="relative">
                         <img 
-                          src="/src/assets/project2/2.3_blending_mask.png"
+                          src={blendingMask23}
                           alt="Step mask with smooth transition zone for blending apple and orange images"
                           className="w-full h-auto rounded"
                         />
@@ -2174,12 +2180,12 @@ gaussian_2d = gaussian_1d * gaussian_1d.T`}</code></pre>
                     <div className="mb-6 flex justify-center">
                       <div 
                         className="bg-white p-4 rounded-lg border max-w-md cursor-pointer hover:opacity-80 transition-opacity group"
-                        onClick={() => setFullscreenImage('/src/assets/project2/2.4_mouth mask.png')}
+                        onClick={() => setFullscreenImage(mouthMask24)}
                         title="Click to view fullscreen"
                       >
                         <div className="relative">
                           <img 
-                            src="/src/assets/project2/2.4_mouth mask.png"
+                            src={mouthMask24}
                             alt="Mouth mask used for watermelon blending"
                             className="w-full h-auto rounded"
                           />
@@ -2202,12 +2208,12 @@ gaussian_2d = gaussian_1d * gaussian_1d.T`}</code></pre>
                     <div className="mb-6 flex justify-center">
                       <div 
                         className="bg-white p-4 rounded-lg border max-w-full cursor-pointer hover:opacity-80 transition-opacity group"
-                        onClick={() => setFullscreenImage('/src/assets/project2/2.4_watermelon_laplace.png')}
+                        onClick={() => setFullscreenImage(watermelonLaplace24)}
                         title="Click to view fullscreen"
                       >
                         <div className="relative">
                           <img 
-                            src="/src/assets/project2/2.4_watermelon_laplace.png"
+                            src={watermelonLaplace24}
                             alt="Watermelon Laplacian stack for blending"
                             className="w-full h-auto rounded"
                           />
@@ -2224,12 +2230,12 @@ gaussian_2d = gaussian_1d * gaussian_1d.T`}</code></pre>
                     <div className="mb-6 flex justify-center">
                       <div 
                         className="bg-white p-4 rounded-lg border max-w-full cursor-pointer hover:opacity-80 transition-opacity group"
-                        onClick={() => setFullscreenImage('/src/assets/project2/2.4_mouth_laplace.png')}
+                        onClick={() => setFullscreenImage(mouthLaplace24)}
                         title="Click to view fullscreen"
                       >
                         <div className="relative">
                           <img 
-                            src="/src/assets/project2/2.4_mouth_laplace.png"
+                            src={mouthLaplace24}
                             alt="Mouth Laplacian stack for blending"
                             className="w-full h-auto rounded"
                           />
@@ -2252,12 +2258,12 @@ gaussian_2d = gaussian_1d * gaussian_1d.T`}</code></pre>
                     <div className="mb-6 flex justify-center">
                       <div 
                         className="bg-white p-4 rounded-lg border max-w-full cursor-pointer hover:opacity-80 transition-opacity group"
-                        onClick={() => setFullscreenImage('/src/assets/project2/2.4_mask_gaussian.png')}
+                        onClick={() => setFullscreenImage(maskGaussian24)}
                         title="Click to view fullscreen"
                       >
                         <div className="relative">
                           <img 
-                            src="/src/assets/project2/2.4_mask_gaussian.png"
+                            src={maskGaussian24}
                             alt="Gaussian stack of the mouth mask"
                             className="w-full h-auto rounded"
                           />
@@ -2301,12 +2307,12 @@ gaussian_2d = gaussian_1d * gaussian_1d.T`}</code></pre>
                     <div className="mb-6 flex justify-center">
                       <div 
                         className="bg-white p-4 rounded-lg border max-w-full cursor-pointer hover:opacity-80 transition-opacity group"
-                        onClick={() => setFullscreenImage('/src/assets/project2/2.4_merge_laplace.png')}
+                        onClick={() => setFullscreenImage(mergeLaplace24)}
                         title="Click to view fullscreen"
                       >
                         <div className="relative">
                           <img 
-                            src="/src/assets/project2/2.4_merge_laplace.png"
+                            src={mergeLaplace24}
                             alt="Merged Laplacian stack showing the blending process"
                             className="w-full h-auto rounded"
                           />
@@ -2329,12 +2335,12 @@ gaussian_2d = gaussian_1d * gaussian_1d.T`}</code></pre>
                     <div className="mb-6 flex justify-center">
                       <div 
                         className="bg-white p-4 rounded-lg border max-w-md cursor-pointer hover:opacity-80 transition-opacity group"
-                        onClick={() => setFullscreenImage('/src/assets/project2/2.4_watermelonwithmouth.png')}
+                        onClick={() => setFullscreenImage(watermelonMouth24)}
                         title="Click to view fullscreen"
                       >
                         <div className="relative">
                           <img 
-                            src="/src/assets/project2/2.4_watermelonwithmouth.png"
+                            src={watermelonMouth24}
                             alt="Final watermelon with mouth blending result"
                             className="w-full h-auto rounded"
                           />
