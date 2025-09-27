@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { ScrollReveal } from '@/components/ScrollReveal';
+import { SocialLinks } from '@/components/SocialLinks';
 import { AssignmentSection } from '@/components/AssignmentSectionNew';
 import { Camera, Palette, Pyramid, Zap, AlertTriangle, CheckCircle, XCircle, Crown, Train, Layers, ArrowRight, X, Maximize2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -1177,9 +1178,10 @@ const Project1 = () => {
       <footer className="bg-gray-800 text-gray-300 py-12">
         <div className="container mx-auto px-4 text-center">
           <h3 className="text-xl font-semibold text-white mb-2">CS180 Project 1</h3>
-          <p className="text-gray-400">
+          <p className="text-gray-400 mb-6">
             Images of the Russian Empire - Colorizing the Prokudin-Gorskii Photo Collection
           </p>
+          <SocialLinks className="justify-center" iconSize={24} />
         </div>
       </footer>
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ScrollReveal } from '@/components/ScrollReveal';
+import { SocialLinks } from '@/components/SocialLinks';
 import { AssignmentSection } from '@/components/AssignmentSectionNew';
 import { 
   Filter, 
@@ -37,17 +38,33 @@ import derekCat22 from '@/assets/project2/2.2_derek_cat.png';
 import dogDude22 from '@/assets/project2/2.2_dog_dude.png';
 import twoLions22 from '@/assets/project2/2.2_two_lions.png';
 import stacks23 from '@/assets/project2/2.3_stacks.png';
+import myOrapple24 from '@/assets/project2/2.4_my_orapple.png';
+import verticalSurfboard24 from '@/assets/project2/2.4_vertical_surfboard.png';
+import horizontalSurfboard24 from '@/assets/project2/2.4_horizontal_surfboard.png';
+import watermelonMouth24 from '@/assets/project2/2.4_watermelonwithmouth.png';
 
 const Project2 = () => {
   const [activeSection, setActiveSection] = useState('');
+  const [activeSubsection, setActiveSubsection] = useState('');
+  const [scrollProgress, setScrollProgress] = useState(0);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const [showGaussianWidget, setShowGaussianWidget] = useState(true);
+  const [isCarouselHovered, setIsCarouselHovered] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
       const sections = document.querySelectorAll('section[id]');
+      const subsections = document.querySelectorAll('div[id^="part"]');
       const scrollPosition = window.scrollY + 200;
+      
+      // Calculate scroll progress
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const progress = (scrollTop / (documentHeight - windowHeight)) * 100;
+      setScrollProgress(Math.min(progress, 100));
 
+      // Track main sections
       sections.forEach((section) => {
         const sectionTop = (section as HTMLElement).offsetTop;
         const sectionHeight = (section as HTMLElement).offsetHeight;
@@ -57,11 +74,27 @@ const Project2 = () => {
           setActiveSection(sectionId);
         }
       });
+
+      // Track subsections with more granular detection
+      let currentSubsection = '';
+      subsections.forEach((subsection) => {
+        const subsectionTop = (subsection as HTMLElement).offsetTop;
+        const subsectionHeight = (subsection as HTMLElement).offsetHeight;
+        const subsectionId = subsection.getAttribute('id') || '';
+
+        if (scrollPosition >= subsectionTop && scrollPosition < subsectionTop + subsectionHeight) {
+          currentSubsection = subsectionId;
+        }
+      });
+      
+      if (currentSubsection !== activeSubsection) {
+        setActiveSubsection(currentSubsection);
+      }
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [activeSubsection]);
 
   // Handle Escape key to close fullscreen modal
   useEffect(() => {
@@ -378,6 +411,35 @@ const Project2 = () => {
     };
   }, [showGaussianWidget]);
 
+  // Auto-scroll carousel effect
+  useEffect(() => {
+    if (isCarouselHovered) return;
+
+    const carousel = document.getElementById('blending-carousel');
+    if (!carousel) return;
+
+    const scrollStep = 1;
+    const scrollDelay = 30;
+    let scrollDirection = 1;
+
+    const autoScroll = () => {
+      if (isCarouselHovered) return;
+
+      const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+      
+      if (carousel.scrollLeft >= maxScroll) {
+        scrollDirection = -1;
+      } else if (carousel.scrollLeft <= 0) {
+        scrollDirection = 1;
+      }
+
+      carousel.scrollLeft += scrollStep * scrollDirection;
+    };
+
+    const interval = setInterval(autoScroll, scrollDelay);
+    return () => clearInterval(interval);
+  }, [isCarouselHovered]);
+
   const navigationItems = [
     { id: 'overview', title: 'Overview', icon: <Eye className="h-4 w-4" /> },
     { id: 'part1', title: 'Part 1: Filters', icon: <Filter className="h-4 w-4" /> },
@@ -388,10 +450,37 @@ const Project2 = () => {
     { id: 'part2-1', title: '2.1: Image Sharpening', icon: <Sparkles className="h-4 w-4" /> },
     { id: 'part2-2', title: '2.2: Hybrid Images', icon: <Eye className="h-4 w-4" /> },
     { id: 'part2-3', title: '2.3: Gaussian & Laplacian Stacks', icon: <Grid className="h-4 w-4" /> },
+    { id: 'part2-4', title: '2.4: Multiresolution Blending', icon: <Filter className="h-4 w-4" /> },
   ];
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Custom scrollbar styles */}
+      <style>{`
+        .carousel-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: #d1d5db #f3f4f6;
+        }
+        
+        .carousel-scrollbar::-webkit-scrollbar {
+          height: 8px;
+        }
+        
+        .carousel-scrollbar::-webkit-scrollbar-track {
+          background: #f3f4f6;
+          border-radius: 4px;
+        }
+        
+        .carousel-scrollbar::-webkit-scrollbar-thumb {
+          background: #d1d5db;
+          border-radius: 4px;
+        }
+        
+        .carousel-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #9ca3af;
+        }
+      `}</style>
+      
       {/* Fixed Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="container mx-auto px-4 py-3">
@@ -401,59 +490,99 @@ const Project2 = () => {
               <span className="font-medium">Home</span>
             </Link>
             
-            <div className="flex items-center space-x-2">
-              <img src={bearIcon} alt="Bear" className="h-8 w-8" />
-              <span className="text-lg font-bold text-primary">Project 2</span>
+            <div className="flex items-center space-x-4">
+              {activeSubsection && (
+                <div className="hidden md:flex items-center space-x-2 text-sm text-muted-foreground">
+                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                  <span>Currently: <span className="text-primary font-medium">{activeSubsection}</span></span>
+                </div>
+              )}
+              
+              <div className="flex items-center space-x-2">
+                <img src={bearIcon} alt="Bear" className="h-8 w-8" />
+                <span className="text-lg font-bold text-primary">Project 2</span>
+              </div>
             </div>
           </div>
         </div>
+        
+        {/* Progress Bar */}
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-border">
+          <div 
+            className="h-full bg-gradient-to-r from-primary to-primary/60 transition-all duration-300 ease-out"
+            style={{ width: `${scrollProgress}%` }}
+          />
+        </div>
       </nav>
 
+      {/* Mobile Navigation Indicator */}
+      <div className="fixed bottom-6 right-6 z-40 xl:hidden">
+        {activeSubsection && (
+          <div className="px-3 py-2 bg-background/95 backdrop-blur-sm border border-border/50 rounded-full">
+            <div className="text-xs text-muted-foreground">
+              {activeSubsection}
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Side Navigation */}
-      <div className="fixed left-4 top-1/2 transform -translate-y-1/2 z-40 hidden xl:block">
-        <Card className="w-64 p-4">
-          <div className="space-y-2">
-            <h3 className="font-semibold text-sm text-muted-foreground mb-4">Navigation</h3>
-            {navigationItems.map((item) => (
+      <div className="fixed left-6 top-1/2 transform -translate-y-1/2 z-40 hidden xl:block">
+        <div className="w-56 space-y-1">
+          {navigationItems.map((item) => {
+            const isMainSection = ['overview', 'part1', 'part2'].includes(item.id);
+            const isActiveSection = activeSection === item.id;
+            const isActiveSubsection = activeSubsection === item.id;
+            const isInActiveSection = !isMainSection && activeSection && item.id.startsWith(activeSection);
+            
+            return (
               <button
                 key={item.id}
                 onClick={() => document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth' })}
-                className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg text-sm transition-colors ${
-                  activeSection === item.id
-                    ? 'bg-primary text-primary-foreground'
-                    : 'hover:bg-muted text-muted-foreground hover:text-foreground'
+                className={`w-full text-left px-3 py-2 text-sm transition-all duration-200 ${
+                  isActiveSection || isActiveSubsection
+                    ? 'text-foreground font-medium'
+                    : isInActiveSection
+                    ? 'text-muted-foreground/80 pl-6 border-l border-border'
+                    : isMainSection
+                    ? 'text-muted-foreground hover:text-foreground'
+                    : 'text-muted-foreground/60 hover:text-muted-foreground pl-6'
                 }`}
               >
-                {item.icon}
-                <span>{item.title}</span>
+                <span className={`${isActiveSubsection ? 'relative' : ''}`}>
+                  {item.title}
+                  {isActiveSubsection && (
+                    <div className="absolute -left-3 top-1/2 transform -translate-y-1/2 w-1 h-1 bg-foreground rounded-full" />
+                  )}
+                </span>
               </button>
-            ))}
-          </div>
-        </Card>
+            );
+          })}
+        </div>
       </div>
 
       {/* Hero Section */}
       <section className="relative py-24 bg-gray-900 overflow-hidden">
         {/* Background Images */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 h-full">
+        <div className="absolute inset-0 opacity-25">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 h-full">
             <div className="relative">
-              <img src={mountainHero} alt="" className="w-full h-full object-cover" />
+              <img src={myOrapple24} alt="" className="w-full h-full object-cover" />
             </div>
             <div className="relative">
-              <img src={bearIcon} alt="" className="w-full h-full object-cover" />
+              <img src={watermelonMouth24} alt="" className="w-full h-full object-cover" />
             </div>
             <div className="relative">
-              <img src={mountainHero} alt="" className="w-full h-full object-cover" />
-            </div>
-            <div className="relative">
-              <img src={bearIcon} alt="" className="w-full h-full object-cover" />
+              <img src={verticalSurfboard24} alt="" className="w-full h-full object-cover" />
             </div>
             <div className="relative hidden md:block">
-              <img src={mountainHero} alt="" className="w-full h-full object-cover" />
+              <img src={horizontalSurfboard24} alt="" className="w-full h-full object-cover" />
             </div>
-            <div className="relative hidden md:block">
-              <img src={bearIcon} alt="" className="w-full h-full object-cover" />
+            <div className="relative hidden lg:block">
+              <img src={myOrapple24} alt="" className="w-full h-full object-cover" />
+            </div>
+            <div className="relative hidden lg:block">
+              <img src={watermelonMouth24} alt="" className="w-full h-full object-cover" />
             </div>
           </div>
         </div>
@@ -1179,7 +1308,7 @@ gaussian_2d = gaussian_1d * gaussian_1d.T`}</code></pre>
                   </div>
                   
                   <p className="text-gray-700 mb-4">
-                    These filters look like smoothed edge detectors — they resemble <strong>blurred versions of the original finite difference filters</strong>, but with a Gaussian "bell curve" weighting.
+                    These filters look like smoothed edge detectors, they resemble <strong>blurred versions of the original finite difference filters</strong>, but with a Gaussian "bell curve" weighting.
                   </p>
                   
                   <p className="text-gray-700 mb-4">
@@ -1881,8 +2010,364 @@ gaussian_2d = gaussian_1d * gaussian_1d.T`}</code></pre>
                       </p>
                     </div>
                   </div>
+                   
+                   
+                 </div>
+               </div>
+            </div>
+
+            <div id="part2-4">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Part 2.4: Multiresolution Blending (a.k.a. the oraple!)</h3>
+              
+              <p className="text-gray-700 mb-4">
+                With the help of the Laplacian stack from above, it is possible to make some cool image blending!
+              </p>
+
+              <div className="relative">
+                {/* Carousel Container */}
+                <div 
+                  id="blending-carousel"
+                  className="overflow-x-auto pb-6 carousel-scrollbar"
+                  onMouseEnter={() => setIsCarouselHovered(true)}
+                  onMouseLeave={() => setIsCarouselHovered(false)}
+                >
+                  <div className="flex gap-8 min-w-max px-6">
+                    {/* Oraple Image */}
+                    <div 
+                      className="bg-white p-6 rounded-xl border flex-shrink-0 w-96 cursor-pointer hover:opacity-90 transition-all duration-300 group hover:shadow-xl hover:scale-105"
+                      onClick={() => setFullscreenImage(myOrapple24)}
+                      title="Click to view fullscreen"
+                    >
+                      <div className="relative">
+                        <img 
+                          src={myOrapple24}
+                          alt="Apple and orange multiresolution blending result - the famous Oraple"
+                          className="w-full h-80 object-cover rounded-lg"
+                        />
+                        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <Maximize2 className="h-5 w-5 text-white drop-shadow-lg" />
+                        </div>
+                      </div>
+                      <p className="text-base text-gray-700 mt-4 text-center font-semibold">
+                        The Oraple
+                      </p>
+                    </div>
+                    
+                    {/* Vertical Surfboard */}
+                    <div 
+                      className="bg-white p-6 rounded-xl border flex-shrink-0 w-96 cursor-pointer hover:opacity-90 transition-all duration-300 group hover:shadow-xl hover:scale-105"
+                      onClick={() => setFullscreenImage(verticalSurfboard24)}
+                      title="Click to view fullscreen"
+                    >
+                      <div className="relative">
+                        <img 
+                          src={verticalSurfboard24}
+                          alt="Vertical surfboard multiresolution blending example"
+                          className="w-full h-80 object-cover rounded-lg"
+                        />
+                        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <Maximize2 className="h-5 w-5 text-white drop-shadow-lg" />
+                        </div>
+                      </div>
+                      <p className="text-base text-gray-700 mt-4 text-center font-semibold">
+                        Vertical Surfboard
+                      </p>
+                    </div>
+                    
+                    {/* Horizontal Surfboard */}
+                    <div 
+                      className="bg-white p-6 rounded-xl border flex-shrink-0 w-96 cursor-pointer hover:opacity-90 transition-all duration-300 group hover:shadow-xl hover:scale-105"
+                      onClick={() => setFullscreenImage(horizontalSurfboard24)}
+                      title="Click to view fullscreen"
+                    >
+                      <div className="relative">
+                        <img 
+                          src={horizontalSurfboard24}
+                          alt="Horizontal surfboard multiresolution blending example"
+                          className="w-full h-80 object-cover rounded-lg"
+                        />
+                        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <Maximize2 className="h-5 w-5 text-white drop-shadow-lg" />
+                        </div>
+                      </div>
+                      <p className="text-base text-gray-700 mt-4 text-center font-semibold">
+                        Horizontal Surfboard
+                      </p>
+                    </div>
+                    
+                    {/* Watermelon */}
+                    <div 
+                      className="bg-white p-6 rounded-xl border flex-shrink-0 w-96 cursor-pointer hover:opacity-90 transition-all duration-300 group hover:shadow-xl hover:scale-105"
+                      onClick={() => setFullscreenImage(watermelonMouth24)}
+                      title="Click to view fullscreen"
+                    >
+                      <div className="relative">
+                        <img 
+                          src={watermelonMouth24}
+                          alt="Creative watermelon with mouth multiresolution blending example"
+                          className="w-full h-80 object-cover rounded-lg"
+                        />
+                        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <Maximize2 className="h-5 w-5 text-white drop-shadow-lg" />
+                        </div>
+                      </div>
+                      <p className="text-base text-gray-700 mt-4 text-center font-semibold">
+                        Watermelon with Mouth
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Auto-scroll indicator */}
+                <div className="flex justify-center mt-6">
+                  <div className="flex items-center space-x-2 text-sm text-gray-500">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                      <div className="w-2 h-2 bg-primary/60 rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
+                      <div className="w-2 h-2 bg-primary/30 rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
+                    </div>
+                    <span className="italic">Auto-scrolling • Hover to pause</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-16">
+                <h4 className="text-lg font-semibold text-gray-900 mb-4">Step-by-Step Process: Watermelon with Mouth Example</h4>
+                
+                <p className="text-gray-700 mb-4">
+                  With the example of the <strong>"Watermelon with mouth"</strong> I will show how image blending works step by step:
+                </p>
+                
+                <div className="space-y-6">
+                  <div>
+                    <p className="text-gray-700 mb-4">
+                      <strong>1.</strong> As a first step, the two desired images have to be aligned in the way they should be merged, which I did with the given alignment code.
+                    </p>
+                  </div>
                   
+                  <div>
+                    <p className="text-gray-700 mb-4">
+                      <strong>2.</strong> After that, I had to define the blending filter.
+                    </p>
+                    
+                    <ul className="list-disc list-inside space-y-2 text-gray-700 mb-4 ml-6">
+                      <li>For the first three examples this is pretty easy, as you just pick a vertical or horizontal line at the position of blending.</li>
+                      <li>For the watermelon and the mouth this is a bit trickier, as you need a mask that has the form of the mouth, essentially an irregular mask.</li>
+                    </ul>
+                    
+                    <p className="text-gray-700 mb-4">
+                      To create this, I converted the mouth to grayscale and, with a threshold, assigned all white pixels to background and all other pixels to the mask.
+                    </p>
+                    
+                    <p className="text-gray-700 mb-4">
+                      As there were still some artifacts, I used morphological opening to remove the noise and morphological closing to fill in the holes.
+                    </p>
+                    
+                    <p className="text-gray-700 mb-4">
+                      To make the edges smoother, one must then convert the harsh edge of the filter into a step function that has a "smooth transition."
+                    </p>
+                    
+                    <p className="text-gray-700 mb-4">
+                      In the end the filter looked like this:
+                    </p>
+                    
+                    <div className="mb-6 flex justify-center">
+                      <div 
+                        className="bg-white p-4 rounded-lg border max-w-md cursor-pointer hover:opacity-80 transition-opacity group"
+                        onClick={() => setFullscreenImage('/src/assets/project2/2.4_mouth mask.png')}
+                        title="Click to view fullscreen"
+                      >
+                        <div className="relative">
+                          <img 
+                            src="/src/assets/project2/2.4_mouth mask.png"
+                            alt="Mouth mask used for watermelon blending"
+                            className="w-full h-auto rounded"
+                          />
+                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Maximize2 className="h-4 w-4 text-gray-600" />
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-2 text-center">
+                          Mouth mask for watermelon blending
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                   
+                  <div>
+                    <p className="text-gray-700 mb-4">
+                      <strong>3.</strong> Then you build up a Laplacian stack of the two images you want to blend (I used sigma = 2 and a stack size of 6).
+                    </p>
+                    
+                    <div className="mb-6 flex justify-center">
+                      <div 
+                        className="bg-white p-4 rounded-lg border max-w-full cursor-pointer hover:opacity-80 transition-opacity group"
+                        onClick={() => setFullscreenImage('/src/assets/project2/2.4_watermelon_laplace.png')}
+                        title="Click to view fullscreen"
+                      >
+                        <div className="relative">
+                          <img 
+                            src="/src/assets/project2/2.4_watermelon_laplace.png"
+                            alt="Watermelon Laplacian stack for blending"
+                            className="w-full h-auto rounded"
+                          />
+                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Maximize2 className="h-4 w-4 text-gray-600" />
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-2 text-center">
+                          Watermelon Laplacian stack
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-6 flex justify-center">
+                      <div 
+                        className="bg-white p-4 rounded-lg border max-w-full cursor-pointer hover:opacity-80 transition-opacity group"
+                        onClick={() => setFullscreenImage('/src/assets/project2/2.4_mouth_laplace.png')}
+                        title="Click to view fullscreen"
+                      >
+                        <div className="relative">
+                          <img 
+                            src="/src/assets/project2/2.4_mouth_laplace.png"
+                            alt="Mouth Laplacian stack for blending"
+                            className="w-full h-auto rounded"
+                          />
+                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Maximize2 className="h-4 w-4 text-gray-600" />
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-2 text-center">
+                          Mouth Laplacian stack
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <p className="text-gray-700 mb-4">
+                      <strong>4.</strong> As well as a Gaussian stack of the mask.
+                    </p>
+                    
+                    <div className="mb-6 flex justify-center">
+                      <div 
+                        className="bg-white p-4 rounded-lg border max-w-full cursor-pointer hover:opacity-80 transition-opacity group"
+                        onClick={() => setFullscreenImage('/src/assets/project2/2.4_mask_gaussian.png')}
+                        title="Click to view fullscreen"
+                      >
+                        <div className="relative">
+                          <img 
+                            src="/src/assets/project2/2.4_mask_gaussian.png"
+                            alt="Gaussian stack of the mouth mask"
+                            className="w-full h-auto rounded"
+                          />
+                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Maximize2 className="h-4 w-4 text-gray-600" />
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-2 text-center">
+                          Gaussian stack of the mask
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <p className="text-gray-700 mb-4">
+                      <strong>5.</strong> In the end, you blend these together with the following formula:
+                    </p>
+                    
+                    <div className="bg-white p-6 rounded-lg border mb-6">
+                      <div className="text-center font-mono text-lg">
+                        L<sub>blended</sub>[i] = M<sub>G</sub>[i] · L<sub>A</sub>[i] + (1 - M<sub>G</sub>[i]) · L<sub>B</sub>[i]
+                      </div>
+                      <div className="text-center text-sm text-gray-600 mt-3">
+                        where i represents each level of the Laplacian stack
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gray-50 p-4 rounded-lg mb-4">
+                      <div className="text-sm text-gray-700">
+                        <p className="mb-2"><strong>Where:</strong></p>
+                        <ul className="space-y-1 ml-4">
+                          <li>• <strong>L<sub>blended</sub>[i]</strong> = Blended result at stack level i</li>
+                          <li>• <strong>M<sub>G</sub>[i]</strong> = Gaussian-blurred mask at level i</li>
+                          <li>• <strong>L<sub>A</sub>[i]</strong> = Laplacian of image A at level i</li>
+                          <li>• <strong>L<sub>B</sub>[i]</strong> = Laplacian of image B at level i</li>
+                        </ul>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-6 flex justify-center">
+                      <div 
+                        className="bg-white p-4 rounded-lg border max-w-full cursor-pointer hover:opacity-80 transition-opacity group"
+                        onClick={() => setFullscreenImage('/src/assets/project2/2.4_merge_laplace.png')}
+                        title="Click to view fullscreen"
+                      >
+                        <div className="relative">
+                          <img 
+                            src="/src/assets/project2/2.4_merge_laplace.png"
+                            alt="Merged Laplacian stack showing the blending process"
+                            className="w-full h-auto rounded"
+                          />
+                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Maximize2 className="h-4 w-4 text-gray-600" />
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-2 text-center">
+                          Merged Laplacian stack
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <p className="text-gray-700 mb-4">
+                      And end up with this result:
+                    </p>
+                    
+                    <div className="mb-6 flex justify-center">
+                      <div 
+                        className="bg-white p-4 rounded-lg border max-w-md cursor-pointer hover:opacity-80 transition-opacity group"
+                        onClick={() => setFullscreenImage('/src/assets/project2/2.4_watermelonwithmouth.png')}
+                        title="Click to view fullscreen"
+                      >
+                        <div className="relative">
+                          <img 
+                            src="/src/assets/project2/2.4_watermelonwithmouth.png"
+                            alt="Final watermelon with mouth blending result"
+                            className="w-full h-auto rounded"
+                          />
+                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Maximize2 className="h-4 w-4 text-gray-600" />
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-2 text-center">
+                          Final watermelon with mouth result
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-16 pt-8 border-t border-gray-300">
+                <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">Part 2 Takeaways</h3>
+                
+                <div className="max-w-3xl mx-auto">
+                  <div className="space-y-4 text-gray-700">
+                    <p>• <strong>Unsharp masking</strong> enhances image sharpness by extracting high-frequency details (original - blurred) and adding them back to the original with amplification, but cannot recover information lost during blurring</p>
+                    
+                    <p>• <strong>Frequency domain separation</strong> allows sophisticated image manipulation by treating images as combinations of low-frequency (smooth) and high-frequency (detailed) components that can be independently processed</p>
+                    
+                    <p>• <strong>Hybrid images</strong> exploit human visual perception by combining low frequencies from one image with high frequencies from another, creating distance-dependent visual interpretations</p>
+                    
+                    <p>• <strong>Gaussian stacks</strong> create multi-scale image representations through iterative smoothing, while Laplacian stacks isolate frequency bands by computing differences between consecutive Gaussian levels</p>
+                    
+                    <p>• <strong>Multiresolution blending</strong> produces seamless image composites by blending corresponding frequency bands separately using smooth mask transitions, avoiding artifacts that occur with direct pixel blending</p>
+                                        
+                    <p>• <strong>Smooth mask transitions</strong> are crucial for natural-looking blends - sharp mask edges create visible seams, while gradual transitions using Gaussian-blurred masks ensure seamless frequency domain merging</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1894,9 +2379,10 @@ gaussian_2d = gaussian_1d * gaussian_1d.T`}</code></pre>
       <footer className="bg-gray-800 text-gray-300 py-12">
         <div className="container mx-auto px-4 text-center">
           <h3 className="text-xl font-semibold text-white mb-2">CS180 Project 2</h3>
-          <p className="text-gray-400">
+          <p className="text-gray-400 mb-6">
             Fun with Filters and Frequencies! - From edge detection with convolutions to image enhancement with frequency domain techniques
           </p>
+          <SocialLinks className="justify-center" iconSize={24} />
         </div>
       </footer>
 

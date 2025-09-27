@@ -1,6 +1,7 @@
 import React from 'react';
 import { AssignmentSection } from '@/components/AssignmentSectionNew';
 import { ScrollReveal } from '@/components/ScrollReveal';
+import { SocialLinks } from '@/components/SocialLinks';
 import { ImagePlaceholder } from '@/components/ImagePlaceholder';
 import { Camera, Users, Building, Clapperboard } from 'lucide-react';
 import mountainHero from '@/assets/mountain-hero.jpg';
@@ -175,9 +176,10 @@ const Project0 = () => {
             <img src={bearIcon} alt="Bear" className="h-8 w-8 opacity-80" />
             <h3 className="text-xl font-semibold">CS180 Assignment 0</h3>
           </div>
-          <p className="text-primary-foreground/80">
+          <p className="text-primary-foreground/80 mb-6">
             Capturing the beauty of perspective and focal length in nature's grandest classroom
           </p>
+          <SocialLinks className="justify-center" iconSize={24} />
         </div>
       </footer>
     </div>

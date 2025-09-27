@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ScrollReveal } from '@/components/ScrollReveal';
+import { SocialLinks } from '@/components/SocialLinks';
 import { Camera, BookOpen, ArrowRight, Palette, Filter } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -136,9 +137,10 @@ const LandingPage = () => {
             <img src={bearIcon} alt="Bear" className="h-8 w-8 opacity-80" />
             <h3 className="text-xl font-semibold">CS180 Project Collection</h3>
           </div>
-          <p className="text-primary-foreground/80">
+          <p className="text-primary-foreground/80 mb-6">
             Exploring the frontiers of computational photography and computer vision
           </p>
+          <SocialLinks className="justify-center" iconSize={24} />
         </div>
       </footer>
     </div>
