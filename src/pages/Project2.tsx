@@ -57,6 +57,15 @@ const Project2 = () => {
   const [showGaussianWidget, setShowGaussianWidget] = useState(true);
   const [isCarouselHovered, setIsCarouselHovered] = useState(false);
 
+  // Helper function to scroll to section with offset
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const offsetTop = element.offsetTop - 80; // 80px offset for header
+      window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+    }
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       const sections = document.querySelectorAll('section[id]');
@@ -491,7 +500,7 @@ const Project2 = () => {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <Link to="/" className="flex items-center space-x-2 text-primary hover:text-primary/80 transition-colors">
+            <Link to="/" className="flex items-center space-x-2 text-nav-green hover:opacity-80 transition-colors">
               <Home className="h-5 w-5" />
               <span className="font-medium">Home</span>
             </Link>
@@ -499,14 +508,14 @@ const Project2 = () => {
             <div className="flex items-center space-x-4">
               {activeSubsection && (
                 <div className="hidden md:flex items-center space-x-2 text-sm text-muted-foreground">
-                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-                  <span>Currently: <span className="text-primary font-medium">{activeSubsection}</span></span>
+                  <div className="w-2 h-2 bg-nav-green rounded-full animate-pulse"></div>
+                  <span>Currently: <span className="text-nav-green font-medium">{activeSubsection}</span></span>
                 </div>
               )}
               
               <div className="flex items-center space-x-2">
                 <img src={bearIcon} alt="Bear" className="h-8 w-8" />
-                <span className="text-lg font-bold text-primary">Project 2</span>
+                <span className="text-lg font-bold text-nav-green">Project 2</span>
               </div>
             </div>
           </div>
@@ -515,8 +524,8 @@ const Project2 = () => {
         {/* Progress Bar */}
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-border">
           <div 
-            className="h-full bg-gradient-to-r from-primary to-primary/60 transition-all duration-300 ease-out"
-            style={{ width: `${scrollProgress}%` }}
+            className="h-full transition-all duration-300 ease-out"
+            style={{ width: `${scrollProgress}%`, background: 'linear-gradient(to right, hsl(120, 40%, 25%), hsl(120, 40%, 25%, 0.6))' }}
           />
         </div>
       </nav>
@@ -544,21 +553,21 @@ const Project2 = () => {
             return (
               <button
                 key={item.id}
-                onClick={() => document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => scrollToSection(item.id)}
                 className={`w-full text-left px-3 py-2 text-sm transition-all duration-200 ${
                   isActiveSection || isActiveSubsection
-                    ? 'text-foreground font-medium'
+                    ? 'text-nav-green font-medium'
                     : isInActiveSection
-                    ? 'text-muted-foreground/80 pl-6 border-l border-border'
+                    ? 'text-muted-foreground/80 pl-6 border-l border-nav-green'
                     : isMainSection
-                    ? 'text-muted-foreground hover:text-foreground'
+                    ? 'text-muted-foreground hover:text-nav-green'
                     : 'text-muted-foreground/60 hover:text-muted-foreground pl-6'
                 }`}
               >
                 <span className={`${isActiveSubsection ? 'relative' : ''}`}>
                   {item.title}
                   {isActiveSubsection && (
-                    <div className="absolute -left-3 top-1/2 transform -translate-y-1/2 w-1 h-1 bg-foreground rounded-full" />
+                    <div className="absolute -left-3 top-1/2 transform -translate-y-1/2 w-1 h-1 bg-nav-green rounded-full" />
                   )}
                 </span>
               </button>
@@ -603,9 +612,6 @@ const Project2 = () => {
               Fun with Filters and Frequencies!
             </h1>
             
-            <p className="text-xl mb-8 text-gray-200">
-              CS180 Programming Project #2 (proj2)
-            </p>
           </ScrollReveal>
         </div>
       </section>

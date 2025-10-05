@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ScrollReveal } from '@/components/ScrollReveal';
 import { SocialLinks } from '@/components/SocialLinks';
-import { Camera, BookOpen, ArrowRight, Palette, Filter } from 'lucide-react';
+import { Camera, BookOpen, ArrowRight, Palette, Filter, Image as ImageIcon } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import mountainHero from '@/assets/mountain-hero.jpg';
@@ -33,6 +33,14 @@ const LandingPage = () => {
       description: 'Exploring 2D convolutions, filtering, hybrid images, and multi-resolution blending techniques for creative visual effects.',
       path: '/project-2',
       icon: <Filter className="h-6 w-6" />,
+    },
+    {
+      id: 'project-3',
+      title: 'Project 3',
+      subtitle: '[Auto]Stitching Photo Mosaics',
+      description: 'Creating image mosaics through projective warping, homography computation, and advanced image stitching techniques.',
+      path: '/project-3',
+      icon: <ImageIcon className="h-6 w-6" />,
     }
     // Future projects can be added here
   ];
@@ -55,10 +63,9 @@ const LandingPage = () => {
           <ScrollReveal>
             <div className="flex items-center justify-center space-x-4 mb-8">
               <img src={bearIcon} alt="Bear" className="h-20 w-20 animate-float" />
-              <BookOpen className="h-20 w-20 animate-float" style={{ animationDelay: '1s' }} />
             </div>
             
-            <h1 className="text-6xl md:text-8xl font-bold mb-8 mountain-gradient bg-clip-text text-transparent">
+            <h1 className="text-6xl md:text-8xl font-bold mb-8 text-white">
               CS180 Projects
             </h1>
             
@@ -70,7 +77,13 @@ const LandingPage = () => {
               <Button 
                 size="lg" 
                 className="bg-white/10 hover:bg-white/20 text-white border-white/30 backdrop-blur-sm"
-                onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => {
+                  const element = document.getElementById('projects');
+                  if (element) {
+                    const offsetTop = element.offsetTop - 80;
+                    window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+                  }
+                }}
               >
                 Explore Projects
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -131,7 +144,7 @@ const LandingPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-primary text-primary-foreground py-12">
+      <footer className="bg-gray-800 text-gray-300 py-12">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center space-x-4 mb-4">
             <img src={bearIcon} alt="Bear" className="h-8 w-8 opacity-80" />

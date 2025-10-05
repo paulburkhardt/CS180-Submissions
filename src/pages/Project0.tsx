@@ -170,7 +170,7 @@ const Project0 = () => {
       </AssignmentSection>
 
       {/* Footer */}
-      <footer className="bg-primary text-primary-foreground py-12">
+      <footer className="bg-gray-800 text-gray-300 py-12">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center space-x-4 mb-4">
             <img src={bearIcon} alt="Bear" className="h-8 w-8 opacity-80" />

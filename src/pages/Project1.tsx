@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { ScrollReveal } from '@/components/ScrollReveal';
 import { SocialLinks } from '@/components/SocialLinks';
 import { AssignmentSection } from '@/components/AssignmentSectionNew';
-import { Camera, Palette, Pyramid, Zap, AlertTriangle, CheckCircle, XCircle, Crown, Train, Layers, ArrowRight, X, Maximize2 } from 'lucide-react';
+import { Camera, Palette, Pyramid, Zap, AlertTriangle, CheckCircle, XCircle, Crown, Train, Layers, ArrowRight, X, Maximize2, Home, Eye, Grid, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import mountainHero from '@/assets/mountain-hero.jpg';
@@ -269,9 +270,50 @@ interface BellsWhistlesImageData {
 }
 
 const Project1 = () => {
+  const [activeSection, setActiveSection] = useState('');
+  const [activeSubsection, setActiveSubsection] = useState('');
+  const [scrollProgress, setScrollProgress] = useState(0);
   const [fullscreenImage, setFullscreenImage] = useState<ImageData | null>(null);
   const [fullscreenBellsWhistles, setFullscreenBellsWhistles] = useState<BellsWhistlesImageData | null>(null);
   const [fullscreenMappings, setFullscreenMappings] = useState<string | null>(null);
+
+  // Helper function to scroll to section with offset
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const offsetTop = element.offsetTop - 80; // 80px offset for header
+      window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+    }
+  };
+
+  // Navigation tracking
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = document.querySelectorAll('section[id]');
+      const scrollPosition = window.scrollY + 200;
+      
+      // Calculate scroll progress
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const progress = (scrollTop / (documentHeight - windowHeight)) * 100;
+      setScrollProgress(Math.min(progress, 100));
+
+      // Track main sections
+      sections.forEach((section) => {
+        const sectionTop = (section as HTMLElement).offsetTop;
+        const sectionHeight = (section as HTMLElement).offsetHeight;
+        const sectionId = section.getAttribute('id') || '';
+
+        if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+          setActiveSection(sectionId);
+        }
+      });
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Handle Escape key to close fullscreen modal
   useEffect(() => {
@@ -527,8 +569,105 @@ const Project1 = () => {
     }
   ];
 
+  const navigationItems = [
+    { id: 'process', title: 'Process Demo', icon: <Eye className="h-4 w-4" /> },
+    { id: 'overview', title: 'Overview', icon: <Eye className="h-4 w-4" /> },
+    { id: 'approach', title: 'Approach', icon: <Grid className="h-4 w-4" /> },
+    { id: 'approach-naive', title: '1. Naive Search', icon: <Grid className="h-4 w-4" /> },
+    { id: 'approach-pyramid', title: '2. Pyramid', icon: <Pyramid className="h-4 w-4" /> },
+    { id: 'results', title: 'Results', icon: <CheckCircle className="h-4 w-4" /> },
+    { id: 'results-naive', title: '1. Naive Results', icon: <CheckCircle className="h-4 w-4" /> },
+    { id: 'results-pyramid', title: '2. Pyramid Results', icon: <CheckCircle className="h-4 w-4" /> },
+    { id: 'additional', title: 'Additional Images', icon: <Camera className="h-4 w-4" /> },
+    { id: 'bells-whistles', title: 'Bells & Whistles', icon: <Sparkles className="h-4 w-4" /> },
+    { id: 'bells-cropping', title: '1. Auto Cropping', icon: <Sparkles className="h-4 w-4" /> },
+    { id: 'bells-contrasting', title: '2. Auto Contrasting', icon: <Sparkles className="h-4 w-4" /> },
+    { id: 'bells-whitebalance', title: '3. White Balance', icon: <Sparkles className="h-4 w-4" /> },
+    { id: 'bells-colormapping', title: '4. Color Mapping', icon: <Sparkles className="h-4 w-4" /> },
+    { id: 'bells-features', title: '5. Better Features', icon: <Sparkles className="h-4 w-4" /> },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
+      {/* Fixed Navigation */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <Link to="/" className="flex items-center space-x-2 text-nav-green hover:opacity-80 transition-colors">
+              <Home className="h-5 w-5" />
+              <span className="font-medium">Home</span>
+            </Link>
+            
+            <div className="flex items-center space-x-4">
+              {activeSection && (
+                <div className="hidden md:flex items-center space-x-2 text-sm text-muted-foreground">
+                  <div className="w-2 h-2 bg-nav-green rounded-full animate-pulse"></div>
+                  <span>Currently: <span className="text-nav-green font-medium">{activeSection}</span></span>
+                </div>
+              )}
+              
+              <div className="flex items-center space-x-2">
+                <img src={bearIcon} alt="Bear" className="h-8 w-8" />
+                <span className="text-lg font-bold text-nav-green">Project 1</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Progress Bar */}
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-border">
+          <div 
+            className="h-full transition-all duration-300 ease-out"
+            style={{ width: `${scrollProgress}%`, background: 'linear-gradient(to right, hsl(120, 40%, 25%), hsl(120, 40%, 25%, 0.6))' }}
+          />
+        </div>
+      </nav>
+
+      {/* Mobile Navigation Indicator */}
+      <div className="fixed bottom-6 right-6 z-40 xl:hidden">
+        {activeSection && (
+          <div className="px-3 py-2 bg-background/95 backdrop-blur-sm border border-border/50 rounded-full">
+            <div className="text-xs text-muted-foreground">
+              {activeSection}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Side Navigation */}
+      <div className="fixed left-6 top-1/2 transform -translate-y-1/2 z-40 hidden xl:block">
+        <div className="w-56 space-y-1">
+          {navigationItems.map((item) => {
+            const isMainSection = ['process', 'overview', 'approach', 'results', 'additional', 'bells-whistles'].includes(item.id);
+            const isActiveSection = activeSection === item.id;
+            const isInActiveSection = !isMainSection && activeSection && item.id.startsWith(activeSection.split('-')[0]);
+            
+            return (
+              <button
+                key={item.id}
+                onClick={() => scrollToSection(item.id)}
+                className={`w-full text-left px-3 py-2 text-sm transition-all duration-200 ${
+                  isActiveSection
+                    ? 'text-nav-green font-medium'
+                    : isInActiveSection
+                    ? 'text-muted-foreground/80 pl-6 border-l border-nav-green'
+                    : isMainSection
+                    ? 'text-muted-foreground hover:text-nav-green'
+                    : 'text-muted-foreground/60 hover:text-muted-foreground pl-6'
+                }`}
+              >
+                <span className={`${isActiveSection ? 'relative' : ''}`}>
+                  {item.title}
+                  {isActiveSection && (
+                    <div className="absolute -left-3 top-1/2 transform -translate-y-1/2 w-1 h-1 bg-nav-green rounded-full" />
+                  )}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Hero Section */}
       <section className="relative py-24 bg-gray-900 overflow-hidden">
         {/* Background Images */}
@@ -591,7 +730,7 @@ const Project1 = () => {
       </section>
 
       {/* Process Demonstration Section */}
-      <section className="py-16 bg-white">
+      <section id="process" className="py-16 bg-white">
         <div className="container mx-auto px-4 max-w-6xl">
           <ScrollReveal>
             <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">From Glass Plate to Color Image</h2>
@@ -637,7 +776,7 @@ const Project1 = () => {
       </section>
 
       {/* Project Overview */}
-      <section className="py-16 bg-gray-50">
+      <section id="overview" className="py-16 bg-gray-50">
         <div className="container mx-auto px-4 max-w-4xl">
           <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Project Overview</h2>
           <div className="prose prose-lg max-w-none">
@@ -652,12 +791,12 @@ const Project1 = () => {
       </section>
 
       {/* Approach Section */}
-      <section className="py-16 bg-gray-50">
+      <section id="approach" className="py-16 bg-gray-50">
         <div className="container mx-auto px-4 max-w-4xl">
           <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">My Approach</h2>
           
           <div className="space-y-12">
-            <div>
+            <div id="approach-naive">
               <h3 className="text-xl font-semibold text-gray-900 mb-4">1. Naive Exhaustive Search</h3>
               <p className="text-gray-700 mb-4">
                 My first approach was straightforward: keep one image channel fixed (the green channel) and exhaustively slide the other channels over it within a specified window (±15 pixels). At each shifted position, I calculated the displacement using similarity metrics.
@@ -704,7 +843,7 @@ const Project1 = () => {
               </p>
             </div>
 
-            <div>
+            <div id="approach-pyramid">
               <h3 className="text-xl font-semibold text-gray-900 mb-4">2. Multi-Scale Image Pyramid Solution</h3>
               <p className="text-gray-700 mb-4">
                 To handle larger images efficiently, I implemented a multi-scale pyramid that downsamples the image at each level using bilinear interpolation.
@@ -760,12 +899,12 @@ const Project1 = () => {
       </section>
 
       {/* Results Section - Naive Method */}
-      <section className="py-16 bg-white">
+      <section id="results" className="py-16 bg-white">
         <div className="container mx-auto px-4 max-w-6xl">
           <h2 className="text-3xl font-bold text-gray-900 mb-4 text-center">Results</h2>
           <p className="text-gray-600 text-center mb-12">Blue and Red channels aligned to Green (reference)</p>
           
-          <div className="mb-16">
+          <div id="results-naive" className="mb-16">
             <h3 className="text-2xl font-semibold text-gray-900 mb-6 text-center">1. Naive Exhaustive Search Results</h3>
             <p className="text-gray-600 text-center mb-8">Smaller .jpg images successfully aligned with ±15 pixel window</p>
             
@@ -843,7 +982,7 @@ const Project1 = () => {
             </div>
           </div>
 
-          <div>
+          <div id="results-pyramid">
             <h3 className="text-2xl font-semibold text-gray-900 mb-6 text-center">2. Multi-Scale Pyramid Results</h3>
             <p className="text-gray-600 text-center mb-8">Larger .tif images aligned using image pyramid approach</p>
             
@@ -924,7 +1063,7 @@ const Project1 = () => {
       </section>
 
       {/* Additional Images Section */}
-      <section className="py-16 bg-gray-50">
+      <section id="additional" className="py-16 bg-gray-50">
         <div className="container mx-auto px-4 max-w-4xl">
           <h2 className="text-3xl font-bold text-gray-900 mb-4 text-center">Additional Images from Prokudin-Gorskii Collection</h2>
           <p className="text-gray-600 text-center mb-12">Self-selected examples from the Library of Congress collection</p>
@@ -1004,7 +1143,7 @@ const Project1 = () => {
       </section>
 
       {/* Bells & Whistles Results */}
-      <section className="py-16 bg-white">
+      <section id="bells-whistles" className="py-16 bg-white">
         <div className="container mx-auto px-4 max-w-4xl">
           <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Bells & Whistles Implementation</h2>
           
@@ -1026,8 +1165,19 @@ const Project1 = () => {
           </div>
           
           <div className="space-y-16">
-            {bellsWhistles.map((feature, index) => (
-              <div key={index}>
+            {bellsWhistles.map((feature, index) => {
+              // Map feature names to IDs
+              const featureIdMap: Record<string, string> = {
+                'Automatic Cropping': 'bells-cropping',
+                'Automatic Contrasting': 'bells-contrasting',
+                'Automatic White Balance': 'bells-whitebalance',
+                'Better Color Mapping': 'bells-colormapping',
+                'Better Features': 'bells-features'
+              };
+              const featureId = featureIdMap[feature.name] || '';
+              
+              return (
+              <div key={index} id={featureId}>
                 <div className="mb-8">
                   <h3 className="text-2xl font-semibold text-gray-900 mb-3 flex items-center">
                     <span className={`mr-3 text-2xl ${feature.implemented ? 'text-green-600' : 'text-red-500'}`}>
@@ -1169,7 +1319,8 @@ const Project1 = () => {
                   </div>
                 )}
               </div>
-            ))}
+            );
+            })}
           </div>
         </div>
       </section>

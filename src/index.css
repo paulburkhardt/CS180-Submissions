@@ -17,17 +17,17 @@
     --popover: 45 20% 98%;
     --popover-foreground: 120 25% 15%;
 
-    /* Forest green primary with mountain gray accents */
-    --primary: 120 40% 25%;
+    /* Gray-800 primary color */
+    --primary: 215 20% 27%;
     --primary-foreground: 45 15% 97%;
 
     /* Warm earth secondary */
     --secondary: 35 25% 85%;
     --secondary-foreground: 120 40% 25%;
 
-    /* Muted forest tones */
-    --muted: 35 15% 90%;
-    --muted-foreground: 120 15% 45%;
+    /* Muted gray tones */
+    --muted: 215 15% 90%;
+    --muted-foreground: 215 15% 40%;
 
     /* Sunset orange accent */
     --accent: 25 80% 65%;
@@ -39,7 +39,7 @@
     /* Natural borders */
     --border: 35 15% 85%;
     --input: 35 15% 85%;
-    --ring: 120 40% 25%;
+    --ring: 215 20% 27%;
 
     --radius: 0.5rem;
 
@@ -71,14 +71,14 @@
     --popover: 220 25% 10%;
     --popover-foreground: 45 15% 90%;
 
-    --primary: 120 30% 35%;
+    --primary: 215 20% 35%;
     --primary-foreground: 45 15% 97%;
 
     --secondary: 220 15% 18%;
     --secondary-foreground: 45 15% 90%;
 
     --muted: 220 15% 18%;
-    --muted-foreground: 45 10% 65%;
+    --muted-foreground: 215 10% 60%;
 
     --accent: 25 70% 55%;
     --accent-foreground: 45 15% 97%;
@@ -88,7 +88,7 @@
 
     --border: 220 15% 18%;
     --input: 220 15% 18%;
-    --ring: 120 30% 35%;
+    --ring: 215 20% 35%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -118,6 +118,23 @@
     background-image: 
       radial-gradient(circle at 25% 25%, hsl(var(--primary) / 0.1) 0%, transparent 50%),
       radial-gradient(circle at 75% 75%, hsl(var(--accent) / 0.1) 0%, transparent 50%);
+  }
+
+  /* Custom green for navigation */
+  .text-nav-green {
+    color: hsl(120, 40%, 25%);
+  }
+
+  .text-nav-green:hover {
+    color: hsl(120, 40%, 20%);
+  }
+
+  .bg-nav-green {
+    background-color: hsl(120, 40%, 25%);
+  }
+
+  .border-nav-green {
+    border-color: hsl(120, 40%, 25%);
   }
 
   /* Scroll animations */
