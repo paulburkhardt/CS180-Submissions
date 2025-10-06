@@ -192,22 +192,34 @@ const Project3 = () => {
       {/* Fullscreen Image Modal */}
       {fullscreenImage && (
         <div 
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4"
           onClick={() => setFullscreenImage(null)}
         >
-          <button
-            onClick={() => setFullscreenImage(null)}
-            className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors"
-            aria-label="Close fullscreen"
-          >
-            <X className="h-8 w-8" />
-          </button>
-          <img 
-            src={fullscreenImage} 
-            alt="Fullscreen view" 
-            className="max-w-full max-h-full object-contain"
-            onClick={(e) => e.stopPropagation()}
-          />
+          <div className="relative w-full h-full max-w-7xl max-h-screen">
+            {/* Close button */}
+            <button
+              onClick={() => setFullscreenImage(null)}
+              className="absolute top-4 right-4 z-10 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full p-2 text-white transition-all"
+              title="Close (Esc)"
+            >
+              <X className="h-6 w-6" />
+            </button>
+
+            {/* Escape key hint */}
+            <div className="absolute top-4 right-16 z-10 bg-black bg-opacity-50 rounded-lg px-3 py-1 text-white text-sm">
+              Press <kbd className="bg-gray-700 px-1 py-0.5 rounded text-xs">Esc</kbd> to close
+            </div>
+
+            {/* Image container */}
+            <div className="flex items-center justify-center h-full w-full">
+              <img 
+                src={fullscreenImage} 
+                alt="Fullscreen view" 
+                className="max-w-full max-h-full object-contain cursor-pointer"
+                onClick={() => setFullscreenImage(null)}
+              />
+            </div>
+          </div>
         </div>
       )}
 
@@ -296,10 +308,173 @@ const Project3 = () => {
                     Down here you can see the example pictures I acquired for the project:
                   </p>
                   
-                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-6">
-                    <p className="text-gray-600 text-center italic">
-                      INSERT IMAGES HERE
-                    </p>
+                  <div className="space-y-8 mb-6">
+                    {/* Cal Sailing Club */}
+                    <div>
+                      <h5 className="text-md font-semibold text-gray-800 mb-3">Cal Sailing Club</h5>
+                      <div className="overflow-x-auto">
+                        <div className="flex gap-4 pb-4">
+                          <div 
+                            className="cursor-pointer hover:opacity-80 transition-opacity group flex-shrink-0 relative"
+                            onClick={() => setFullscreenImage("/src/assets/project3/boats/a1_boats1.jpeg")}
+                            title="Click to view fullscreen"
+                          >
+                            <img 
+                              src="/src/assets/project3/boats/a1_boats1.jpeg" 
+                              alt="Cal Sailing 1" 
+                              className="h-64 w-auto rounded-lg shadow-md"
+                            />
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                            </div>
+                          </div>
+                          <div 
+                            className="cursor-pointer hover:opacity-80 transition-opacity group flex-shrink-0 relative"
+                            onClick={() => setFullscreenImage("/src/assets/project3/boats/a1_boats2.jpeg")}
+                            title="Click to view fullscreen"
+                          >
+                            <img 
+                              src="/src/assets/project3/boats/a1_boats2.jpeg" 
+                              alt="Cal Sailing 2" 
+                              className="h-64 w-auto rounded-lg shadow-md"
+                            />
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                            </div>
+                          </div>
+                          <div 
+                            className="cursor-pointer hover:opacity-80 transition-opacity group flex-shrink-0 relative"
+                            onClick={() => setFullscreenImage("/src/assets/project3/boats/a1_boats3.jpeg")}
+                            title="Click to view fullscreen"
+                          >
+                            <img 
+                              src="/src/assets/project3/boats/a1_boats3.jpeg" 
+                              alt="Cal Sailing 3" 
+                              className="h-64 w-auto rounded-lg shadow-md"
+                            />
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                            </div>
+                          </div>
+                          <div 
+                            className="cursor-pointer hover:opacity-80 transition-opacity group flex-shrink-0 relative"
+                            onClick={() => setFullscreenImage("/src/assets/project3/boats/a1_boats4.jpeg")}
+                            title="Click to view fullscreen"
+                          >
+                            <img 
+                              src="/src/assets/project3/boats/a1_boats4.jpeg" 
+                              alt="Cal Sailing 4" 
+                              className="h-64 w-auto rounded-lg shadow-md"
+                            />
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* East Asian Library */}
+                    <div>
+                      <h5 className="text-md font-semibold text-gray-800 mb-3">East Asian Library</h5>
+                      <div className="overflow-x-auto">
+                        <div className="flex gap-4 pb-4">
+                          <div 
+                            className="cursor-pointer hover:opacity-80 transition-opacity group flex-shrink-0 relative"
+                            onClick={() => setFullscreenImage("/src/assets/project3/east_asian/a1_east_asian_1.jpeg")}
+                            title="Click to view fullscreen"
+                          >
+                            <img 
+                              src="/src/assets/project3/east_asian/a1_east_asian_1.jpeg" 
+                              alt="East Asian Library 1" 
+                              className="h-64 w-auto rounded-lg shadow-md"
+                            />
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                            </div>
+                          </div>
+                          <div 
+                            className="cursor-pointer hover:opacity-80 transition-opacity group flex-shrink-0 relative"
+                            onClick={() => setFullscreenImage("/src/assets/project3/east_asian/a1_east_asian_2.jpeg")}
+                            title="Click to view fullscreen"
+                          >
+                            <img 
+                              src="/src/assets/project3/east_asian/a1_east_asian_2.jpeg" 
+                              alt="East Asian Library 2" 
+                              className="h-64 w-auto rounded-lg shadow-md"
+                            />
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Berkeley Campus */}
+                    <div>
+                      <h5 className="text-md font-semibold text-gray-800 mb-3">Berkeley Campus</h5>
+                      <div className="overflow-x-auto">
+                        <div className="flex gap-4 pb-4">
+                          <div 
+                            className="cursor-pointer hover:opacity-80 transition-opacity group flex-shrink-0 relative"
+                            onClick={() => setFullscreenImage("/src/assets/project3/outside/a1_outside1.jpeg")}
+                            title="Click to view fullscreen"
+                          >
+                            <img 
+                              src="/src/assets/project3/outside/a1_outside1.jpeg" 
+                              alt="Berkeley Campus 1" 
+                              className="h-64 w-auto rounded-lg shadow-md"
+                            />
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                            </div>
+                          </div>
+                          <div 
+                            className="cursor-pointer hover:opacity-80 transition-opacity group flex-shrink-0 relative"
+                            onClick={() => setFullscreenImage("/src/assets/project3/outside/a1_outside2.jpeg")}
+                            title="Click to view fullscreen"
+                          >
+                            <img 
+                              src="/src/assets/project3/outside/a1_outside2.jpeg" 
+                              alt="Berkeley Campus 2" 
+                              className="h-64 w-auto rounded-lg shadow-md"
+                            />
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                            </div>
+                          </div>
+                          <div 
+                            className="cursor-pointer hover:opacity-80 transition-opacity group flex-shrink-0 relative"
+                            onClick={() => setFullscreenImage("/src/assets/project3/outside/a1_outside3.jpeg")}
+                            title="Click to view fullscreen"
+                          >
+                            <img 
+                              src="/src/assets/project3/outside/a1_outside3.jpeg" 
+                              alt="Berkeley Campus 3" 
+                              className="h-64 w-auto rounded-lg shadow-md"
+                            />
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                            </div>
+                          </div>
+                          <div 
+                            className="cursor-pointer hover:opacity-80 transition-opacity group flex-shrink-0 relative"
+                            onClick={() => setFullscreenImage("/src/assets/project3/outside/a1_outside4.jpeg")}
+                            title="Click to view fullscreen"
+                          >
+                            <img 
+                              src="/src/assets/project3/outside/a1_outside4.jpeg" 
+                              alt="Berkeley Campus 4" 
+                              className="h-64 w-auto rounded-lg shadow-md"
+                              />
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -328,11 +503,12 @@ const Project3 = () => {
                     For each point pair (p, p'), where p = (x, y) in the source image and p' = (x', y') in the destination image, the following equations are added to the linear system:
                   </p>
                   
-                  <div className="bg-white p-6 rounded-lg border mb-6">
-                    <div className="text-center font-mono text-base space-y-2">
-                      <div>x' = (h₁₁x + h₁₂y + h₁₃) / (h₃₁x + h₃₂y + 1)</div>
-                      <div>y' = (h₂₁x + h₂₂y + h₂₃) / (h₃₁x + h₃₂y + 1)</div>
-                    </div>
+                  <div className="bg-white p-6 rounded-lg border mb-6 overflow-x-auto flex justify-center">
+                    <img 
+                      src="https://latex.codecogs.com/svg.image?\begin{bmatrix}x&y&1&0&0&0&-x'x&-x'y&-x'\\0&0&0&x&y&1&-y'x&-y'y&-y'\end{bmatrix}\begin{bmatrix}h_{11}\\h_{12}\\h_{13}\\h_{21}\\h_{22}\\h_{23}\\h_{31}\\h_{32}\\h_{33}\end{bmatrix}=0"
+                      alt="Homography matrix equation" 
+                      className="max-w-full h-auto"
+                    />
                   </div>
                   
                   <p className="text-gray-700 mb-4">
@@ -340,33 +516,146 @@ const Project3 = () => {
                   </p>
                   
                   <p className="text-gray-700 mb-4">
-                    For the following images, I selected the following corresponding points:
+                    For the images I took at the Cal Sailing Club, I selected the following corresponding points:
                   </p>
                   
-                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-6">
-                    <p className="text-gray-600 text-center italic">
-                      [Image with points placeholder]
-                    </p>
+                  <div className="space-y-6 mb-6">
+                    {/* Correspondences between images 1 and 2 */}
+                    <div>
+                      <div 
+                        className="cursor-pointer hover:opacity-80 transition-opacity group relative"
+                        onClick={() => setFullscreenImage("/src/assets/project3/boats/correspondences_1_2.png")}
+                        title="Click to view fullscreen"
+                      >
+                        <img 
+                          src="/src/assets/project3/boats/correspondences_1_2.png" 
+                          alt="Correspondences between images 1 and 2" 
+                          className="w-full rounded-lg shadow-md border border-gray-200"
+                        />
+                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Correspondences between images 2 and 3 */}
+                    <div>
+                      <div 
+                        className="cursor-pointer hover:opacity-80 transition-opacity group relative"
+                        onClick={() => setFullscreenImage("/src/assets/project3/boats/correspondences_2_3.png")}
+                        title="Click to view fullscreen"
+                      >
+                        <img 
+                          src="/src/assets/project3/boats/correspondences_2_3.png" 
+                          alt="Correspondences between images 2 and 3" 
+                          className="w-full rounded-lg shadow-md border border-gray-200"
+                        />
+                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Correspondences between images 3 and 4 */}
+                    <div>
+                      <div 
+                        className="cursor-pointer hover:opacity-80 transition-opacity group relative"
+                        onClick={() => setFullscreenImage("/src/assets/project3/boats/correspondences_3_4.png")}
+                        title="Click to view fullscreen"
+                      >
+                        <img 
+                          src="/src/assets/project3/boats/correspondences_3_4.png" 
+                          alt="Correspondences between images 3 and 4" 
+                          className="w-full rounded-lg shadow-md border border-gray-200"
+                        />
+                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   
                   <p className="text-gray-700 mb-4">
-                    That resulted in this system of equations:
+                    For image 1 and image 2, this resulted in this system of equations:
                   </p>
                   
-                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-6">
-                    <p className="text-gray-600 text-center italic">
-                      [System of equations placeholder]
-                    </p>
+                  <div className="mb-6">
+                    <div className="bg-white border border-gray-200 rounded-lg p-6 overflow-x-auto">
+                      <div className="text-sm font-mono">
+                        <div className="mb-3 text-gray-700 font-semibold text-center">System of equations (A | b):</div>
+                        <div className="overflow-x-auto flex justify-center">
+                          <table className="text-xs">
+                              <thead>
+                                <tr className="text-gray-600">
+                                  <th className="px-2 py-1 text-right">h₁</th>
+                                  <th className="px-2 py-1 text-right">h₂</th>
+                                  <th className="px-2 py-1 text-right">h₃</th>
+                                  <th className="px-2 py-1 text-right">h₄</th>
+                                  <th className="px-2 py-1 text-right">h₅</th>
+                                  <th className="px-2 py-1 text-right">h₆</th>
+                                  <th className="px-2 py-1 text-right">h₇</th>
+                                  <th className="px-2 py-1 text-right">h₈</th>
+                                  <th className="px-2 py-1 text-center">|</th>
+                                  <th className="px-2 py-1 text-right">b</th>
+                                </tr>
+                              </thead>
+                              <tbody className="text-gray-700">
+                                <tr><td className="px-2 py-0.5 text-right">628.0</td><td className="px-2 py-0.5 text-right">575.0</td><td className="px-2 py-0.5 text-right">1.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">-506796.0</td><td className="px-2 py-0.5 text-right">-464025.0</td><td className="px-2 py-0.5 text-center border-l border-gray-300">|</td><td className="px-2 py-0.5 text-right">807.0</td></tr>
+                                <tr><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">628.0</td><td className="px-2 py-0.5 text-right">575.0</td><td className="px-2 py-0.5 text-right">1.0</td><td className="px-2 py-0.5 text-right">-349168.0</td><td className="px-2 py-0.5 text-right">-319700.0</td><td className="px-2 py-0.5 text-center border-l border-gray-300">|</td><td className="px-2 py-0.5 text-right">556.0</td></tr>
+                                <tr><td className="px-2 py-0.5 text-right">684.0</td><td className="px-2 py-0.5 text-right">430.0</td><td className="px-2 py-0.5 text-right">1.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">-593712.0</td><td className="px-2 py-0.5 text-right">-373240.0</td><td className="px-2 py-0.5 text-center border-l border-gray-300">|</td><td className="px-2 py-0.5 text-right">868.0</td></tr>
+                                <tr><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">684.0</td><td className="px-2 py-0.5 text-right">430.0</td><td className="px-2 py-0.5 text-right">1.0</td><td className="px-2 py-0.5 text-right">-276336.0</td><td className="px-2 py-0.5 text-right">-173720.0</td><td className="px-2 py-0.5 text-center border-l border-gray-300">|</td><td className="px-2 py-0.5 text-right">404.0</td></tr>
+                                <tr><td className="px-2 py-0.5 text-right">299.0</td><td className="px-2 py-0.5 text-right">609.0</td><td className="px-2 py-0.5 text-right">1.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">-138736.0</td><td className="px-2 py-0.5 text-right">-282576.0</td><td className="px-2 py-0.5 text-center border-l border-gray-300">|</td><td className="px-2 py-0.5 text-right">464.0</td></tr>
+                                <tr><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">299.0</td><td className="px-2 py-0.5 text-right">609.0</td><td className="px-2 py-0.5 text-right">1.0</td><td className="px-2 py-0.5 text-right">-179101.0</td><td className="px-2 py-0.5 text-right">-364791.0</td><td className="px-2 py-0.5 text-center border-l border-gray-300">|</td><td className="px-2 py-0.5 text-right">599.0</td></tr>
+                                <tr><td className="px-2 py-0.5 text-right">314.0</td><td className="px-2 py-0.5 text-right">808.0</td><td className="px-2 py-0.5 text-right">1.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">-150092.0</td><td className="px-2 py-0.5 text-right">-386224.0</td><td className="px-2 py-0.5 text-center border-l border-gray-300">|</td><td className="px-2 py-0.5 text-right">478.0</td></tr>
+                                <tr><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">314.0</td><td className="px-2 py-0.5 text-right">808.0</td><td className="px-2 py-0.5 text-right">1.0</td><td className="px-2 py-0.5 text-right">-249002.0</td><td className="px-2 py-0.5 text-right">-640744.0</td><td className="px-2 py-0.5 text-center border-l border-gray-300">|</td><td className="px-2 py-0.5 text-right">793.0</td></tr>
+                                <tr><td className="px-2 py-0.5 text-right">145.0</td><td className="px-2 py-0.5 text-right">782.0</td><td className="px-2 py-0.5 text-right">1.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">-46690.0</td><td className="px-2 py-0.5 text-right">-251804.0</td><td className="px-2 py-0.5 text-center border-l border-gray-300">|</td><td className="px-2 py-0.5 text-right">322.0</td></tr>
+                                <tr><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">145.0</td><td className="px-2 py-0.5 text-right">782.0</td><td className="px-2 py-0.5 text-right">1.0</td><td className="px-2 py-0.5 text-right">-110780.0</td><td className="px-2 py-0.5 text-right">-597448.0</td><td className="px-2 py-0.5 text-center border-l border-gray-300">|</td><td className="px-2 py-0.5 text-right">764.0</td></tr>
+                                <tr><td className="px-2 py-0.5 text-right">309.0</td><td className="px-2 py-0.5 text-right">583.0</td><td className="px-2 py-0.5 text-right">1.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">-146157.0</td><td className="px-2 py-0.5 text-right">-275759.0</td><td className="px-2 py-0.5 text-center border-l border-gray-300">|</td><td className="px-2 py-0.5 text-right">473.0</td></tr>
+                                <tr><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">309.0</td><td className="px-2 py-0.5 text-right">583.0</td><td className="px-2 py-0.5 text-right">1.0</td><td className="px-2 py-0.5 text-right">-177057.0</td><td className="px-2 py-0.5 text-right">-334059.0</td><td className="px-2 py-0.5 text-center border-l border-gray-300">|</td><td className="px-2 py-0.5 text-right">573.0</td></tr>
+                                <tr><td className="px-2 py-0.5 text-right">15.0</td><td className="px-2 py-0.5 text-right">706.0</td><td className="px-2 py-0.5 text-right">1.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">-3075.0</td><td className="px-2 py-0.5 text-right">-144730.0</td><td className="px-2 py-0.5 text-center border-l border-gray-300">|</td><td className="px-2 py-0.5 text-right">205.0</td></tr>
+                                <tr><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">15.0</td><td className="px-2 py-0.5 text-right">706.0</td><td className="px-2 py-0.5 text-right">1.0</td><td className="px-2 py-0.5 text-right">-10395.0</td><td className="px-2 py-0.5 text-right">-489258.0</td><td className="px-2 py-0.5 text-center border-l border-gray-300">|</td><td className="px-2 py-0.5 text-right">693.0</td></tr>
+                                <tr><td className="px-2 py-0.5 text-right">120.0</td><td className="px-2 py-0.5 text-right">838.0</td><td className="px-2 py-0.5 text-right">1.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">-35880.0</td><td className="px-2 py-0.5 text-right">-250562.0</td><td className="px-2 py-0.5 text-center border-l border-gray-300">|</td><td className="px-2 py-0.5 text-right">299.0</td></tr>
+                                <tr><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">120.0</td><td className="px-2 py-0.5 text-right">838.0</td><td className="px-2 py-0.5 text-right">1.0</td><td className="px-2 py-0.5 text-right">-97920.0</td><td className="px-2 py-0.5 text-right">-683808.0</td><td className="px-2 py-0.5 text-center border-l border-gray-300">|</td><td className="px-2 py-0.5 text-right">816.0</td></tr>
+                                <tr><td className="px-2 py-0.5 text-right">199.0</td><td className="px-2 py-0.5 text-right">290.0</td><td className="px-2 py-0.5 text-right">1.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">-73232.0</td><td className="px-2 py-0.5 text-right">-106720.0</td><td className="px-2 py-0.5 text-center border-l border-gray-300">|</td><td className="px-2 py-0.5 text-right">368.0</td></tr>
+                                <tr><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">0.0</td><td className="px-2 py-0.5 text-right">199.0</td><td className="px-2 py-0.5 text-right">290.0</td><td className="px-2 py-0.5 text-right">1.0</td><td className="px-2 py-0.5 text-right">-57312.0</td><td className="px-2 py-0.5 text-right">-83520.0</td><td className="px-2 py-0.5 text-center border-l border-gray-300">|</td><td className="px-2 py-0.5 text-right">288.0</td></tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
                   </div>
                   
                   <p className="text-gray-700 mb-4">
                     And finally, this recovered homography matrix:
                   </p>
                   
-                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-6">
-                    <p className="text-gray-600 text-center italic">
-                      [Homography matrix placeholder]
-                    </p>
+                  <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+                    <div className="text-center">
+                      <div className="mb-2 text-sm font-semibold text-gray-700">Computed Homography Matrix H:</div>
+                      <div className="inline-block text-left font-mono text-sm bg-gray-50 p-4 rounded border border-gray-300">
+                        <div className="flex items-center">
+                          <span className="text-2xl mr-2">[</span>
+                          <div className="flex flex-col">
+                            <div className="flex gap-4">
+                              <span className="text-right min-w-[120px]">0.8511</span>
+                              <span className="text-right min-w-[120px]">0.0195</span>
+                              <span className="text-right min-w-[120px]">183.1163</span>
+                            </div>
+                            <div className="flex gap-4">
+                              <span className="text-right min-w-[120px]">-0.1231</span>
+                              <span className="text-right min-w-[120px]">0.9721</span>
+                              <span className="text-right min-w-[120px]">24.0005</span>
+                            </div>
+                            <div className="flex gap-4">
+                              <span className="text-right min-w-[120px]">-0.0002</span>
+                              <span className="text-right min-w-[120px]">0.0000</span>
+                              <span className="text-right min-w-[120px]">1.0000</span>
+                            </div>
+                          </div>
+                          <span className="text-2xl ml-2">]</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   
                   <p className="text-gray-700 mb-4">
