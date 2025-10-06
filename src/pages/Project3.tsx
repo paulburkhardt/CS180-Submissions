@@ -36,7 +36,20 @@ import a1_east_asian_2 from '@/assets/project3/east_asian/a1_east_asian_2.jpeg';
 import a1_outside1 from '@/assets/project3/outside/a1_outside1.jpeg';
 import a1_outside2 from '@/assets/project3/outside/a1_outside2.jpeg';
 import a1_outside3 from '@/assets/project3/outside/a1_outside3.jpeg';
-import a1_outside4 from '@/assets/project3/outside/a1_outside4.jpeg';
+
+// Rectification images
+import a3_macbook_comparison from '@/assets/project3/rectification/a3_macbook_comparison.png';
+import a3_macbook_zoom from '@/assets/project3/rectification/a3_macbook_zoom.png';
+import a3_sign_comparison_with_zoom from '@/assets/project3/rectification/a3_sign_comparison_with_zoom.png';
+import a3_sign_zoomed from '@/assets/project3/rectification/a3_sign_zoomed.png';
+
+// Blended images
+import boats_warped from '@/assets/project3/blended/boats_warped.png';
+import boats_binary_alpha_vs_blending from '@/assets/project3/blended/boats_binary_alpha_vs_blending.png';
+import boats_weight_acc from '@/assets/project3/blended/boats_weight_acc.png';
+import boats_blended from '@/assets/project3/blended/boats_blended.png';
+import outside_blended from '@/assets/project3/blended/outside_blended.png';
+import east_asian_warped from '@/assets/project3/blended/east_asian_warped.png';
 
 const Project3 = () => {
   const [activeSection, setActiveSection] = useState('');
@@ -124,6 +137,8 @@ const Project3 = () => {
     { id: 'parta', title: 'Part A: Image Warping and Mosaicing', icon: <ImageIcon className="h-4 w-4" /> },
     { id: 'parta-1', title: 'A.1: Shoot the Pictures', icon: <Grid className="h-4 w-4" /> },
     { id: 'parta-2', title: 'A.2: Recover Homographies', icon: <Zap className="h-4 w-4" /> },
+    { id: 'parta-3', title: 'A.3: Warp the Images', icon: <Sparkles className="h-4 w-4" /> },
+    { id: 'parta-4', title: 'A.4: Blend the Images into a Mosaic', icon: <ImageIcon className="h-4 w-4" /> },
   ];
 
   return (
@@ -477,20 +492,6 @@ const Project3 = () => {
                               <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
                             </div>
                           </div>
-                          <div 
-                            className="cursor-pointer hover:opacity-80 transition-opacity group flex-shrink-0 relative"
-                            onClick={() => setFullscreenImage(a1_outside4)}
-                            title="Click to view fullscreen"
-                          >
-                            <img 
-                              src={a1_outside4} 
-                              alt="Berkeley Campus 4" 
-                              className="h-64 w-auto rounded-lg shadow-md"
-                            />
-                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
-                            </div>
-                          </div>
                         </div>
                       </div>
                     </div>
@@ -680,6 +681,439 @@ const Project3 = () => {
                   <p className="text-gray-700 mb-4">
                     After solving with least squares, the resulting h vector is reshaped into a 3×3 matrix, giving me the homography that describes the projective transformation between the two images.
                   </p>
+                </div>
+              </div>
+            </div>
+
+            <div id="parta-3">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">A.3: Warp the Images</h3>
+              
+              <p className="text-gray-700 mb-4">
+                With the homographies computed, I implemented image warping to transform one image to match the perspective of another.
+              </p>
+              
+              <div className="space-y-6">
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">Implementation Approach</h4>
+                  
+                  <p className="text-gray-700 mb-3">
+                    I implemented two warping functions: nearest neighbor and bilinear interpolation. Both use <strong>inverse warping</strong>, for each output pixel, I calculate where it came from in the source image using H⁻¹.
+                  </p>
+                  
+                  <p className="text-gray-700 mb-2"><strong>Core algorithm steps:</strong></p>
+                  <ul className="list-disc list-inside space-y-1 text-gray-700 mb-4 ml-4">
+                    <li>Transform source corners through H to determine output canvas size</li>
+                    <li>Create coordinate grid for output image</li>
+                    <li>Apply inverse homography (H⁻¹) to map output pixels to source locations</li>
+                    <li>Sample colors using interpolation method</li>
+                    <li>Use alpha mask for pixels outside source bounds</li>
+                  </ul>
+                  
+                  <h5 className="text-md font-semibold text-gray-800 mb-2">Interpolation Methods</h5>
+                  
+                  <div className="bg-white p-4 rounded-lg border mb-3">
+                    <p className="text-gray-700 text-sm">
+                      <strong>Nearest Neighbor:</strong> Rounds coordinates to closest integer pixel and copies its value directly.
+                    </p>
+                  </div>
+                  
+                  <div className="bg-white p-4 rounded-lg border mb-4">
+                    <p className="text-gray-700 text-sm">
+                      <strong>Bilinear:</strong> Samples four surrounding pixels and computes weighted average based on fractional coordinates.
+                    </p>
+                  </div>
+                  
+                  <h5 className="text-md font-semibold text-gray-800 mb-2">Rectification Test</h5>
+                  
+                  <p className="text-gray-700 mb-3">
+                    To verify the warping implementation, I tested rectification on tilted rectangular objects (MacBook, university sign). Process:
+                  </p>
+                  
+                  <ul className="list-disc list-inside space-y-1 text-gray-700 mb-4 ml-4">
+                    <li>Select four corners of tilted object</li>
+                    <li>Define target points as perfect rectangle</li>
+                    <li>Compute and apply homography</li>
+                  </ul>
+                  
+                  <div className="space-y-4 mb-4">
+                    <div>
+                      <h6 className="text-sm font-semibold text-gray-800 mb-2">MacBook Rectification</h6>
+                      <div className="space-y-2">
+                        <div 
+                          className="cursor-pointer hover:opacity-80 transition-opacity group relative"
+                          onClick={() => setFullscreenImage(a3_macbook_comparison)}
+                          title="Click to view fullscreen"
+                        >
+                          <img 
+                            src={a3_macbook_comparison} 
+                            alt="MacBook rectification comparison" 
+                            className="w-full rounded-lg shadow-md border border-gray-200"
+                          />
+                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                          </div>
+                        </div>
+                        <div 
+                          className="cursor-pointer hover:opacity-80 transition-opacity group relative"
+                          onClick={() => setFullscreenImage(a3_macbook_zoom)}
+                          title="Click to view fullscreen"
+                        >
+                          <img 
+                            src={a3_macbook_zoom} 
+                            alt="MacBook rectification zoom" 
+                            className="w-full rounded-lg shadow-md border border-gray-200"
+                          />
+                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h6 className="text-sm font-semibold text-gray-800 mb-2">University Sign Rectification</h6>
+                      <div 
+                        className="cursor-pointer hover:opacity-80 transition-opacity group relative"
+                        onClick={() => setFullscreenImage(a3_sign_comparison_with_zoom)}
+                        title="Click to view fullscreen"
+                      >
+                        <img 
+                          src={a3_sign_comparison_with_zoom} 
+                          alt="University sign rectification comparison" 
+                          className="w-full rounded-lg shadow-md border border-gray-200"
+                        />
+                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <h5 className="text-md font-semibold text-gray-800 mb-2">Performance & Quality</h5>
+                  
+                  <div className="bg-white p-4 rounded-lg border mb-3">
+                    <p className="text-gray-700 text-sm mb-2"><strong>Timing:</strong></p>
+                    <ul className="list-disc list-inside space-y-1 text-gray-700 text-sm ml-4">
+                      <li>Nearest Neighbor: 0.0481s</li>
+                      <li>Bilinear: 0.0697s (45% slower, 4× more pixel reads)</li>
+                    </ul>
+                  </div>
+                  
+                  <div className="mb-3">
+                    <h6 className="text-sm font-semibold text-gray-800 mb-2">Quality Comparison</h6>
+                    <div 
+                      className="cursor-pointer hover:opacity-80 transition-opacity group relative"
+                      onClick={() => setFullscreenImage(a3_sign_zoomed)}
+                      title="Click to view fullscreen"
+                    >
+                      <img 
+                        src={a3_sign_zoomed} 
+                        alt="Quality comparison between nearest neighbor and bilinear interpolation" 
+                        className="w-full rounded-lg shadow-md border border-gray-200"
+                      />
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <p className="text-gray-700 text-sm mb-3">
+                    <strong>Quality differences:</strong> Nearest neighbor shows blockiness and jagged edges from multiple pixels rounding to the same source pixel. Bilinear produces smoother results by blending neighboring pixels.
+                  </p>
+                  
+                  <p className="text-gray-700 text-sm">
+                    Final choice: <strong>bilinear interpolation</strong> for better output quality.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div id="parta-4">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">A.4: Blend the Images into a Mosaic</h3>
+              
+              <p className="text-gray-700 mb-4">
+                Now that I could warp images, I needed to actually combine them into a panorama. This wasn't as simple as just overlaying them—the overlapping regions created visible seams that needed to be handled carefully.
+              </p>
+              
+              <div className="space-y-6">
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">Setting Up the Canvas</h4>
+                  
+                  <p className="text-gray-700 mb-3">
+                    First, I had to figure out how big the final panorama should be. When you warp images with homographies, corners can end up at negative coordinates or way outside the original bounds. So I:
+                  </p>
+                  
+                  <ul className="list-disc list-inside space-y-1 text-gray-700 mb-4 ml-4">
+                    <li>Transformed all the corners of all images through their homographies</li>
+                    <li>Found the min/max x and y coordinates to get the bounding box</li>
+                    <li>Created a translation matrix to shift everything back to (0, 0)</li>
+                    <li>Composed this translation with each homography</li>
+                  </ul>
+                  
+                  <p className="text-gray-700 mb-4">
+                    This gave me a canvas that fit all the warped images perfectly.
+                  </p>
+                </div>
+                
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">The Blending Problem</h4>
+                  
+                  <p className="text-gray-700 mb-3">
+                    In the overlapping regions, multiple images contribute to the same pixel. You can't just pick one or the other because that will give you hard seams. Averaging them helps, but not enough.
+                  </p>
+                  
+                  <p className="text-gray-700 mb-3">
+                    I tried two approaches:
+                  </p>
+                  
+                  <div className="space-y-4 mb-4">
+                    <div className="bg-white p-4 rounded-lg border">
+                      <p className="text-gray-700 mb-2"><strong>Simple Binary Blending:</strong></p>
+                      <p className="text-gray-700 text-sm">
+                        Each pixel is either in the image (alpha = 1) or not (alpha = 0). For the final output, I weighted each image by its alpha and averaged. This works but creates <strong>visible seams</strong> because the transition from one image to another is abrupt.
+                      </p>
+                    </div>
+                    
+                    <div className="bg-white p-4 rounded-lg border">
+                      <p className="text-gray-700 mb-2"><strong>Distance Transform Blending:</strong></p>
+                      <p className="text-gray-700 text-sm">
+                        Instead of binary alphas, I used the <strong>distance transform</strong> to create smooth gradients. Pixels near the center of an image get higher weight, pixels near the edges get lower weight. This creates a feathering effect where images gradually blend into each other.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <p className="text-gray-700 mb-4">
+                    The distance transform basically measures how far each pixel is from the nearest edge, then normalizes it to create smooth alpha values that fade from 1.0 at the center to 0.0 at the boundaries.
+                  </p>
+                </div>
+                
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">Results</h4>
+                  
+                  <div className="space-y-6">
+                    {/* Cal Sailing Club Results */}
+                    <div>
+                      <h5 className="text-md font-semibold text-gray-800 mb-3">Cal Sailing Club Panorama</h5>
+                      
+                      <div className="space-y-4">
+                        <div>
+                          <p className="text-sm text-gray-600 mb-2">Warped images before blending:</p>
+                          <div 
+                            className="cursor-pointer hover:opacity-80 transition-opacity group relative"
+                            onClick={() => setFullscreenImage(boats_warped)}
+                            title="Click to view fullscreen"
+                          >
+                            <img 
+                              src={boats_warped} 
+                              alt="Cal Sailing Club warped images" 
+                              className="w-full rounded-lg shadow-md border border-gray-200"
+                            />
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <p className="text-sm text-gray-600 mb-2">Weight accumulator visualization:</p>
+                          <div 
+                            className="cursor-pointer hover:opacity-80 transition-opacity group relative"
+                            onClick={() => setFullscreenImage(boats_weight_acc)}
+                            title="Click to view fullscreen"
+                          >
+                            <img 
+                              src={boats_weight_acc} 
+                              alt="Weight accumulator visualization" 
+                              className="w-full rounded-lg shadow-md border border-gray-200"
+                            />
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <p className="text-sm text-gray-600 mb-2">Alpha mask comparison - binary vs smooth:</p>
+                          <div 
+                            className="cursor-pointer hover:opacity-80 transition-opacity group relative"
+                            onClick={() => setFullscreenImage(boats_binary_alpha_vs_blending)}
+                            title="Click to view fullscreen"
+                          >
+                            <img 
+                              src={boats_binary_alpha_vs_blending} 
+                              alt="Binary alpha vs distance transform blending comparison" 
+                              className="w-full rounded-lg shadow-md border border-gray-200"
+                            />
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <p className="text-sm text-gray-600 mb-2">Final blended panorama:</p>
+                          <div 
+                            className="cursor-pointer hover:opacity-80 transition-opacity group relative"
+                            onClick={() => setFullscreenImage(boats_blended)}
+                            title="Click to view fullscreen"
+                          >
+                            <img 
+                              src={boats_blended} 
+                              alt="Cal Sailing Club final blended panorama" 
+                              className="w-full rounded-lg shadow-md border border-gray-200"
+                            />
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mt-4">
+                        <p className="text-gray-700 text-sm">
+                          The difference is pretty obvious. Simple blending shows clear seam lines where you can see the color shifts and alignment errors. With distance transform blending, these seams mostly disappear—the transitions are smooth enough that your eye doesn't catch them.
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {/* Other Image Results */}
+                    <div>
+                      <h5 className="text-md font-semibold text-gray-800 mb-3">Berkeley Campus Panorama</h5>
+                      
+                      <div className="space-y-3">
+                        <div className="overflow-x-auto">
+                          <p className="text-sm text-gray-600 mb-2">Original images:</p>
+                          <div className="flex gap-4 pb-4">
+                            <div 
+                              className="cursor-pointer hover:opacity-80 transition-opacity group flex-shrink-0 relative"
+                              onClick={() => setFullscreenImage(a1_outside1)}
+                              title="Click to view fullscreen"
+                            >
+                              <img 
+                                src={a1_outside1} 
+                                alt="Berkeley Campus 1" 
+                                className="h-48 w-auto rounded-lg shadow-md"
+                              />
+                              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                              </div>
+                            </div>
+                            <div 
+                              className="cursor-pointer hover:opacity-80 transition-opacity group flex-shrink-0 relative"
+                              onClick={() => setFullscreenImage(a1_outside2)}
+                              title="Click to view fullscreen"
+                            >
+                              <img 
+                                src={a1_outside2} 
+                                alt="Berkeley Campus 2" 
+                                className="h-48 w-auto rounded-lg shadow-md"
+                              />
+                              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                              </div>
+                            </div>
+                            <div 
+                              className="cursor-pointer hover:opacity-80 transition-opacity group flex-shrink-0 relative"
+                              onClick={() => setFullscreenImage(a1_outside3)}
+                              title="Click to view fullscreen"
+                            >
+                              <img 
+                                src={a1_outside3} 
+                                alt="Berkeley Campus 3" 
+                                className="h-48 w-auto rounded-lg shadow-md"
+                              />
+                              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <p className="text-sm text-gray-600 mb-2">Final blended panorama:</p>
+                          <div 
+                            className="cursor-pointer hover:opacity-80 transition-opacity group relative"
+                            onClick={() => setFullscreenImage(outside_blended)}
+                            title="Click to view fullscreen"
+                          >
+                            <img 
+                              src={outside_blended} 
+                              alt="Berkeley Campus final blended panorama" 
+                              className="w-full rounded-lg shadow-md border border-gray-200"
+                            />
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h5 className="text-md font-semibold text-gray-800 mb-3">East Asian Library Panorama</h5>
+                      
+                      <div className="space-y-3">
+                        <div className="overflow-x-auto">
+                          <p className="text-sm text-gray-600 mb-2">Original images:</p>
+                          <div className="flex gap-4 pb-4">
+                            <div 
+                              className="cursor-pointer hover:opacity-80 transition-opacity group flex-shrink-0 relative"
+                              onClick={() => setFullscreenImage(a1_east_asian_1)}
+                              title="Click to view fullscreen"
+                            >
+                              <img 
+                                src={a1_east_asian_1} 
+                                alt="East Asian Library 1" 
+                                className="h-48 w-auto rounded-lg shadow-md"
+                              />
+                              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                              </div>
+                            </div>
+                            <div 
+                              className="cursor-pointer hover:opacity-80 transition-opacity group flex-shrink-0 relative"
+                              onClick={() => setFullscreenImage(a1_east_asian_2)}
+                              title="Click to view fullscreen"
+                            >
+                              <img 
+                                src={a1_east_asian_2} 
+                                alt="East Asian Library 2" 
+                                className="h-48 w-auto rounded-lg shadow-md"
+                              />
+                              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <p className="text-sm text-gray-600 mb-2">Warped and blended result:</p>
+                          <div 
+                            className="cursor-pointer hover:opacity-80 transition-opacity group relative"
+                            onClick={() => setFullscreenImage(east_asian_warped)}
+                            title="Click to view fullscreen"
+                          >
+                            <img 
+                              src={east_asian_warped} 
+                              alt="East Asian Library final panorama" 
+                              className="w-full rounded-lg shadow-md border border-gray-200"
+                            />
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-green-50 p-4 rounded-lg border border-green-200 mt-6">
+                    <p className="text-gray-700 text-sm mb-2"><strong>Why it works:</strong></p>
+                    <p className="text-gray-700 text-sm">
+                      Alignment errors and color mismatches are worst at image edges. By weighting center pixels more heavily than edge pixels, the distance transform naturally downplays the problematic areas while keeping the good stuff from the middle of each image. The result looks much more like a single photo instead of stitched pieces.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
