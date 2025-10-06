@@ -259,10 +259,31 @@ const Project3 = () => {
 
       {/* Hero Section */}
       <section className="relative py-24 bg-gray-900 overflow-hidden">
-        {/* Background pattern */}
-        <div className="absolute inset-0 opacity-25">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 h-full">
-            {/* Placeholder for future mosaic images */}
+        {/* Background pattern with mosaic images */}
+        <div className="absolute inset-0 opacity-20">
+          <div className="grid grid-cols-2 md:grid-cols-3 h-full gap-2 p-4">
+            
+            <div className="relative overflow-hidden rounded-lg md:block hidden">
+              <img 
+                src={boats_blended} 
+                alt="Warped images" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="relative overflow-hidden rounded-lg md:block hidden">
+              <img 
+                src={a3_sign_comparison_with_zoom} 
+                alt="Rectification" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="relative overflow-hidden rounded-lg md:block hidden">
+              <img 
+                src={east_asian_warped} 
+                alt="Weight accumulator" 
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
         </div>
         
