@@ -689,7 +689,7 @@ const Project3 = () => {
               <h3 className="text-xl font-semibold text-gray-900 mb-4">A.3: Warp the Images</h3>
               
               <p className="text-gray-700 mb-4">
-                With the homographies computed, I implemented image warping to transform one image to match the perspective of another.
+                With the homographies computed, the next step was to implement image warping to transform one image to match the perspective of another.
               </p>
               
               <div className="space-y-6">
@@ -697,7 +697,7 @@ const Project3 = () => {
                   <h4 className="text-lg font-semibold text-gray-900 mb-3">Implementation Approach</h4>
                   
                   <p className="text-gray-700 mb-3">
-                    I implemented two warping functions: nearest neighbor and bilinear interpolation. Both use <strong>inverse warping</strong>, for each output pixel, I calculate where it came from in the source image using H⁻¹.
+                    Two warping functions were implemented: nearest neighbor and bilinear interpolation. Both use <strong>inverse warping</strong>, for each output pixel, the algorithm calculates its source location in the original image using H⁻¹.
                   </p>
                   
                   <p className="text-gray-700 mb-2"><strong>Core algorithm steps:</strong></p>
@@ -705,7 +705,7 @@ const Project3 = () => {
                     <li>Transform source corners through H to determine output canvas size</li>
                     <li>Create coordinate grid for output image</li>
                     <li>Apply inverse homography (H⁻¹) to map output pixels to source locations</li>
-                    <li>Sample colors using interpolation method</li>
+                    <li>Sample colors using the specified interpolation method</li>
                     <li>Use alpha mask for pixels outside source bounds</li>
                   </ul>
                   
@@ -713,26 +713,27 @@ const Project3 = () => {
                   
                   <div className="bg-white p-4 rounded-lg border mb-3">
                     <p className="text-gray-700 text-sm">
-                      <strong>Nearest Neighbor:</strong> Rounds coordinates to closest integer pixel and copies its value directly.
+                      <strong>Nearest Neighbor:</strong> Rounds coordinates to the closest integer pixel and copies its value directly. This is computationally efficient but can produce blocky artifacts.
                     </p>
                   </div>
                   
                   <div className="bg-white p-4 rounded-lg border mb-4">
                     <p className="text-gray-700 text-sm">
-                      <strong>Bilinear:</strong> Samples four surrounding pixels and computes weighted average based on fractional coordinates.
+                      <strong>Bilinear:</strong> Samples the four surrounding pixels and computes a weighted average based on fractional coordinates. This produces smoother results at the cost of additional computation.
                     </p>
                   </div>
                   
                   <h5 className="text-md font-semibold text-gray-800 mb-2">Rectification Test</h5>
                   
                   <p className="text-gray-700 mb-3">
-                    To verify the warping implementation, I tested rectification on tilted rectangular objects (MacBook, university sign). Process:
+                    To verify the warping implementation, rectification was tested on tilted rectangular objects (MacBook, university sign). The process involved:
                   </p>
                   
                   <ul className="list-disc list-inside space-y-1 text-gray-700 mb-4 ml-4">
-                    <li>Select four corners of tilted object</li>
-                    <li>Define target points as perfect rectangle</li>
-                    <li>Compute and apply homography</li>
+                    <li>Selecting four corners of the tilted object in the source image</li>
+                    <li>Defining target points as a perfect rectangle with desired dimensions</li>
+                    <li>Computing the homography between source and target points</li>
+                    <li>Applying the homography to warp the image</li>
                   </ul>
                   
                   <div className="space-y-4 mb-4">
@@ -789,14 +790,17 @@ const Project3 = () => {
                     </div>
                   </div>
                   
-                  <h5 className="text-md font-semibold text-gray-800 mb-2">Performance & Quality</h5>
+                  <h5 className="text-md font-semibold text-gray-800 mb-2">Performance & Quality Analysis</h5>
                   
                   <div className="bg-white p-4 rounded-lg border mb-3">
-                    <p className="text-gray-700 text-sm mb-2"><strong>Timing:</strong></p>
+                    <p className="text-gray-700 text-sm mb-2"><strong>Timing Comparison:</strong></p>
                     <ul className="list-disc list-inside space-y-1 text-gray-700 text-sm ml-4">
                       <li>Nearest Neighbor: 0.0481s</li>
-                      <li>Bilinear: 0.0697s (45% slower, 4× more pixel reads)</li>
+                      <li>Bilinear: 0.0697s (45% slower)</li>
                     </ul>
+                    <p className="text-gray-700 text-sm mt-3">
+                      The performance difference stems from computational complexity. Nearest neighbor performs a single memory read per output pixel, it rounds the source coordinates and retrieves one pixel value. Bilinear interpolation, however, requires four memory reads (the 2×2 neighborhood of surrounding pixels), followed by arithmetic operations to compute weighted averages in both x and y directions. Additionally, the fractional coordinate calculations and floating-point multiplication operations add overhead. This results in approximately 4× more memory access and significantly more arithmetic operations per pixel, explaining the 45% performance difference.
+                    </p>
                   </div>
                   
                   <div className="mb-3">
@@ -818,12 +822,14 @@ const Project3 = () => {
                   </div>
                   
                   <p className="text-gray-700 text-sm mb-3">
-                    <strong>Quality differences:</strong> Nearest neighbor shows blockiness and jagged edges from multiple pixels rounding to the same source pixel. Bilinear produces smoother results by blending neighboring pixels.
+                    <strong>Visual quality differences:</strong> Nearest neighbor interpolation exhibits blockiness and jagged edges due to multiple output pixels rounding to the same source pixel. Bilinear interpolation produces smoother results by blending neighboring pixel values based on fractional coordinate distances.
                   </p>
                   
-                  <p className="text-gray-700 text-sm">
-                    Final choice: <strong>bilinear interpolation</strong> for better output quality.
-                  </p>
+                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <p className="text-gray-700 text-sm">
+                      <strong>Method selection:</strong> Despite the 45% performance overhead, bilinear interpolation was selected for all subsequent operations due to its superior visual quality in the final mosaics. To be honest, both are still super fast :D.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -832,63 +838,63 @@ const Project3 = () => {
               <h3 className="text-xl font-semibold text-gray-900 mb-4">A.4: Blend the Images into a Mosaic</h3>
               
               <p className="text-gray-700 mb-4">
-                Now that I could warp images, I needed to actually combine them into a panorama. This wasn't as simple as just overlaying them—the overlapping regions created visible seams that needed to be handled carefully.
+                With the ability to warp images established, the next challenge was to combine multiple warped images into a seamless panorama. This required careful handling of overlapping regions to avoid visible seams.
               </p>
               
               <div className="space-y-6">
                 <div>
-                  <h4 className="text-lg font-semibold text-gray-900 mb-3">Setting Up the Canvas</h4>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">Canvas Size Computation</h4>
                   
                   <p className="text-gray-700 mb-3">
-                    First, I had to figure out how big the final panorama should be. When you warp images with homographies, corners can end up at negative coordinates or way outside the original bounds. So I:
+                    The first step was determining the appropriate output canvas size. When images are warped with homographies, their corners can map to negative coordinates or extend beyond the original bounds. The approach taken was:
                   </p>
                   
                   <ul className="list-disc list-inside space-y-1 text-gray-700 mb-4 ml-4">
-                    <li>Transformed all the corners of all images through their homographies</li>
-                    <li>Found the min/max x and y coordinates to get the bounding box</li>
-                    <li>Created a translation matrix to shift everything back to (0, 0)</li>
-                    <li>Composed this translation with each homography</li>
+                    <li>Transform all corners of all images through their respective homographies</li>
+                    <li>Compute the min/max x and y coordinates to establish the bounding box</li>
+                    <li>Create a translation matrix to shift all coordinates to positive values starting at (0, 0)</li>
+                    <li>Compose this translation with each homography to get the final transformations</li>
                   </ul>
                   
                   <p className="text-gray-700 mb-4">
-                    This gave me a canvas that fit all the warped images perfectly.
+                    This ensures the output canvas accommodates all warped images without clipping.
                   </p>
                 </div>
                 
                 <div>
-                  <h4 className="text-lg font-semibold text-gray-900 mb-3">The Blending Problem</h4>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">Blending Strategy</h4>
                   
                   <p className="text-gray-700 mb-3">
-                    In the overlapping regions, multiple images contribute to the same pixel. You can't just pick one or the other because that will give you hard seams. Averaging them helps, but not enough.
+                    In overlapping regions, multiple images contribute pixel values to the same output location. A naive approach of selecting one image or simple averaging produces visible seams due to alignment errors and color mismatches.
                   </p>
                   
                   <p className="text-gray-700 mb-3">
-                    I tried two approaches:
+                    Two blending approaches were implemented and compared:
                   </p>
                   
                   <div className="space-y-4 mb-4">
                     <div className="bg-white p-4 rounded-lg border">
-                      <p className="text-gray-700 mb-2"><strong>Simple Binary Blending:</strong></p>
+                      <p className="text-gray-700 mb-2"><strong>Binary Alpha Blending:</strong></p>
                       <p className="text-gray-700 text-sm">
-                        Each pixel is either in the image (alpha = 1) or not (alpha = 0). For the final output, I weighted each image by its alpha and averaged. This works but creates <strong>visible seams</strong> because the transition from one image to another is abrupt.
+                        Each pixel has a binary alpha value: α = 1 if within the image bounds, α = 0 otherwise. The final pixel value is computed as a weighted average based on these alpha values. This approach is simple but creates visible seams due to abrupt transitions between images.
                       </p>
                     </div>
                     
                     <div className="bg-white p-4 rounded-lg border">
                       <p className="text-gray-700 mb-2"><strong>Distance Transform Blending:</strong></p>
                       <p className="text-gray-700 text-sm">
-                        Instead of binary alphas, I used the <strong>distance transform</strong> to create smooth gradients. Pixels near the center of an image get higher weight, pixels near the edges get lower weight. This creates a feathering effect where images gradually blend into each other.
+                        Instead of binary alpha values, the distance transform is applied to each image's mask to create smooth alpha gradients. Pixels near the image center receive higher weights, while edge pixels receive lower weights. This creates a feathering effect that produces smooth transitions in overlapping regions.
                       </p>
                     </div>
                   </div>
                   
                   <p className="text-gray-700 mb-4">
-                    The distance transform basically measures how far each pixel is from the nearest edge, then normalizes it to create smooth alpha values that fade from 1.0 at the center to 0.0 at the boundaries.
+                    The distance transform computes the Euclidean distance from each pixel to the nearest boundary, then normalizes these values to create smooth alpha gradients that fade from 1.0 at the center to 0.0 at the edges.
                   </p>
                 </div>
                 
                 <div>
-                  <h4 className="text-lg font-semibold text-gray-900 mb-3">Results</h4>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">Results and Analysis</h4>
                   
                   <div className="space-y-6">
                     {/* Cal Sailing Club Results */}
@@ -971,7 +977,7 @@ const Project3 = () => {
                       
                       <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mt-4">
                         <p className="text-gray-700 text-sm">
-                          The difference is pretty obvious. Simple blending shows clear seam lines where you can see the color shifts and alignment errors. With distance transform blending, these seams mostly disappear—the transitions are smooth enough that your eye doesn't catch them.
+                          The comparison demonstrates a significant quality difference. Binary alpha blending exhibits clear seam lines with visible color shifts and alignment errors at image boundaries. Distance transform blending effectively eliminates these artifacts, producing smooth transitions that are imperceptible in the final result.
                         </p>
                       </div>
                     </div>
@@ -1048,6 +1054,10 @@ const Project3 = () => {
                         </div>
                       </div>
                     </div>
+
+                    <p className="text-gray-700 text-sm mb-4">
+                        Note: Some artifacts are visible in the panorama because people in the background were moving between shots (for example, the kid with the scooter appears multiple times).
+                    </p>
                     
                     <div>
                       <h5 className="text-md font-semibold text-gray-800 mb-3">East Asian Library Panorama</h5>
@@ -1109,9 +1119,9 @@ const Project3 = () => {
                   </div>
                   
                   <div className="bg-green-50 p-4 rounded-lg border border-green-200 mt-6">
-                    <p className="text-gray-700 text-sm mb-2"><strong>Why it works:</strong></p>
+                    <p className="text-gray-700 text-sm mb-2"><strong>Effectiveness of Distance Transform Blending:</strong></p>
                     <p className="text-gray-700 text-sm">
-                      Alignment errors and color mismatches are worst at image edges. By weighting center pixels more heavily than edge pixels, the distance transform naturally downplays the problematic areas while keeping the good stuff from the middle of each image. The result looks much more like a single photo instead of stitched pieces.
+                      Alignment errors and color mismatches are most pronounced at image boundaries. The distance transform approach naturally downweights these problematic edge regions while emphasizing the more reliable center portions of each image. This produces final mosaics that maintain visual continuity and appear as unified photographs rather than composite images.
                     </p>
                   </div>
                 </div>
