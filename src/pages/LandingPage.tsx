@@ -11,11 +11,11 @@ import bearIcon from '@/assets/bear-icon.png';
 const LandingPage = () => {
   const projects = [
     {
-      id: 'homework-0',
-      title: 'Homework 0',
+      id: 'project-0',
+      title: 'Project 0',
       subtitle: 'Becoming Friends with Your Camera',
       description: 'Understanding perspective, focal length, and the center of projection through photography.',
-      path: '/homework-0',
+      path: '/project-0',
       icon: <Camera className="h-6 w-6" />,
     },
     {
@@ -110,7 +110,7 @@ const LandingPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {projects.map((project, index) => (
               <ScrollReveal key={project.id} delay={index * 0.2}>
-                <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-2 hover:border-primary/50">
+                <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-2 hover:border-primary/50 min-h-[420px] flex flex-col">
                   <CardHeader>
                     <div className="flex items-center justify-between mb-4">
                       <div className="p-3 rounded-full bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-300">
@@ -125,16 +125,20 @@ const LandingPage = () => {
                       {project.subtitle}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground mb-6 leading-relaxed">
-                      {project.description}
-                    </p>
-                    <Link to={project.path}>
-                      <Button className="w-full group-hover:bg-primary group-hover:text-white transition-all duration-300">
-                        View Project
-                        <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
-                      </Button>
-                    </Link>
+                  <CardContent className="flex flex-col flex-1 justify-between">
+                    <div>
+                      <p className="text-muted-foreground mb-6 leading-relaxed">
+                        {project.description}
+                      </p>
+                    </div>
+                    <div className="mt-auto">
+                      <Link to={project.path}>
+                        <Button className="w-full group-hover:bg-primary group-hover:text-white transition-all duration-300">
+                          View Project
+                          <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
+                        </Button>
+                      </Link>
+                    </div>
                   </CardContent>
                 </Card>
               </ScrollReveal>
