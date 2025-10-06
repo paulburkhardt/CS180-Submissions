@@ -19,6 +19,25 @@ import { Button } from '@/components/ui/button';
 import mountainHero from '@/assets/mountain-hero.jpg';
 import bearIcon from '@/assets/bear-icon.png';
 
+// Boats images
+import a1_boats1 from '@/assets/project3/boats/a1_boats1.jpeg';
+import a1_boats2 from '@/assets/project3/boats/a1_boats2.jpeg';
+import a1_boats3 from '@/assets/project3/boats/a1_boats3.jpeg';
+import a1_boats4 from '@/assets/project3/boats/a1_boats4.jpeg';
+import correspondences_1_2 from '@/assets/project3/boats/correspondences_1_2.png';
+import correspondences_2_3 from '@/assets/project3/boats/correspondences_2_3.png';
+import correspondences_3_4 from '@/assets/project3/boats/correspondences_3_4.png';
+
+// East Asian Library images
+import a1_east_asian_1 from '@/assets/project3/east_asian/a1_east_asian_1.jpeg';
+import a1_east_asian_2 from '@/assets/project3/east_asian/a1_east_asian_2.jpeg';
+
+// Outside images
+import a1_outside1 from '@/assets/project3/outside/a1_outside1.jpeg';
+import a1_outside2 from '@/assets/project3/outside/a1_outside2.jpeg';
+import a1_outside3 from '@/assets/project3/outside/a1_outside3.jpeg';
+import a1_outside4 from '@/assets/project3/outside/a1_outside4.jpeg';
+
 const Project3 = () => {
   const [activeSection, setActiveSection] = useState('');
   const [activeSubsection, setActiveSubsection] = useState('');
@@ -316,11 +335,11 @@ const Project3 = () => {
                         <div className="flex gap-4 pb-4">
                           <div 
                             className="cursor-pointer hover:opacity-80 transition-opacity group flex-shrink-0 relative"
-                            onClick={() => setFullscreenImage("/src/assets/project3/boats/a1_boats1.jpeg")}
+                            onClick={() => setFullscreenImage(a1_boats1)}
                             title="Click to view fullscreen"
                           >
                             <img 
-                              src="/src/assets/project3/boats/a1_boats1.jpeg" 
+                              src={a1_boats1} 
                               alt="Cal Sailing 1" 
                               className="h-64 w-auto rounded-lg shadow-md"
                             />
@@ -330,11 +349,11 @@ const Project3 = () => {
                           </div>
                           <div 
                             className="cursor-pointer hover:opacity-80 transition-opacity group flex-shrink-0 relative"
-                            onClick={() => setFullscreenImage("/src/assets/project3/boats/a1_boats2.jpeg")}
+                            onClick={() => setFullscreenImage(a1_boats2)}
                             title="Click to view fullscreen"
                           >
                             <img 
-                              src="/src/assets/project3/boats/a1_boats2.jpeg" 
+                              src={a1_boats2} 
                               alt="Cal Sailing 2" 
                               className="h-64 w-auto rounded-lg shadow-md"
                             />
@@ -344,11 +363,11 @@ const Project3 = () => {
                           </div>
                           <div 
                             className="cursor-pointer hover:opacity-80 transition-opacity group flex-shrink-0 relative"
-                            onClick={() => setFullscreenImage("/src/assets/project3/boats/a1_boats3.jpeg")}
+                            onClick={() => setFullscreenImage(a1_boats3)}
                             title="Click to view fullscreen"
                           >
                             <img 
-                              src="/src/assets/project3/boats/a1_boats3.jpeg" 
+                              src={a1_boats3} 
                               alt="Cal Sailing 3" 
                               className="h-64 w-auto rounded-lg shadow-md"
                             />
@@ -358,11 +377,11 @@ const Project3 = () => {
                           </div>
                           <div 
                             className="cursor-pointer hover:opacity-80 transition-opacity group flex-shrink-0 relative"
-                            onClick={() => setFullscreenImage("/src/assets/project3/boats/a1_boats4.jpeg")}
+                            onClick={() => setFullscreenImage(a1_boats4)}
                             title="Click to view fullscreen"
                           >
                             <img 
-                              src="/src/assets/project3/boats/a1_boats4.jpeg" 
+                              src={a1_boats4} 
                               alt="Cal Sailing 4" 
                               className="h-64 w-auto rounded-lg shadow-md"
                             />
@@ -381,11 +400,11 @@ const Project3 = () => {
                         <div className="flex gap-4 pb-4">
                           <div 
                             className="cursor-pointer hover:opacity-80 transition-opacity group flex-shrink-0 relative"
-                            onClick={() => setFullscreenImage("/src/assets/project3/east_asian/a1_east_asian_1.jpeg")}
+                            onClick={() => setFullscreenImage(a1_east_asian_1)}
                             title="Click to view fullscreen"
                           >
                             <img 
-                              src="/src/assets/project3/east_asian/a1_east_asian_1.jpeg" 
+                              src={a1_east_asian_1} 
                               alt="East Asian Library 1" 
                               className="h-64 w-auto rounded-lg shadow-md"
                             />
@@ -395,11 +414,11 @@ const Project3 = () => {
                           </div>
                           <div 
                             className="cursor-pointer hover:opacity-80 transition-opacity group flex-shrink-0 relative"
-                            onClick={() => setFullscreenImage("/src/assets/project3/east_asian/a1_east_asian_2.jpeg")}
+                            onClick={() => setFullscreenImage(a1_east_asian_2)}
                             title="Click to view fullscreen"
                           >
                             <img 
-                              src="/src/assets/project3/east_asian/a1_east_asian_2.jpeg" 
+                              src={a1_east_asian_2} 
                               alt="East Asian Library 2" 
                               className="h-64 w-auto rounded-lg shadow-md"
                             />
@@ -418,11 +437,11 @@ const Project3 = () => {
                         <div className="flex gap-4 pb-4">
                           <div 
                             className="cursor-pointer hover:opacity-80 transition-opacity group flex-shrink-0 relative"
-                            onClick={() => setFullscreenImage("/src/assets/project3/outside/a1_outside1.jpeg")}
+                            onClick={() => setFullscreenImage(a1_outside1)}
                             title="Click to view fullscreen"
                           >
                             <img 
-                              src="/src/assets/project3/outside/a1_outside1.jpeg" 
+                              src={a1_outside1} 
                               alt="Berkeley Campus 1" 
                               className="h-64 w-auto rounded-lg shadow-md"
                             />
@@ -432,11 +451,11 @@ const Project3 = () => {
                           </div>
                           <div 
                             className="cursor-pointer hover:opacity-80 transition-opacity group flex-shrink-0 relative"
-                            onClick={() => setFullscreenImage("/src/assets/project3/outside/a1_outside2.jpeg")}
+                            onClick={() => setFullscreenImage(a1_outside2)}
                             title="Click to view fullscreen"
                           >
                             <img 
-                              src="/src/assets/project3/outside/a1_outside2.jpeg" 
+                              src={a1_outside2} 
                               alt="Berkeley Campus 2" 
                               className="h-64 w-auto rounded-lg shadow-md"
                             />
@@ -446,11 +465,11 @@ const Project3 = () => {
                           </div>
                           <div 
                             className="cursor-pointer hover:opacity-80 transition-opacity group flex-shrink-0 relative"
-                            onClick={() => setFullscreenImage("/src/assets/project3/outside/a1_outside3.jpeg")}
+                            onClick={() => setFullscreenImage(a1_outside3)}
                             title="Click to view fullscreen"
                           >
                             <img 
-                              src="/src/assets/project3/outside/a1_outside3.jpeg" 
+                              src={a1_outside3} 
                               alt="Berkeley Campus 3" 
                               className="h-64 w-auto rounded-lg shadow-md"
                             />
@@ -460,14 +479,14 @@ const Project3 = () => {
                           </div>
                           <div 
                             className="cursor-pointer hover:opacity-80 transition-opacity group flex-shrink-0 relative"
-                            onClick={() => setFullscreenImage("/src/assets/project3/outside/a1_outside4.jpeg")}
+                            onClick={() => setFullscreenImage(a1_outside4)}
                             title="Click to view fullscreen"
                           >
                             <img 
-                              src="/src/assets/project3/outside/a1_outside4.jpeg" 
+                              src={a1_outside4} 
                               alt="Berkeley Campus 4" 
                               className="h-64 w-auto rounded-lg shadow-md"
-                              />
+                            />
                             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                               <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
                             </div>
@@ -524,11 +543,11 @@ const Project3 = () => {
                     <div>
                       <div 
                         className="cursor-pointer hover:opacity-80 transition-opacity group relative"
-                        onClick={() => setFullscreenImage("/src/assets/project3/boats/correspondences_1_2.png")}
+                        onClick={() => setFullscreenImage(correspondences_1_2)}
                         title="Click to view fullscreen"
                       >
                         <img 
-                          src="/src/assets/project3/boats/correspondences_1_2.png" 
+                          src={correspondences_1_2} 
                           alt="Correspondences between images 1 and 2" 
                           className="w-full rounded-lg shadow-md border border-gray-200"
                         />
@@ -542,11 +561,11 @@ const Project3 = () => {
                     <div>
                       <div 
                         className="cursor-pointer hover:opacity-80 transition-opacity group relative"
-                        onClick={() => setFullscreenImage("/src/assets/project3/boats/correspondences_2_3.png")}
+                        onClick={() => setFullscreenImage(correspondences_2_3)}
                         title="Click to view fullscreen"
                       >
                         <img 
-                          src="/src/assets/project3/boats/correspondences_2_3.png" 
+                          src={correspondences_2_3} 
                           alt="Correspondences between images 2 and 3" 
                           className="w-full rounded-lg shadow-md border border-gray-200"
                         />
@@ -560,11 +579,11 @@ const Project3 = () => {
                     <div>
                       <div 
                         className="cursor-pointer hover:opacity-80 transition-opacity group relative"
-                        onClick={() => setFullscreenImage("/src/assets/project3/boats/correspondences_3_4.png")}
+                        onClick={() => setFullscreenImage(correspondences_3_4)}
                         title="Click to view fullscreen"
                       >
                         <img 
-                          src="/src/assets/project3/boats/correspondences_3_4.png" 
+                          src={correspondences_3_4} 
                           alt="Correspondences between images 3 and 4" 
                           className="w-full rounded-lg shadow-md border border-gray-200"
                         />
