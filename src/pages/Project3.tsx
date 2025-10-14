@@ -51,6 +51,9 @@ import boats_blended from '@/assets/project3/blended/boats_blended.png';
 import outside_blended from '@/assets/project3/blended/outside_blended.png';
 import east_asian_warped from '@/assets/project3/blended/east_asian_warped.png';
 
+// Part B images
+import harris_anms from '@/assets/project3/3b.1_harris_anms.png';
+
 const Project3 = () => {
   const [activeSection, setActiveSection] = useState('');
   const [activeSubsection, setActiveSubsection] = useState('');
@@ -139,6 +142,8 @@ const Project3 = () => {
     { id: 'parta-2', title: 'A.2: Recover Homographies', icon: <Zap className="h-4 w-4" /> },
     { id: 'parta-3', title: 'A.3: Warp the Images', icon: <Sparkles className="h-4 w-4" /> },
     { id: 'parta-4', title: 'A.4: Blend the Images into a Mosaic', icon: <ImageIcon className="h-4 w-4" /> },
+    { id: 'partb', title: 'Part B: Feature Matching for Autostitching', icon: <Zap className="h-4 w-4" /> },
+    { id: 'partb-1', title: 'B.1: Harris Corner Detection', icon: <Grid className="h-4 w-4" /> },
   ];
 
   return (
@@ -1145,6 +1150,136 @@ const Project3 = () => {
                       Alignment errors and color mismatches are most pronounced at image boundaries. The distance transform approach naturally downweights these problematic edge regions while emphasizing the more reliable center portions of each image. This produces final mosaics that maintain visual continuity and appear as unified photographs rather than composite images.
                     </p>
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Part B: Feature Matching for Autostitching */}
+      <section id="partb" className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Part B: Feature Matching for Autostitching</h2>
+          
+          <div className="space-y-12">
+            <div>
+              <p className="text-gray-700 mb-4">
+                While Part A demonstrated image mosaicing using manually selected correspondence points, Part B focuses on automating this process. The goal is to detect and match feature points automatically, eliminating the need for manual point selection and making the mosaicing pipeline fully automatic.
+              </p>
+            </div>
+
+            <div id="partb-1">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">B.1: Harris Corner Detection</h3>
+              
+              <p className="text-gray-700 mb-4">
+                The first step in automatic feature matching is identifying distinctive points in the images. Harris corner detection is a widely-used algorithm that identifies corner features, regions where the image has significant intensity variation in multiple directions.
+              </p>
+              
+              <div className="space-y-8">
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">How Harris Corner Detection Works</h4>
+                  
+                  <p className="text-gray-700 mb-4">
+                    The implementation uses scikit-image's <code className="bg-gray-100 px-1 py-0.5 rounded text-sm">corner_harris</code> function with the 'eps' method and sigma=1 for Gaussian smoothing. This computes a corner response map where high values indicate potential corner locations.
+                  </p>
+                  
+                  <p className="text-gray-700 mb-4">
+                    The algorithm works by analyzing local image gradients to determine corner strength. At a high level:
+                  </p>
+                  
+                  <div className="bg-white p-6 rounded-lg border mb-6">
+                    <ul className="space-y-2 text-gray-700">
+                      <li><strong>Compute image gradients:</strong> Calculate I<sub>x</sub> and I<sub>y</sub> in the x and y directions</li>
+                      <li><strong>Build the structure tensor:</strong> For each pixel, compute the matrix M from I<sub>x</sub>², I<sub>x</sub>I<sub>y</sub>, and I<sub>y</sub>²</li>
+                      <li><strong>Calculate corner response:</strong> The 'eps' method uses the harmonic mean of eigenvalues to compute the response</li>
+                      <li><strong>Extract local maxima:</strong> Use <code className="bg-gray-100 px-1 py-0.5 rounded text-sm">peak_local_max</code> to find corner locations with min_distance spacing</li>
+                      <li><strong>Filter edge regions:</strong> Discard corners within edge_discard pixels of image boundaries</li>
+                    </ul>
+                  </div>
+                  
+                  <p className="text-gray-700 mb-4">
+                    The corner response is high when both eigenvalues of M are large (indicating variation in multiple directions), which corresponds to corner-like structures. Edges produce only one large eigenvalue, while flat regions produce small eigenvalues in all directions.
+                  </p>
+                </div>
+                
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">The Distribution Problem</h4>
+                  
+                  <p className="text-gray-700 mb-4">
+                    Harris corner detection often produces thousands of corner points, but they are not well-distributed across the image. Points tend to cluster in high-texture regions (like building corners or text) while leaving large empty areas in uniform regions (like sky or smooth surfaces).
+                  </p>
+                  
+                  
+                  
+                  <p className="text-gray-700 mb-4">
+                    What we need is a smaller set of well-distributed corners that cover the entire image more uniformly while maintaining the strongest, most distinctive features.
+                  </p>
+                </div>
+                
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Adaptive Non-Maximal Suppression (ANMS)</h4>
+                  
+                  <p className="text-gray-700 mb-4">
+                    ANMS solves the distribution problem by selecting a subset of corners that are both strong (high corner response) and spatially well-distributed. The key insight is to keep only corners that are local maxima within a certain radius.
+                  </p>
+                  
+                  <p className="text-gray-700 mb-4">
+                    For each corner point, ANMS computes its <em>suppression radius</em>: the minimum distance to a significantly stronger corner. Corners with larger suppression radii are isolated strong features, while corners with small radii are near stronger corners and can be suppressed.
+                  </p>
+                  
+                  <div className="bg-white p-6 rounded-lg border mb-6">
+                    <p className="text-gray-700 mb-3"><strong>ANMS Algorithm:</strong></p>
+                    <ol className="list-decimal list-inside space-y-2 text-gray-700 ml-4">
+                      <li>For each corner i with strength f<sub>i</sub>, compute the distance to every other corner j</li>
+                      <li>Find the minimum distance to a corner j where f<sub>j</sub> &gt; c·f<sub>i</sub> (typically c = 0.9)</li>
+                      <li>This minimum distance becomes the suppression radius r<sub>i</sub> for corner i</li>
+                      <li>Sort corners by their suppression radius in descending order</li>
+                      <li>Keep the top N corners with the largest suppression radii</li>
+                    </ol>
+                  </div>
+                  
+                  <p className="text-gray-700 mb-4">
+                    This approach naturally distributes features across the image because corners in dense regions have small suppression radii and are filtered out, while isolated corners in sparser regions have large radii and are retained.
+                  </p>
+                </div>
+                
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Implementation Details</h4>
+                  
+                  <p className="text-gray-700 mb-4">
+                    The Harris corner detection pipeline uses the following parameters (increased from default values for better results):
+                  </p>
+                  
+                  <div className="bg-white p-6 rounded-lg border mb-6">
+                    <ul className="space-y-2 text-gray-700">
+                      <li><strong>edge_discard=50:</strong> Filters out corners within 50 pixels of image boundaries (increased from 20). Edge regions are prone to artifacts during warping and often lack sufficient context for reliable matching.</li>
+                      <li><strong>min_distance=10:</strong> Enforces a minimum separation of 10 pixels between corners in <code className="bg-gray-100 px-1 py-0.5 rounded text-sm">peak_local_max</code> (increased from 1). This provides initial spatial distribution before ANMS is applied.</li>
+                    </ul>
+                  </div>
+                  
+                  <p className="text-gray-700 mb-4">
+                    After extracting Harris corners with these parameters, ANMS is applied to further reduce the set to 500 well-distributed points. Down here you can see the results before and after applying ANMS:
+                  </p>
+                  
+                  <div className="mb-6">
+                    <div 
+                      className="cursor-pointer hover:opacity-80 transition-opacity group relative"
+                      onClick={() => setFullscreenImage(harris_anms)}
+                      title="Click to view fullscreen"
+                    >
+                      <img 
+                        src={harris_anms} 
+                        alt="Harris corner detection before and after ANMS" 
+                        className="w-full rounded-lg shadow-md border border-gray-200"
+                      />
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  
                 </div>
               </div>
             </div>
