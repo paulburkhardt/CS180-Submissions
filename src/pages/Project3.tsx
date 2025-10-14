@@ -53,6 +53,13 @@ import east_asian_warped from '@/assets/project3/blended/east_asian_warped.png';
 
 // Part B images
 import harris_anms from '@/assets/project3/3b.1_harris_anms.png';
+import features from '@/assets/project3/3b.2_features.png';
+import feature_locations from '@/assets/project3/3b.2_feature_locations.png';
+import correspondences from '@/assets/project3/3b.3_correspondences.png';
+import ransac_example from '@/assets/project3/3b.4_RANSAC example.png';
+import boats_auto_stitched from '@/assets/project3/3b.4_boats_auto_stitched.png';
+import outside_auto_stitched from '@/assets/project3/3b.4_outside_auto_stitched.png';
+import east_asian_auto_stitched from '@/assets/project3/3b.4_east_asian_auto_stitched.png';
 
 const Project3 = () => {
   const [activeSection, setActiveSection] = useState('');
@@ -144,6 +151,9 @@ const Project3 = () => {
     { id: 'parta-4', title: 'A.4: Blend the Images into a Mosaic', icon: <ImageIcon className="h-4 w-4" /> },
     { id: 'partb', title: 'Part B: Feature Matching for Autostitching', icon: <Zap className="h-4 w-4" /> },
     { id: 'partb-1', title: 'B.1: Harris Corner Detection', icon: <Grid className="h-4 w-4" /> },
+    { id: 'partb-2', title: 'B.2: Feature Descriptor Extraction', icon: <Sparkles className="h-4 w-4" /> },
+    { id: 'partb-3', title: 'B.3: Feature Matching', icon: <Zap className="h-4 w-4" /> },
+    { id: 'partb-4', title: 'B.4: RANSAC for Robust Homography', icon: <Sparkles className="h-4 w-4" /> },
   ];
 
   return (
@@ -1167,13 +1177,17 @@ const Project3 = () => {
               <p className="text-gray-700 mb-4">
                 While Part A demonstrated image mosaicing using manually selected correspondence points, Part B focuses on automating this process. The goal is to detect and match feature points automatically, eliminating the need for manual point selection and making the mosaicing pipeline fully automatic.
               </p>
+              
+              <p className="text-gray-700 mb-4">
+                The implementation follows the approach described in <a href="https://cal-cs180.github.io/fa25/hw/proj3/Papers/MOPS.pdf" target="_blank" rel="noopener noreferrer" className="text-nav-green hover:underline font-medium">"Multi-Image Matching using Multi-Scale Oriented Patches"</a> by Brown et al. (with several simplifications).
+              </p>
             </div>
 
             <div id="partb-1">
               <h3 className="text-xl font-semibold text-gray-900 mb-4">B.1: Harris Corner Detection</h3>
               
               <p className="text-gray-700 mb-4">
-                The first step in automatic feature matching is identifying distinctive points in the images. Harris corner detection is a widely-used algorithm that identifies corner features, regions where the image has significant intensity variation in multiple directions.
+                The first step in automatic feature matching is identifying distinctive points in the images. Harris corner detection (Section 2 of the paper) is a widely-used algorithm that identifies corner features, regions where the image has significant intensity variation in multiple directions.
               </p>
               
               <div className="space-y-8">
@@ -1218,7 +1232,7 @@ const Project3 = () => {
                 </div>
                 
                 <div>
-                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Adaptive Non-Maximal Suppression (ANMS)</h4>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Adaptive Non-Maximal Suppression (ANMS, Section 3)</h4>
                   
                   <p className="text-gray-700 mb-4">
                     ANMS solves the distribution problem by selecting a subset of corners that are both strong (high corner response) and spatially well-distributed. The key insight is to keep only corners that are local maxima within a certain radius.
@@ -1278,8 +1292,450 @@ const Project3 = () => {
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="partb-2">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">B.2: Feature Descriptor Extraction</h3>
+              
+              <p className="text-gray-700 mb-4">
+                With corner locations identified, the next step is to create distinctive feature descriptors for each point (Section 4 of the paper). The goal is to obtain stable representations that are robust to changes in illumination and minor geometric variations, enabling reliable matching between images.
+              </p>
+              
+              <div className="space-y-8">
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Descriptor Extraction Process</h4>
                   
+                  <p className="text-gray-700 mb-4">
+                    For each corner point, a feature descriptor is computed from the local image region. The implementation extracts descriptors through the following pipeline:
+                  </p>
                   
+                  <div className="bg-white p-6 rounded-lg border mb-6">
+                    <ol className="space-y-2 text-gray-700 list-decimal list-inside ml-4">
+                      <li><strong>Extract local window:</strong> For each corner point, extract a 40×40 pixel window centered at the point</li>
+                      <li><strong>Boundary checking:</strong> Skip points too close to image edges where the full window doesn't fit</li>
+                      <li><strong>Downsample to 8×8:</strong> Sample the 40×40 window at regular intervals to create an 8×8 descriptor grid</li>
+                      <li><strong>Normalize:</strong> Subtract the mean and divide by standard deviation to achieve illumination invariance</li>
+                      <li><strong>Flatten:</strong> Convert the 8×8 grid into a 64-dimensional feature vector</li>
+                    </ol>
+                  </div>
+                  
+                  <p className="text-gray-700 mb-4">
+                    The 40×40 window provides sufficient context around each corner, while the 8×8 downsampling creates a compact descriptor that captures local structure without excessive detail. The normalization step is crucial,by standardizing each descriptor to have zero mean and unit variance, the representation becomes invariant to linear brightness and contrast changes.
+                  </p>
+                  
+                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-6">
+                    <p className="text-gray-700 text-sm">
+                      <strong>Why this approach works:</strong> The descriptor captures local intensity patterns in a scale-reduced form. Normalization ensures that two patches with similar structure but different lighting will produce similar descriptor vectors, making matching across images more robust.
+                    </p>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Visualizing Feature Descriptors</h4>
+                  
+                  <p className="text-gray-700 mb-4">
+                    Below you can see 10 example feature descriptors extracted from an image. Each descriptor is an 8×8 grid representing the local intensity pattern around a corner point:
+                  </p>
+                  
+                  <div className="mb-6">
+                    <div 
+                      className="cursor-pointer hover:opacity-80 transition-opacity group relative"
+                      onClick={() => setFullscreenImage(features)}
+                      title="Click to view fullscreen"
+                    >
+                      <img 
+                        src={features} 
+                        alt="Example feature descriptors" 
+                        className="w-full rounded-lg shadow-md border border-gray-200"
+                      />
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <p className="text-gray-700 mb-4">
+                    And here are the locations of these features in the source image:
+                  </p>
+                  
+                  <div className="mb-6">
+                    <div 
+                      className="cursor-pointer hover:opacity-80 transition-opacity group relative"
+                      onClick={() => setFullscreenImage(feature_locations)}
+                      title="Click to view fullscreen"
+                    >
+                      <img 
+                        src={feature_locations} 
+                        alt="Feature descriptor locations in image" 
+                        className="w-full rounded-lg shadow-md border border-gray-200"
+                      />
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                    <p className="text-gray-700 text-sm">
+                      Each descriptor captures distinctive local patterns - edges, corners, and texture - that can be reliably matched across different images. The normalized 8×8 representation provides a good balance between discriminative power and computational efficiency.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="partb-3">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">B.3: Feature Matching</h3>
+              
+              <p className="text-gray-700 mb-4">
+                With feature descriptors extracted from both images, the next step is to establish correspondences between them. The goal is to match features that represent the same physical location in the scene, even though they appear in different images with different perspectives.
+              </p>
+              
+              <div className="space-y-8">
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Lowe's Ratio Test (Section 5)</h4>
+                  
+                  <p className="text-gray-700 mb-4">
+                    A naive approach would be to match each feature in image 1 to its nearest neighbor in image 2 based on descriptor distance. However, this produces many false matches when features are ambiguous or repetitive (like uniform textures or repeating patterns).
+                  </p>
+                  
+                  <p className="text-gray-700 mb-4">
+                    Lowe's ratio test provides a robust solution by considering not just the nearest neighbor, but also the second-nearest neighbor. The implementation works as follows:
+                  </p>
+                  
+                  <div className="bg-white p-6 rounded-lg border mb-6">
+                    <ol className="space-y-2 text-gray-700 list-decimal list-inside ml-4">
+                      <li><strong>Compute pairwise distances:</strong> Calculate Euclidean distances between all descriptor pairs from both images</li>
+                      <li><strong>Find two nearest neighbors:</strong> For each feature in image 1, identify its closest and second-closest matches in image 2</li>
+                      <li><strong>Apply ratio test:</strong> Accept the match only if distance_1nn / distance_2nn &lt; threshold</li>
+                      <li><strong>Filter ambiguous matches:</strong> Features with similar distances to multiple neighbors are rejected</li>
+                    </ol>
+                  </div>
+                  
+                  <p className="text-gray-700 mb-4">
+                    The key insight is that good matches have a significantly closer nearest neighbor compared to the second-nearest neighbor. If both neighbors are similarly close, the match is ambiguous and likely incorrect.
+                  </p>
+                  
+                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-6">
+                    <p className="text-gray-700 text-sm mb-2">
+                      <strong>Ratio Threshold Selection:</strong> The ratio threshold controls the trade-off between match quantity and quality. A lower threshold accepts fewer but more reliable matches, while a higher threshold accepts more matches but with increased false positives.
+                    </p>
+                    <p className="text-gray-700 text-sm">
+                      For this exercise, I used a threshold of <strong>0.76</strong>, extracted from Figure 6b in the paper. This value provides a good balance between obtaining sufficient correspondences for robust homography estimation while maintaining high match accuracy.
+                    </p>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Matching Results</h4>
+                  
+                  <p className="text-gray-700 mb-4">
+                    Below you can see the matched keypoints between images 1 and 2 of the boat scene. Lines connect corresponding features that passed the ratio test:
+                  </p>
+                  
+                  <div className="mb-6">
+                    <div 
+                      className="cursor-pointer hover:opacity-80 transition-opacity group relative"
+                      onClick={() => setFullscreenImage(correspondences)}
+                      title="Click to view fullscreen"
+                    >
+                      <img 
+                        src={correspondences} 
+                        alt="Matched features between boat images" 
+                        className="w-full rounded-lg shadow-md border border-gray-200"
+                      />
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                    <p className="text-gray-700 text-sm">
+                      The matched features demonstrate strong spatial consistency and correctly identify corresponding points between the overlapping regions. These reliable correspondences will serve as input for automatic homography estimation in the next step, replacing the manual point selection from Part A.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="partb-4">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">B.4: RANSAC for Robust Homography Estimation</h3>
+              
+              <p className="text-gray-700 mb-4">
+                While Lowe's ratio test filters out many ambiguous matches, some incorrect correspondences inevitably remain. Computing a homography using all matched points would be highly sensitive to these outliers, potentially resulting in poor alignment. RANSAC (RANdom SAmple Consensus) provides a robust solution for estimating the homography in the presence of outliers.
+              </p>
+              
+              <div className="space-y-8">
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Why RANSAC?</h4>
+                  
+                  <p className="text-gray-700 mb-4">
+                    Traditional least-squares methods assume all data points are valid measurements corrupted only by noise. However, in feature matching, we often have:
+                  </p>
+                  
+                  <div className="bg-white p-6 rounded-lg border mb-6">
+                    <ul className="space-y-2 text-gray-700">
+                      <li><strong>Outliers:</strong> False matches that don't correspond to the same physical point</li>
+                      <li><strong>Repetitive structures:</strong> Similar-looking features that create incorrect correspondences</li>
+                      <li><strong>Occlusions:</strong> Objects that appear in one image but not the other</li>
+                      <li><strong>Moving objects:</strong> Elements that moved between captures</li>
+                    </ul>
+                  </div>
+                  
+                  <p className="text-gray-700 mb-4">
+                    RANSAC is specifically designed to work with datasets containing a significant proportion of outliers. Instead of trying to fit all points, it iteratively finds the largest subset of points (inliers) that agree with a particular model.
+                  </p>
+                </div>
+                
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">How RANSAC Works</h4>
+                  
+                  <p className="text-gray-700 mb-4">
+                    The RANSAC algorithm for homography estimation follows this iterative process:
+                  </p>
+                  
+                  <div className="bg-white p-6 rounded-lg border mb-6">
+                    <ol className="space-y-2 text-gray-700 list-decimal list-inside ml-4">
+                      <li><strong>Random sampling:</strong> Randomly select 4 matched point pairs (minimum needed for homography)</li>
+                      <li><strong>Model fitting:</strong> Compute a candidate homography from these 4 pairs</li>
+                      <li><strong>Consensus evaluation:</strong> Transform all points using the candidate homography and measure error</li>
+                      <li><strong>Inlier counting:</strong> Count points with error below threshold as inliers</li>
+                      <li><strong>Best model selection:</strong> Keep the model with the most inliers</li>
+                      <li><strong>Repeat:</strong> Iterate for a fixed number of iterations (e.g., 2000)</li>
+                      <li><strong>Refinement:</strong> Recompute homography using all inliers from the best model</li>
+                    </ol>
+                  </div>
+                  
+                  <p className="text-gray-700 mb-4">
+                    The key insight is that correct matches (inliers) will consistently agree with the true homography, while outliers will produce random errors. By trying many random subsets, RANSAC finds the homography that best explains the largest set of correspondences.
+                  </p>
+                  
+                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-6">
+                    <p className="text-gray-700 text-sm">
+                      <strong>4-Point RANSAC:</strong> This implementation uses 4-point RANSAC, meaning each iteration samples exactly 4 correspondence pairs to compute a candidate homography. Since a homography has 8 degrees of freedom and each point pair provides 2 constraints, 4 points give us the minimum required to solve for H uniquely.
+                    </p>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Visualizing RANSAC: Inliers vs Outliers</h4>
+                  
+                  <p className="text-gray-700 mb-4">
+                    To test RANSAC, I ran it on the boat images with 2000 iterations and a threshold of 10.0 pixels. Below you can see the distinction between inliers (green) and outliers (red), and then just the inliers that form the consensus set:
+                  </p>
+                  
+                  <div className="mb-6">
+                    <div 
+                      className="cursor-pointer hover:opacity-80 transition-opacity group relative"
+                      onClick={() => setFullscreenImage(ransac_example)}
+                      title="Click to view fullscreen"
+                    >
+                      <img 
+                        src={ransac_example} 
+                        alt="RANSAC inliers vs outliers visualization" 
+                        className="w-full rounded-lg shadow-md border border-gray-200"
+                      />
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <p className="text-gray-700 mb-4">
+                    The visualization clearly shows how RANSAC filters out incorrect matches. Inliers exhibit consistent geometric relationships and form coherent correspondence patterns, while outliers show random, inconsistent alignments. The robust homography computed from inliers only produces much better alignment than using all matches.
+                  </p>
+                </div>
+                
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Automatic Mosaicing Results</h4>
+                  
+                  <p className="text-gray-700 mb-4">
+                    With RANSAC-estimated homographies, I created automatic mosaics for all three image sets. Different parameter values were used for each scene to optimize results:
+                  </p>
+                  
+                  <div className="bg-white p-6 rounded-lg border mb-6">
+                    <div className="space-y-3 text-gray-700">
+                      <div>
+                        <strong>Boats:</strong> ratio_threshold=0.67, num_points=500, c_robust=0.9
+                      </div>
+                      <div>
+                        <strong>Outside & East Asian:</strong> ratio_threshold=0.8, num_points=1000, c_robust=0.8
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-6">
+                    <p className="text-gray-700 text-sm">
+                      <strong>Why different parameters?</strong> My hypothesis is that the boat scene likely had stronger, more distinctive features that allowed for a more stringent ratio threshold (0.67) with fewer points (500). In contrast, the outdoor and library scenes probably contained more uniform regions and repetitive patterns, which may have required more matches (1000 points) and a more permissive ratio threshold (0.8) to gather sufficient correspondences for reliable homography estimation.
+                    </p>
+                  </div>
+                  
+                  <p className="text-gray-700 mb-4">
+                    Below are side-by-side comparisons of manual mosaics (Part A) versus automatic mosaics (Part B):
+                  </p>
+                  
+                  <div className="space-y-8 mb-6">
+                    {/* Boats Comparison */}
+                    <div>
+                      <h5 className="text-md font-semibold text-gray-800 mb-3">Cal Sailing Club</h5>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm text-gray-600 mb-2 text-center">Manual Mosaic (Part A)</p>
+                          <div 
+                            className="cursor-pointer hover:opacity-80 transition-opacity group relative"
+                            onClick={() => setFullscreenImage(boats_blended)}
+                            title="Click to view fullscreen"
+                          >
+                            <img 
+                              src={boats_blended} 
+                              alt="Boats manual mosaic" 
+                              className="w-full rounded-lg shadow-md border border-gray-200"
+                            />
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-600 mb-2 text-center">Automatic Mosaic (Part B)</p>
+                          <div 
+                            className="cursor-pointer hover:opacity-80 transition-opacity group relative"
+                            onClick={() => setFullscreenImage(boats_auto_stitched)}
+                            title="Click to view fullscreen"
+                          >
+                            <img 
+                              src={boats_auto_stitched} 
+                              alt="Boats automatic mosaic" 
+                              className="w-full rounded-lg shadow-md border border-gray-200"
+                            />
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Outside Comparison */}
+                    <div>
+                      <h5 className="text-md font-semibold text-gray-800 mb-3">Berkeley Campus</h5>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm text-gray-600 mb-2 text-center">Manual Mosaic (Part A)</p>
+                          <div 
+                            className="cursor-pointer hover:opacity-80 transition-opacity group relative"
+                            onClick={() => setFullscreenImage(outside_blended)}
+                            title="Click to view fullscreen"
+                          >
+                            <img 
+                              src={outside_blended} 
+                              alt="Outside manual mosaic" 
+                              className="w-full rounded-lg shadow-md border border-gray-200"
+                            />
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-600 mb-2 text-center">Automatic Mosaic (Part B)</p>
+                          <div 
+                            className="cursor-pointer hover:opacity-80 transition-opacity group relative"
+                            onClick={() => setFullscreenImage(outside_auto_stitched)}
+                            title="Click to view fullscreen"
+                          >
+                            <img 
+                              src={outside_auto_stitched} 
+                              alt="Outside automatic mosaic" 
+                              className="w-full rounded-lg shadow-md border border-gray-200"
+                            />
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* East Asian Comparison */}
+                    <div>
+                      <h5 className="text-md font-semibold text-gray-800 mb-3">East Asian Library</h5>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm text-gray-600 mb-2 text-center">Manual Mosaic (Part A)</p>
+                          <div 
+                            className="cursor-pointer hover:opacity-80 transition-opacity group relative"
+                            onClick={() => setFullscreenImage(east_asian_warped)}
+                            title="Click to view fullscreen"
+                          >
+                            <img 
+                              src={east_asian_warped} 
+                              alt="East Asian manual mosaic" 
+                              className="w-full rounded-lg shadow-md border border-gray-200"
+                            />
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-600 mb-2 text-center">Automatic Mosaic (Part B)</p>
+                          <div 
+                            className="cursor-pointer hover:opacity-80 transition-opacity group relative"
+                            onClick={() => setFullscreenImage(east_asian_auto_stitched)}
+                            title="Click to view fullscreen"
+                          >
+                            <img 
+                              src={east_asian_auto_stitched} 
+                              alt="East Asian automatic mosaic" 
+                              className="w-full rounded-lg shadow-md border border-gray-200"
+                            />
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Maximize2 className="h-4 w-4 text-white drop-shadow-lg" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                    <p className="text-gray-700 text-sm mb-2"><strong>Automatic vs Manual Results:</strong></p>
+                    <p className="text-gray-700 text-sm">
+                      The automatic mosaics achieve comparable quality to the manually-aligned versions, demonstrating that the full pipeline, from corner detection through RANSAC, successfully automates the entire mosaicing process. The automatic approach eliminates tedious manual point selection while maintaining robust alignment even in the presence of outliers and challenging scene conditions.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-16 pt-8 border-t border-gray-300">
+              <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">Project 3 Takeaways</h3>
+              
+              <div className="max-w-3xl mx-auto">
+                <div className="space-y-4 text-gray-700">
+                  <p>• <strong>Projective transformations (homographies)</strong> are 3×3 matrices with 8 degrees of freedom that can warp images to account for perspective changes, essential for mosaicing when images are taken from the same center of projection but at different angles</p>
+                  
+                  <p>• <strong>Homography recovery</strong> requires at least 4 correspondence point pairs (8 constraints for 8 degrees of freedom), but oversampling and using least-squares provides more robust solutions that account for noise and imperfect point selections</p>
+                  
+                  <p>• <strong>Inverse warping</strong> is the key to image warping: for each output pixel, we compute its source location using H⁻¹, preventing holes in the output that would occur with forward warping</p>
+                  
+                  <p>• <strong>Bilinear interpolation</strong> produces smoother warped images than nearest neighbor by blending four neighboring pixels based on fractional coordinate distances, though it's 4-5× slower due to additional computations</p>
+                  
+                  <p>• <strong>Distance transform blending</strong> creates seamless mosaics by computing Euclidean distances from each pixel to the nearest boundary and using these as alpha weights, smoothly transitioning between images in overlapping regions</p>
+                  
+                  <p>• <strong>Harris corner detection</strong> identifies distinctive feature points by analyzing local image gradients to find regions with intensity variation in multiple directions, enabling automatic feature matching without manual point selection</p>
+                  
+                  <p>• <strong>Adaptive Non-Maximal Suppression (ANMS)</strong> ensures features are well-distributed across the image rather than clustered, which is crucial for robust homography estimation as clustered features provide insufficient geometric constraints</p>
+                  
+                  <p>• <strong>Feature descriptors</strong> (40×40 windows downsampled to 8×8 and normalized) capture local image structure in a way that's robust to lighting changes, enabling reliable matching between images with different perspectives</p>
+                  
+                  <p>• <strong>Lowe's ratio test</strong> filters ambiguous matches by rejecting features where the nearest and second-nearest neighbors have similar distances, trading quantity for quality by keeping only distinctive, unambiguous correspondences</p>
+                  
+                  <p>• <strong>RANSAC</strong> robustly estimates homographies by embracing outliers rather than trying to eliminate them beforehand, repeatedly sampling minimal sets and selecting the model with most inliers, remaining effective even when 30-40% of matches are incorrect</p>
                 </div>
               </div>
             </div>
