@@ -9,6 +9,7 @@ import Project0 from "./pages/Project0";
 import Project1 from "./pages/Project1";
 import Project2 from "./pages/Project2";
 import Project3 from "./pages/Project3";
+import Project4 from "./pages/Project4";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => {
             <Route path="/project-1" element={<Project1 />} />
             <Route path="/project-2" element={<Project2 />} />
             <Route path="/project-3" element={<Project3 />} />
+            <Route path="/project-4" element={<Project4 />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

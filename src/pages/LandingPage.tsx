@@ -41,6 +41,14 @@ const LandingPage = () => {
       description: 'Creating image mosaics through projective warping, homography computation, and advanced image stitching techniques.',
       path: '/project-3',
       icon: <ImageIcon className="h-6 w-6" />,
+    },
+    {
+      id: 'project-4',
+      title: 'Project 4',
+      subtitle: 'Neural Radiance Field!',
+      description: 'Building NeRFs: calibration, neural fields, and multi-view volume rendering to reconstruct immersive 3D scenes.',
+      path: '/project-4',
+      icon: <BookOpen className="h-6 w-6" />,
     }
     // Future projects can be added here
   ];
