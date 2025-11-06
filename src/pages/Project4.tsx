@@ -271,8 +271,7 @@ const Project4 = () => {
           <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Neural Radiance Field (NeRF) Project</h2>
           <div className="prose prose-lg max-w-none">
             <p className="text-lg leading-relaxed text-gray-700">
-              {/* TODO: Add project overview content */}
-              Content coming soon...
+              This project recreates the full Neural Radiance Field pipeline from camera calibration through rendering. I collect a multi-view dataset, fit a neural field that maps 3D positions and viewing directions to density and color, and render photo-realistic views by integrating samples along camera rays. The write-up walks through the 2D warm-up, the Lego benchmark, and my own captured scene.
             </p>
           </div>
         </div>
