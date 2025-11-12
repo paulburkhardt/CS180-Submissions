@@ -31,6 +31,9 @@ import rayVisualization from '@/assets/project4/2_ray_vis.png';
 import part2TrainingProgression from '@/assets/project4/2_training_progression.png';
 import part2PsarCurve from '@/assets/project4/2_psnr_curve.png';
 import legoRenderGif from '@/assets/project4/2_rendering_video.gif';
+import part26IntermediateResults from '@/assets/project4/2_6_interm_results.png';
+import part26TrainingCurve from '@/assets/project4/2_6_training_curve.png';
+import part26NovelViewGif from '@/assets/project4/2_6_novel_view_video.gif';
 
 const Project4 = () => {
   const [activeSection, setActiveSection] = useState('');
@@ -751,8 +754,74 @@ const Project4 = () => {
             <div id="part2-6">
               <h3 className="text-xl font-semibold text-gray-900 mb-4">Part 2.6: Training with your own data</h3>
               <p className="text-gray-700 mb-4 leading-relaxed">
-                After validating on the Lego splits, I reused the same dataloading, sampling, and rendering stack on my captured scene. The only changes were pointing the loader at my COLMAP outputs and adjusting near/far bounds to match the new capture volume.
+                After validating on the Lego splits, I reused the same dataloading, sampling, and rendering stack on my captured lafufu scene. Running the TAs' recommended configuration (num_samples&nbsp;64, near&nbsp;0.02, far&nbsp;0.5, batch_size&nbsp;10k, lr&nbsp;5e-4, 10k iters) never pushed PSNR past ~11&nbsp;dB, so the reconstruction stayed soft despite the full schedule.
               </p>
+              <div className="bg-white border rounded-xl p-6 shadow-sm mb-8">
+                <h4 className="text-lg font-semibold text-gray-900 mb-3">Training configuration</h4>
+                <ul className="space-y-2 text-gray-700 list-disc list-inside">
+                  <li>Device autodetect: MPS first, otherwise CUDA, else CPU fallback.</li>
+                  <li>num_samples = 64, near = 0.02, far = 0.5 ⇒ step_size = (far − near) / num_samples.</li>
+                  <li>batch_size = 10,000 rays, learning_rate = 5e-4 (Adam), num_iters = 10,000.</li>
+                  <li>chunk_size = 2,048 on MPS (4,096 otherwise) to respect unified memory limits.</li>
+                </ul>
+              </div>
+
+              <div className="bg-white border rounded-xl p-6 shadow-sm mb-8">
+                <h4 className="text-lg font-semibold text-gray-900 mb-3">Debugging attempts</h4>
+                <ul className="space-y-2 text-gray-700 list-disc list-inside">
+                  <li>Progressive training: begin with fewer samples/rays for quick feedback before scaling to the full 64-sample run.</li>
+                  <li>Adapted near/far bounds on the density of the scene.</li>
+                  <li>Extended iteration counts beyond 10k and adjusted learning-rate schedules, but PSNR still plateaued near 11&nbsp;dB.</li>
+                </ul>
+              </div>
+
+              <div className="grid grid-cols-1 gap-6 mb-8">
+                <div
+                  className="relative rounded-xl overflow-hidden border bg-card/30 cursor-pointer group"
+                  onClick={() => setFullscreenImage(part26TrainingCurve)}
+                  title="Click to view fullscreen"
+                >
+                  <img
+                    src={part26TrainingCurve}
+                    alt="Training loss curve for custom NeRF scene"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute bottom-3 left-3 text-sm text-white font-medium">Training Loss</div>
+                  <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Maximize2 className="h-5 w-5 text-white drop-shadow" />
+                  </div>
+                </div>
+
+                <div
+                  className="relative rounded-xl overflow-hidden border bg-card/30 cursor-pointer group"
+                  onClick={() => setFullscreenImage(part26IntermediateResults)}
+                  title="Click to view fullscreen"
+                >
+                  <img
+                    src={part26IntermediateResults}
+                    alt="Intermediate renders from custom NeRF training"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute bottom-3 left-3 text-sm text-white font-medium">Intermediate Renders</div>
+                  <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Maximize2 className="h-5 w-5 text-white drop-shadow" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <p className="text-gray-700 leading-relaxed">
+                </p>
+                <div className="relative rounded-xl overflow-hidden border bg-card/30">
+                  <img
+                    src={part26NovelViewGif}
+                    alt="Circular novel-view render of custom NeRF"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
