@@ -28,6 +28,7 @@ import goldenGateGrid from '@/assets/project4/1_gg_grid.png';
 import foxPsarCurve from '@/assets/project4/1_fox_loss.png';
 import goldenGatePsarCurve from '@/assets/project4/1_gg_loss.png';
 import rayVisualization from '@/assets/project4/2_ray_vis.png';
+import raySingleSampleVis from '@/assets/project4/2_rays_from_one_sample.png';
 import part2TrainingProgression from '@/assets/project4/2_training_progression.png';
 import part2PsarCurve from '@/assets/project4/2_psnr_curve.png';
 import legoRenderGif from '@/assets/project4/2_rendering_video.gif';
@@ -678,6 +679,23 @@ const Project4 = () => {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                   <div className="absolute bottom-3 left-3 text-sm text-white font-medium">Lego – Rays & Samples</div>
+                  <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Maximize2 className="h-5 w-5 text-white drop-shadow" />
+                  </div>
+                </div>
+
+                <div
+                  className="relative rounded-xl overflow-hidden border bg-card/30 cursor-pointer group"
+                  onClick={() => setFullscreenImage(raySingleSampleVis)}
+                  title="Click to view fullscreen"
+                >
+                  <img
+                    src={raySingleSampleVis}
+                    alt="Single camera's rays sampled across one frame"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute bottom-3 left-3 text-sm text-white font-medium">Lego – Rays from One Sample</div>
                   <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Maximize2 className="h-5 w-5 text-white drop-shadow" />
                   </div>
