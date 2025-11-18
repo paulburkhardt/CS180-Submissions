@@ -439,11 +439,12 @@ const Project4 = () => {
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="absolute bottom-3 left-3 text-sm text-white font-medium">Fox – Original</div>
+                  <div className="absolute bottom-3 left-3 text-sm text-white font-medium">Fox – Reference Image</div>
                   <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Maximize2 className="h-5 w-5 text-white drop-shadow" />
                   </div>
                 </div>
+
                 <div
                   className="relative rounded-xl overflow-hidden border bg-card/30 cursor-pointer group"
                   onClick={() => setFullscreenImage(goldenGateOriginal)}
@@ -451,52 +452,11 @@ const Project4 = () => {
                 >
                   <img
                     src={goldenGateOriginal}
-                    alt="Original Golden Gate image"
+                    alt="Original Golden Gate Bridge image"
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="absolute bottom-3 left-3 text-sm text-white font-medium">Golden Gate – Original</div>
-                  <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Maximize2 className="h-5 w-5 text-white drop-shadow" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Training Progression</h3>
-              <p className="text-gray-700 mb-6">
-                Snapshots every few hundred steps show the network gradually filling in color and detail for both scenes.
-              </p>
-              <div className="space-y-6">
-                <div
-                  className="relative rounded-xl overflow-hidden border bg-card/30 cursor-pointer group"
-                  onClick={() => setFullscreenImage(foxProgression)}
-                  title="Click to view fullscreen"
-                >
-                  <img
-                    src={foxProgression}
-                    alt="Training progression for fox image"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="absolute bottom-3 left-3 text-sm text-white font-medium">Fox – Training Steps</div>
-                  <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Maximize2 className="h-5 w-5 text-white drop-shadow" />
-                  </div>
-                </div>
-                <div
-                  className="relative rounded-xl overflow-hidden border bg-card/30 cursor-pointer group"
-                  onClick={() => setFullscreenImage(goldenGateProgression)}
-                  title="Click to view fullscreen"
-                >
-                  <img
-                    src={goldenGateProgression}
-                    alt="Training progression for Golden Gate image"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="absolute bottom-3 left-3 text-sm text-white font-medium">Golden Gate – Training Steps</div>
+                  <div className="absolute bottom-3 left-3 text-sm text-white font-medium">Golden Gate – Reference Image</div>
                   <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Maximize2 className="h-5 w-5 text-white drop-shadow" />
                   </div>
@@ -683,7 +643,6 @@ const Project4 = () => {
                     <Maximize2 className="h-5 w-5 text-white drop-shadow" />
                   </div>
                 </div>
-
                 <div
                   className="relative rounded-xl overflow-hidden border bg-card/30 cursor-pointer group"
                   onClick={() => setFullscreenImage(raySingleSampleVis)}
@@ -772,24 +731,24 @@ const Project4 = () => {
             <div id="part2-6">
               <h3 className="text-xl font-semibold text-gray-900 mb-4">Part 2.6: Training with your own data</h3>
               <p className="text-gray-700 mb-4 leading-relaxed">
-                After validating on the Lego splits, I reused the same dataloading, sampling, and rendering stack on my captured lafufu scene. Running the TAs' recommended configuration (num_samples&nbsp;64, near&nbsp;0.02, far&nbsp;0.5, batch_size&nbsp;10k, lr&nbsp;5e-4, 10k iters) never pushed PSNR past ~11&nbsp;dB, so the reconstruction stayed soft despite the full schedule.
+                After validating on the Lego splits, I reused the same dataloading, sampling, and rendering stack on my captured baseball cap pictures. Doubling the per-ray samples to 128 and tightening the near/far planes to match the tabletop helped stabilize training, and sticking with the original (still slightly distorted) iPhone images worked better than COLMAP's undistorted exports. Even with those tweaks, PSNR shot up to ~19&nbsp;dB almost immediately and then flattened.
               </p>
               <div className="bg-white border rounded-xl p-6 shadow-sm mb-8">
                 <h4 className="text-lg font-semibold text-gray-900 mb-3">Training configuration</h4>
                 <ul className="space-y-2 text-gray-700 list-disc list-inside">
-                  <li>Device autodetect: MPS first, otherwise CUDA, else CPU fallback.</li>
-                  <li>num_samples = 64, near = 0.02, far = 0.5 ⇒ step_size = (far − near) / num_samples.</li>
-                  <li>batch_size = 10,000 rays, learning_rate = 5e-4 (Adam), num_iters = 10,000.</li>
-                  <li>chunk_size = 2,048 on MPS (4,096 otherwise) to respect unified memory limits.</li>
+                  <li>num_samples = 128 (double the baseline 64) for higher-frequency detail.</li>
+                  <li>near = 0.35, far = 0.6 to tightly bracket the baseball cap scene.</li>
+                  <li>batch_size = 10,000 rays, learning_rate = 5e-4 (Adam), num_iters = 40,000.</li>
+                  <li>Kept the model width at 512 and trained on the original (distorted) images which reconstructed better than the undistorted set.</li>
                 </ul>
               </div>
 
               <div className="bg-white border rounded-xl p-6 shadow-sm mb-8">
                 <h4 className="text-lg font-semibold text-gray-900 mb-3">Debugging attempts</h4>
                 <ul className="space-y-2 text-gray-700 list-disc list-inside">
-                  <li>Progressive training: begin with fewer samples/rays for quick feedback before scaling to the full 64-sample run.</li>
-                  <li>Adapted near/far bounds on the density of the scene.</li>
-                  <li>Extended iteration counts beyond 10k and adjusted learning-rate schedules, but PSNR still plateaued near 11&nbsp;dB.</li>
+                  <li>Progressive ramps from 32/64 samples up to 128 confirmed the higher sample count was stable.</li>
+                  <li>Iterated on near/far until 0.35–0.6 consistently minimized fogging without clipping the brim.</li>
+                  <li>Even long 10k-iteration runs plateaued near 19&nbsp;dB, suggesting more data or capture refinement is needed.</li>
                 </ul>
               </div>
 
@@ -831,6 +790,7 @@ const Project4 = () => {
 
               <div className="space-y-4">
                 <p className="text-gray-700 leading-relaxed">
+                  Despite the early 19&nbsp;dB plateau, both the intermediate checkpoints and the final orbit render still trace out the cap cleanly; geometry reads well even if the textures stay a bit soft.
                 </p>
                 <div className="relative rounded-xl overflow-hidden border bg-card/30">
                   <img
