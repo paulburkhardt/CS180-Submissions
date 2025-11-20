@@ -51,28 +51,27 @@ import personalEditA from '@/assets/homework 5/download 26.png';
 import personalEditB from '@/assets/homework 5/download 27.png';
 
 // Web + hand-drawn edits
-import webEditsGrid from '@/assets/homework 5/download 28.png';
 import webEdit1 from '@/assets/homework 5/download 29.png';
 import webEditNoise20 from '@/assets/homework 5/download 30.png';
 import webEditNoise3 from '@/assets/homework 5/download 31.png';
 import webEditNoise5 from '@/assets/homework 5/download 32.png';
 import webEditNoise7 from '@/assets/homework 5/download 33.png';
 import webEditNoise10 from '@/assets/homework 5/download 34.png';
-import handDrawnSet1 from '@/assets/homework 5/download 35.png';
+import handDrawnOriginal1 from '@/assets/homework 5/download 35.png';
 import handDrawn1Noise1 from '@/assets/homework 5/download 36.png';
 import handDrawn1Noise20 from '@/assets/homework 5/download 37.png';
 import handDrawn1Noise3 from '@/assets/homework 5/download 38.png';
 import handDrawn1Noise5 from '@/assets/homework 5/download 39.png';
 import handDrawn1Noise7 from '@/assets/homework 5/download 40.png';
 import handDrawn1Noise10 from '@/assets/homework 5/download 41.png';
-import handDrawnSet2 from '@/assets/homework 5/download 42.png';
+import handDrawnOriginal2 from '@/assets/homework 5/download 42.png';
 import handDrawn2Noise1 from '@/assets/homework 5/download 43.png';
 import handDrawn2Noise20 from '@/assets/homework 5/download 44.png';
 import handDrawn2Noise3 from '@/assets/homework 5/download 45.png';
 import handDrawn2Noise5 from '@/assets/homework 5/download 46.png';
 import handDrawn2Noise7 from '@/assets/homework 5/download 47.png';
 import handDrawn2Noise10 from '@/assets/homework 5/download 48.png';
-import webOriginal from '@/assets/homework 5/Screenshot_2025-11-19_at_12.18.14_PM.png';
+import webOriginal from '@/assets/homework 5/download 28.png';
 
 // Inpainting
 import campanileInpaint from '@/assets/homework 5/download 49.png';
@@ -425,11 +424,11 @@ const Project5 = () => {
         <div className="container mx-auto px-4 max-w-4xl space-y-10">
           <h3 className="text-2xl font-semibold text-gray-900">1.2 Classical Denoising</h3>
           <p className="text-gray-700">
-            Gaussian blurs with tuned kernel sizes partially recover structure, especially at lower timesteps. I logged the best-performing configurations for comparison.
+            Gaussian blurs with tuned kernel sizes partially recover structure, especially at lower timesteps. I logged two of the best-performing configurations for comparison.
           </p>
           <div className="grid md:grid-cols-2 gap-6">
-            {renderImageTile(campanileGaussianGrid, 'Gaussian denoising comparisons', 'Denoised Campanile for t ∈ {250, 500, 750}')}
-            {renderImageTile(campanileGaussianDetail, 'Gaussian kernels details', 'Kernel sweeps and PSNR tracking')}
+            {renderImageTile(campanileGaussianGrid, 'Gaussian denoising comparisons', 'Denoised Campanile for k=5 and σ=1.0')}
+            {renderImageTile(campanileGaussianDetail, 'Gaussian kernels details', 'Denoised Campanile for k=9 and σ=1.5')}
           </div>
         </div>
       </section>
@@ -457,7 +456,82 @@ const Project5 = () => {
           {renderImageTile(iterativeTimeline, 'Iterative denoising timeline', 'Every 5th iteration of the denoising loop')}
           {renderImageTile(iterativeComparisons, 'Iterative vs single-step vs Gaussian', 'Final outputs across three strategies')}
 
-          <ImagePlaceholder label="Code snippet placeholder: iterative_denoise implementation (final comments pending)" />
+          <div className="bg-white border rounded-2xl p-6 shadow-sm space-y-6">
+            <h4 className="text-xl font-semibold text-gray-900">How the Notebook Cells Were Filled In</h4>
+            <ul className="list-disc list-inside text-gray-700 space-y-2">
+              <li><strong>Schedule</strong>: build <code>strided_timesteps</code> marching 990 → 0 in steps of 30, then pass it to the scheduler so the variance helper stays synchronized.</li>
+              <li><strong>DDPM Update</strong>: for each step compute <code>α</code>/<code>β</code>, recover <code>x₀</code>, project to the previous timestep, and add the learned variance term.</li>
+              <li><strong>Baselines</strong>: reuse the one-step denoiser and a Gaussian blur to benchmark against the iterative result.</li>
+            </ul>
+
+            <div className="bg-gray-900 text-gray-100 text-sm rounded-xl p-4 overflow-x-auto space-y-4">
+              <pre className="font-mono whitespace-pre-wrap">
+{`# Timesteps & scheduler
+steps = list(range(990, 0, -30)) + [0]
+stage_1.scheduler.set_timesteps(timesteps=steps)`}
+              </pre>
+              <pre className="font-mono whitespace-pre-wrap">
+{`# Core DDPM loop
+def add_variance(pred_var, t, image):
+    sigma = stage_1.scheduler._get_variance(t, predicted_variance=pred_var)
+    return image + torch.exp(0.5 * sigma) * torch.randn_like(image)
+
+def iterative_denoise(im_noisy, i_start, prompt_embeds, timesteps):
+    image = im_noisy
+    with torch.no_grad():
+        for i in range(i_start, len(timesteps) - 1):
+            t, prev_t = timesteps[i], timesteps[i + 1]
+            alpha_t = alphas_cumprod[t]
+            alpha_prev = alphas_cumprod[prev_t]
+            alpha = alpha_t / alpha_prev
+            beta = 1 - alpha
+
+            model_out = stage_1.unet(
+                image.half().cuda(),
+                torch.tensor(t, device='cuda'),
+                encoder_hidden_states=prompt_embeds.half().cuda(),
+                return_dict=False
+            )[0]
+
+            noise_est, pred_var = torch.split(model_out, image.shape[1], dim=1)
+            x0 = (image - torch.sqrt(1 - alpha_t) * noise_est) / torch.sqrt(alpha_t)
+            x_prev = (
+                torch.sqrt(alpha_prev) * beta / (1 - alpha_t) * x0
+                + torch.sqrt(alpha) * (1 - alpha_prev) / (1 - alpha_t) * image
+            )
+            image = add_variance(pred_var, t, x_prev)
+
+    return image.cpu().float().detach().numpy()`}
+              </pre>
+              <pre className="font-mono whitespace-pre-wrap">
+{`# Final comparisons
+prompt_embeds = prompt_embeds_dict["a high quality photo"]
+i_start = 10
+t = steps[i_start]
+im_noisy = forward(test_im, t).half().to(device)
+
+clean_iter = iterative_denoise(im_noisy, i_start, prompt_embeds, steps)
+
+with torch.no_grad():
+    alpha_t = alphas_cumprod[t]
+    noise_est = stage_1.unet(
+        im_noisy.half().cuda(),
+        torch.tensor(t, device='cuda'),
+        encoder_hidden_states=prompt_embeds.half().cuda(),
+        return_dict=False
+    )[0][:, :3].cpu().float()
+    clean_one_step = (
+        im_noisy.cpu().float() - torch.sqrt(1 - alpha_t) * noise_est
+    ) / torch.sqrt(alpha_t)
+
+blur_filtered = TF.gaussian_blur(
+    im_noisy.cpu().float(), kernel_size=[5, 5], sigma=[2.0, 2.0]
+)
+
+# These arrays back the comparison mosaic shown above.`}
+              </pre>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -479,7 +553,63 @@ const Project5 = () => {
           </p>
           {renderImageTile(cfgSamples, 'CFG samples (γ = 7)', 'Five CFG-guided samples conditioned on "a high quality photo"')}
 
-          <ImagePlaceholder label="Code snippet placeholder: iterative_denoise_cfg (documenting prompt conditioning details)" />
+          <div className="bg-white border rounded-2xl p-6 shadow-sm space-y-6">
+            <h4 className="text-xl font-semibold text-gray-900">How γ = 7 Guidance Was Implemented</h4>
+            <ul className="list-disc list-inside text-gray-700 space-y-2">
+              <li>Reuse the same timestep stride as the unconditional loop so variance sampling stays aligned.</li>
+              <li>Run the U-Net twice (conditioned + unconditional) and blend the noise terms with γ = 7.</li>
+              <li>Project back to <em>t − 30</em>, inject learned variance, and keep tensors on CUDA/Half for parity with the notebook.</li>
+            </ul>
+
+            <div className="bg-gray-900 text-gray-100 text-sm rounded-xl p-4 overflow-x-auto">
+              <pre className="font-mono whitespace-pre-wrap">
+{`# Prompt embeddings used for CFG
+prompt_embeds = prompt_embeds_dict["a high quality photo"]
+uncond_prompt_embeds = prompt_embeds_dict[""]
+
+
+def iterative_denoise_cfg(im_noisy, i_start, prompt_embeds, uncond_prompt_embeds, timesteps, scale=7):
+    image = im_noisy
+
+    with torch.no_grad():
+        for i in range(i_start, len(timesteps) - 1):
+            t, prev_t = timesteps[i], timesteps[i + 1]
+
+            alpha_t = alphas_cumprod[t]
+            alpha_prev = alphas_cumprod[prev_t]
+            alpha = alpha_t / alpha_prev
+            beta = 1 - alpha
+
+            t_tensor = torch.tensor(t, device="cuda")
+            cond_out = stage_1.unet(
+                image.half().cuda(),
+                t_tensor,
+                encoder_hidden_states=prompt_embeds.half().cuda(),
+                return_dict=False
+            )[0]
+            uncond_out = stage_1.unet(
+                image.half().cuda(),
+                t_tensor,
+                encoder_hidden_states=uncond_prompt_embeds.half().cuda(),
+                return_dict=False
+            )[0]
+
+            noise_cond, pred_var = torch.split(cond_out, image.shape[1], dim=1)
+            noise_uncond, _ = torch.split(uncond_out, image.shape[1], dim=1)
+            guided_noise = noise_uncond + scale * (noise_cond - noise_uncond)
+
+            x0 = (image - torch.sqrt(1 - alpha_t) * guided_noise) / torch.sqrt(alpha_t)
+            x_prev = (
+                torch.sqrt(alpha_prev) * beta / (1 - alpha_t) * x0
+                + torch.sqrt(alpha) * (1 - alpha_prev) / (1 - alpha_t) * image
+            )
+
+            image = add_variance(pred_var, t, x_prev)
+
+    return image.cpu().float().detach().numpy()`}
+              </pre>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -487,12 +617,12 @@ const Project5 = () => {
         <div className="container mx-auto px-4 max-w-4xl space-y-10">
           <h3 className="text-2xl font-semibold text-gray-900">1.7 Image-to-Image Translation</h3>
           <p className="text-gray-700">
-            Used varying noise levels [1, 3, 5, 7, 10, 20] to edit the Campanile and two personal photos while conditioning on <em>"a high quality photo"</em>. Lower noise keeps structure; higher noise invites new content.
+            Used varying noise levels [1, 3, 5, 7, 10, 20] to edit the Campanile and two personal photos of the MIT and an image in the MoMA while conditioning on <em>"a high quality photo"</em>.
           </p>
           <div className="grid gap-6">
             {renderImageTile(campanileEdits, 'Campanile edits across noise levels', 'Campanile image-to-image results')}
-            {renderImageTile(personalEditA, 'Personal photo edit #1', 'Noise sweep for personal test image A')}
-            {renderImageTile(personalEditB, 'Personal photo edit #2', 'Noise sweep for personal test image B')}
+            {renderImageTile(personalEditA, 'MIT image edits across noise levels', 'MIT image-to-image results')}
+            {renderImageTile(personalEditB, 'Art image edits across noise levels', 'Painting image-to-image results')}
           </div>
         </div>
       </section>
@@ -506,25 +636,21 @@ const Project5 = () => {
 
           <div className="space-y-6">
             <h4 className="text-xl font-semibold text-gray-900">Web Image</h4>
-            <div className="grid md:grid-cols-2 gap-6">
-              {renderImageTile(webOriginal, 'Original web image', 'Original source image')}
-              {renderImageTile(webEditsGrid, 'Web image edits overview', 'Noise levels [1, 3, 5, 7, 10, 20] at a glance')}
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-              {renderImageTile(webEdit1, 'Web edit – noise level 1', 'Noise level 1')}
-              {renderImageTile(webEditNoise3, 'Web edit – noise level 3', 'Noise level 3')}
-              {renderImageTile(webEditNoise5, 'Web edit – noise level 5', 'Noise level 5')}
-              {renderImageTile(webEditNoise7, 'Web edit – noise level 7', 'Noise level 7')}
-              {renderImageTile(webEditNoise10, 'Web edit – noise level 10', 'Noise level 10')}
-              {renderImageTile(webEditNoise20, 'Web edit – noise level 20', 'Noise level 20')}
+            <div className="grid grid-cols-2 md:grid-cols-7 gap-4">
+              {renderImageTile(webOriginal, 'Original web image', 'Original image from the web')}
+              {renderImageTile(webEdit1, 'Web edit – noise level 1', 'Noise 1')}
+              {renderImageTile(webEditNoise3, 'Web edit – noise level 3', 'Noise 3')}
+              {renderImageTile(webEditNoise5, 'Web edit – noise level 5', 'Noise 5')}
+              {renderImageTile(webEditNoise7, 'Web edit – noise level 7', 'Noise 7')}
+              {renderImageTile(webEditNoise10, 'Web edit – noise level 10', 'Noise 10')}
+              {renderImageTile(webEditNoise20, 'Web edit – noise level 20', 'Noise 20')}
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-10">
             <div className="space-y-4">
               <h4 className="text-xl font-semibold text-gray-900">Hand-Drawn Example A</h4>
-              {renderImageTile(handDrawnSet1, 'Hand-drawn edit set A', 'Overview collage for noise levels [1, 3, 5, 7, 10, 20]')}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                {renderImageTile(handDrawnOriginal1, 'Hand-drawn original A', 'Hand-drawn original A')}
                 {renderImageTile(handDrawn1Noise1, 'Hand-drawn A – noise level 1', 'Noise 1')}
                 {renderImageTile(handDrawn1Noise3, 'Hand-drawn A – noise level 3', 'Noise 3')}
                 {renderImageTile(handDrawn1Noise5, 'Hand-drawn A – noise level 5', 'Noise 5')}
@@ -535,8 +661,8 @@ const Project5 = () => {
             </div>
             <div className="space-y-4">
               <h4 className="text-xl font-semibold text-gray-900">Hand-Drawn Example B</h4>
-              {renderImageTile(handDrawnSet2, 'Hand-drawn edit set B', 'Overview collage for noise levels [1, 3, 5, 7, 10, 20]')}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                {renderImageTile(handDrawnOriginal2, 'Hand-drawn original B', 'Hand-drawn original B')}
                 {renderImageTile(handDrawn2Noise1, 'Hand-drawn B – noise level 1', 'Noise 1')}
                 {renderImageTile(handDrawn2Noise3, 'Hand-drawn B – noise level 3', 'Noise 3')}
                 {renderImageTile(handDrawn2Noise5, 'Hand-drawn B – noise level 5', 'Noise 5')}
@@ -545,7 +671,6 @@ const Project5 = () => {
                 {renderImageTile(handDrawn2Noise20, 'Hand-drawn B – noise level 20', 'Noise 20')}
               </div>
             </div>
-          </div>
         </div>
       </section>
 
@@ -556,15 +681,68 @@ const Project5 = () => {
             Implemented the <code className="bg-gray-200 px-2 py-1 rounded">inpaint</code> routine to replace user-defined masks with guided diffusion. Masks were created via binary thresholding and morphological cleanup.
           </p>
           <div className="grid md:grid-cols-2 gap-6">
-            {renderImageTile(campanileInpaint, 'Campanile inpainting result', 'Campanile inpainted with custom mask')}
-            {renderImageTile(campanileInpaintMask, 'Campanile inpainting mask', 'Mask visualization for Campanile edit')}
+            {renderImageTile(campanileInpaint, 'Campanile inpainting result 1', 'Campanile inpainted with custom mask')}
+            {renderImageTile(campanileInpaintMask, 'Campanile inpainting result 2', 'Campanile inpainted with custom mask')}
           </div>
           <div className="grid md:grid-cols-2 gap-6">
-            {renderImageTile(personalInpaintA, 'Personal inpainting example A', 'Custom mask inpainting example #1')}
-            {renderImageTile(personalInpaintB, 'Personal inpainting example B', 'Custom mask inpainting example #2')}
+            {renderImageTile(personalInpaintA, 'Personal inpainting example A', 'Custom mask inpainting on drawing')}
+            {renderImageTile(personalInpaintB, 'Personal inpainting example B', 'Custom mask inpainting on Big Sur shore')}
           </div>
 
-          <ImagePlaceholder label="Code snippet placeholder: inpaint function (mask composition comments incoming)" />
+          <div className="bg-white border rounded-2xl p-6 shadow-sm space-y-6">
+            <h4 className="text-xl font-semibold text-gray-900">How the Inpainting Loop Works</h4>
+            <ul className="list-disc list-inside text-gray-700 space-y-2">
+              <li>Start from pure noise, reusing the CFG loop (γ = 7) to stay consistent with earlier sampling.</li>
+              <li>For each stride, blend conditional/unconditional predictions and recover <code>x₀</code> before stepping to the previous timestep.</li>
+              <li>Reinject the noisy source outside the binary mask so only masked pixels get regenerated.</li>
+            </ul>
+
+            <div className="bg-gray-900 text-gray-100 text-sm rounded-xl p-4 overflow-x-auto">
+              <pre className="font-mono whitespace-pre-wrap">
+{`def inpaint(original_image, mask, prompt_embeds, uncond_prompt_embeds, timesteps, scale=7):
+    image = torch.randn_like(original_image).to(device).half()
+
+    with torch.no_grad():
+        for i in range(len(timesteps) - 1):
+            t, prev_t = timesteps[i], timesteps[i + 1]
+
+            alpha_t = alphas_cumprod[t]
+            alpha_prev = alphas_cumprod[prev_t]
+            alpha = alpha_t / alpha_prev
+            beta = 1 - alpha
+
+            t_tensor = torch.tensor(t, device="cuda")
+            cond_out = stage_1.unet(
+                image.half().cuda(),
+                t_tensor,
+                encoder_hidden_states=prompt_embeds.half().cuda(),
+                return_dict=False
+            )[0]
+            uncond_out = stage_1.unet(
+                image.half().cuda(),
+                t_tensor,
+                encoder_hidden_states=uncond_prompt_embeds.half().cuda(),
+                return_dict=False
+            )[0]
+
+            noise_cond, pred_var = torch.split(cond_out, image.shape[1], dim=1)
+            noise_uncond, _ = torch.split(uncond_out, image.shape[1], dim=1)
+            guided_noise = noise_uncond + scale * (noise_cond - noise_uncond)
+
+            x0 = (image - torch.sqrt(1 - alpha_t) * guided_noise) / torch.sqrt(alpha_t)
+            x_prev = (
+                torch.sqrt(alpha_prev) * beta / (1 - alpha_t) * x0
+                + torch.sqrt(alpha) * (1 - alpha_prev) / (1 - alpha_t) * image
+            )
+            x_prev = add_variance(pred_var, t, x_prev)
+
+            noisy_original = forward(original_image, t).half().to(device)
+            image = mask * x_prev + (1 - mask) * noisy_original
+
+    return image.cpu().float().detach().numpy()`}
+              </pre>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -572,13 +750,11 @@ const Project5 = () => {
         <div className="container mx-auto px-4 max-w-4xl space-y-8">
           <h3 className="text-2xl font-semibold text-gray-900">1.7.3 Text-Conditioned Image-to-Image Translation</h3>
           <p className="text-gray-700">
-            Re-used the noise sweep but swapped prompts to explore stronger conditioning. The Campanile prompt <em>"a christmas tree with blue lights"</em> showcases dramatic seasonal reimagination, while the personal prompts remix Madonna and a Munich skyline.
+            Re-used the noise sweep but swapped prompts to explore stronger conditioning. The Campanile prompt <em>"a christmas tree with blue lights"</em> showcases dramatic seasonal reimagination, while the personal prompts remix Madonna and a Munich skyline. As you can see with higher noise levels the image resembles more the input image in layout and style. For the campanile it actually leaves the campanile and places the christmas tree small in the bottom left of the image.
           </p>
-          <div className="grid md:grid-cols-3 gap-6">
             {renderImageTile(christmasTreeTranslation, 'Campanile → Christmas tree', 'Prompt: "a christmas tree with blue lights"')}
             {renderImageTile(madonnaTranslation, 'Personal photo → Madonna painting', 'Prompt: "an oil painting of Madonna"')}
             {renderImageTile(munichTranslation, 'Personal photo → Snowy Munich', 'Prompt: "snowy munich with nice lighting"')}
-          </div>
         </div>
       </section>
 
@@ -586,15 +762,86 @@ const Project5 = () => {
         <div className="container mx-auto px-4 max-w-4xl space-y-8">
           <h3 className="text-2xl font-semibold text-gray-900">1.8 Visual Anagrams</h3>
           <p className="text-gray-700">
-            Built the <code className="bg-gray-200 px-2 py-1 rounded">visual_anagrams</code> helper to optimize prompts that morph under 180° rotation. Two illusions are shown below, plus an intermediate blend illustrating the shared latent structure.
+            Built the <code className="bg-gray-200 px-2 py-1 rounded">visual_anagrams</code> helper to optimize prompts that morph under 180° rotation. Below you can see two different visual anagrams whereas of the pretzel/yoga pair I decided to show the two best results. 
           </p>
           <div className="grid md:grid-cols-3 gap-6">
-            {renderImageTile(visualAnagramA, 'Visual anagram – upright', 'Illusion #1 (upright)')}
-            {renderImageTile(visualAnagramB, 'Visual anagram – rotated', 'Illusion #1 (rotated 180°)')}
-            {renderImageTile(visualAnagramBlend, 'Visual anagram – intermediate', 'Latent interpolation preview')}
+            {renderImageTile(visualAnagramA, 'Visual anagram 1', 'Pretzel/Yoga 1')}
+            {renderImageTile(visualAnagramB, 'Visual anagram 2', 'Pretzel/Yoga 2')}
+            {renderImageTile(visualAnagramBlend, 'Visual anagram 3', 'Cook/Scientist')}
           </div>
 
-          <ImagePlaceholder label="Code snippet placeholder: visual_anagrams optimization (clean-up in progress)" />
+          <div className="bg-white border rounded-2xl p-6 shadow-sm space-y-6">
+            <h4 className="text-xl font-semibold text-gray-900">Key Pieces of the Flip-Illusion Routine</h4>
+            <ul className="list-disc list-inside text-gray-700 space-y-2">
+              <li>Run the CFG denoiser twice—once with each prompt—and keep both conditional/unconditional noise estimates.</li>
+              <li>Flip the latent horizontally for the second pass, then unflip its guidance term so features meet in the middle.</li>
+              <li>Average the two guidance signals before the DDPM projection so the image reads coherently upright and upside down.</li>
+            </ul>
+
+            <div className="bg-gray-900 text-gray-100 text-sm rounded-xl p-4 overflow-x-auto">
+              <pre className="font-mono whitespace-pre-wrap">
+{`import numpy as np
+
+def visual_anagrams(image, prompt_embeds_1, prompt_embeds_2, uncond_prompt_embeds, timesteps, scale=7):
+    with torch.no_grad():
+        for i in range(len(timesteps) - 1):
+            t, prev_t = timesteps[i], timesteps[i + 1]
+
+            alpha_t = alphas_cumprod[t]
+            alpha_prev = alphas_cumprod[prev_t]
+            alpha = alpha_t / alpha_prev
+            beta = 1 - alpha
+
+            t_tensor = torch.tensor(t, device="cuda")
+            cond1 = stage_1.unet(
+                image.half().cuda(),
+                t_tensor,
+                encoder_hidden_states=prompt_embeds_1.half().cuda(),
+                return_dict=False
+            )[0]
+            uncond1 = stage_1.unet(
+                image.half().cuda(),
+                t_tensor,
+                encoder_hidden_states=uncond_prompt_embeds.half().cuda(),
+                return_dict=False
+            )[0]
+
+            noise1, pred_var = torch.split(cond1, image.shape[1], dim=1)
+            noise1_uncond, _ = torch.split(uncond1, image.shape[1], dim=1)
+            eps1 = noise1_uncond + scale * (noise1 - noise1_uncond)
+
+            flipped = torch.flip(image, dims=[2])
+            cond2 = stage_1.unet(
+                flipped.half().cuda(),
+                t_tensor,
+                encoder_hidden_states=prompt_embeds_2.half().cuda(),
+                return_dict=False
+            )[0]
+            uncond2 = stage_1.unet(
+                flipped.half().cuda(),
+                t_tensor,
+                encoder_hidden_states=uncond_prompt_embeds.half().cuda(),
+                return_dict=False
+            )[0]
+
+            noise2, _ = torch.split(cond2, image.shape[1], dim=1)
+            noise2_uncond, _ = torch.split(uncond2, image.shape[1], dim=1)
+            eps2 = torch.flip(noise2_uncond + scale * (noise2 - noise2_uncond), dims=[2])
+
+            eps = 0.5 * (eps1 + eps2)
+
+            x0 = (image - torch.sqrt(1 - alpha_t) * eps) / torch.sqrt(alpha_t)
+            image = add_variance(
+                pred_var,
+                t,
+                torch.sqrt(alpha_prev) * beta / (1 - alpha_t) * x0
+                + torch.sqrt(alpha) * (1 - alpha_prev) / (1 - alpha_t) * image
+            )
+
+    return image.cpu().float().detach().numpy()`}
+              </pre>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -602,40 +849,85 @@ const Project5 = () => {
         <div className="container mx-auto px-4 max-w-4xl space-y-8">
           <h3 className="text-2xl font-semibold text-gray-900">1.9 Hybrid Images</h3>
           <p className="text-gray-700">
-            Generated hybrid pairs combining low and high frequency components. The first pair uses a modern cityscape and vintage architecture; the second fuses a portrait with a stylized illustration.
+            Generated hybrid pairs combining low and high frequency components. The first pair merges a picture of robots and dinosaurs; the second fuses a nuclear explosion with a rubber duck.
           </p>
           <div className="grid md:grid-cols-2 gap-6">
-            {renderImageTile(hybridImageA, 'Hybrid image – pair 1', 'Hybrid Image #1 frequency fusion')}
-            {renderImageTile(hybridImageB, 'Hybrid image – pair 2', 'Hybrid Image #2 frequency fusion')}
+            {renderImageTile(hybridImageA, 'Hybrid image – pair 1', 'Robots and Dinosaurs frequency fusion')}
+            {renderImageTile(hybridImageB, 'Hybrid image – pair 2', 'Nuclear Explosion and Rubber Duck frequency fusion')}
           </div>
 
-          <ImagePlaceholder label="Code snippet placeholder: make_hybrids frequency pipeline (to be summarized)" />
+          <div className="bg-white border rounded-2xl p-6 shadow-sm space-y-6">
+            <h4 className="text-xl font-semibold text-gray-900">Frequency-Blended Hybrids</h4>
+            <ul className="list-disc list-inside text-gray-700 space-y-2">
+              <li>Generate two CFG-guided noise estimates from distinct prompts while staying on the same timestep schedule.</li>
+              <li>Low-pass one guidance map (wide Gaussian blur) and keep the complementary high frequencies from the other.</li>
+              <li>Combine the filtered signals before the DDPM projection so one scene dominates coarse structure, the other fine detail.</li>
+            </ul>
+
+            <div className="bg-gray-900 text-gray-100 text-sm rounded-xl p-4 overflow-x-auto">
+              <pre className="font-mono whitespace-pre-wrap">
+{`def make_hybrids(image, prompt_embeds_1, prompt_embeds_2, uncond_prompt_embeds, timesteps, scale=7):
+    with torch.no_grad():
+        for i in range(len(timesteps) - 1):
+            t, prev_t = timesteps[i], timesteps[i + 1]
+
+            alpha_t = alphas_cumprod[t]
+            alpha_prev = alphas_cumprod[prev_t]
+            alpha = alpha_t / alpha_prev
+            beta = 1 - alpha
+
+            t_tensor = torch.tensor(t, device="cuda")
+            cond1 = stage_1.unet(
+                image.half().cuda(),
+                t_tensor,
+                encoder_hidden_states=prompt_embeds_1.half().cuda(),
+                return_dict=False
+            )[0]
+            uncond1 = stage_1.unet(
+                image.half().cuda(),
+                t_tensor,
+                encoder_hidden_states=uncond_prompt_embeds.half().cuda(),
+                return_dict=False
+            )[0]
+            noise1, pred_var = torch.split(cond1, image.shape[1], dim=1)
+            noise1_uncond, _ = torch.split(uncond1, image.shape[1], dim=1)
+            eps1 = noise1_uncond + scale * (noise1 - noise1_uncond)
+
+            cond2 = stage_1.unet(
+                image.half().cuda(),
+                t_tensor,
+                encoder_hidden_states=prompt_embeds_2.half().cuda(),
+                return_dict=False
+            )[0]
+            uncond2 = stage_1.unet(
+                image.half().cuda(),
+                t_tensor,
+                encoder_hidden_states=uncond_prompt_embeds.half().cuda(),
+                return_dict=False
+            )[0]
+            noise2, _ = torch.split(cond2, image.shape[1], dim=1)
+            noise2_uncond, _ = torch.split(uncond2, image.shape[1], dim=1)
+            eps2 = noise2_uncond + scale * (noise2 - noise2_uncond)
+
+            eps_low = TF.gaussian_blur(eps1, kernel_size=33, sigma=2)
+            eps_high = eps2 - TF.gaussian_blur(eps2, kernel_size=33, sigma=2)
+            eps = eps_low + eps_high
+
+            x0 = (image - torch.sqrt(1 - alpha_t) * eps) / torch.sqrt(alpha_t)
+            image = add_variance(
+                pred_var,
+                t,
+                torch.sqrt(alpha_prev) * beta / (1 - alpha_t) * x0
+                + torch.sqrt(alpha) * (1 - alpha_prev) / (1 - alpha_t) * image
+            )
+
+    return image.cpu().float().detach().numpy()`}
+              </pre>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section id="takeaways" className="py-16 bg-white">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">Key Takeaways</h2>
-          <div className="grid md:grid-cols-2 gap-6 text-gray-700">
-            <Card className="p-6">
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Diffusion Mechanics</h3>
-              <ul className="space-y-2 list-disc list-inside">
-                <li>Forward noise schedules remain intuitive after implementing the scalar <code className="bg-gray-200 px-1 py-0.5 rounded text-xs">ᾱ<sub>t</sub></code> updates manually.</li>
-                <li>Iterative denoising drastically outperforms one-step approaches, especially when the stride enforces coverage across the entire timeline.</li>
-                <li>Classifier-free guidance trades diversity for photorealism—γ = 7 provided a sweet spot without overshooting colors.</li>
-              </ul>
-            </Card>
-            <Card className="p-6">
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Creative Applications</h3>
-              <ul className="space-y-2 list-disc list-inside">
-                <li>Noise sweeps are a practical knob for how much semantic drift is acceptable during image-to-image translation.</li>
-                <li>Inpainting paired with careful mask design enables high-quality scene edits even for personal photos.</li>
-                <li>Visual anagrams and hybrid images highlight the versatility of diffusion latents beyond straightforward generation.</li>
-              </ul>
-            </Card>
-          </div>
-        </div>
-      </section>
 
       <footer className="bg-gray-800 text-gray-300 py-12">
         <div className="container mx-auto px-4 text-center">
