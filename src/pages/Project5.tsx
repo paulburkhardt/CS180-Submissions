@@ -20,7 +20,6 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import bearIcon from '@/assets/bear-icon.png';
-import mountainHero from '@/assets/mountain-hero.jpg';
 
 // Part 0 prompts (num_inference_steps = 10 / 20 / 40)
 import bearCampus10 from '@/assets/homework 5/download.png';
@@ -314,7 +313,7 @@ const Project5 = () => {
       <section
         className="relative py-24 bg-gray-900 overflow-hidden"
         style={{
-          backgroundImage: `linear-gradient(rgba(17, 24, 39, 0.88), rgba(17, 24, 39, 0.88)), url(${mountainHero})`,
+          backgroundImage: `linear-gradient(rgba(17, 24, 39, 0.88), rgba(17, 24, 39, 0.88)), url(${diffusionSamples})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
