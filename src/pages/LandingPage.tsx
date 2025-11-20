@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ScrollReveal } from '@/components/ScrollReveal';
 import { SocialLinks } from '@/components/SocialLinks';
-import { Camera, BookOpen, ArrowRight, Palette, Filter, Image as ImageIcon } from 'lucide-react';
+import { Camera, BookOpen, ArrowRight, Palette, Filter, Image as ImageIcon, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import mountainHero from '@/assets/mountain-hero.jpg';
@@ -49,6 +49,14 @@ const LandingPage = () => {
       description: 'Building NeRFs: calibration, neural fields, and multi-view volume rendering to reconstruct immersive 3D scenes.',
       path: '/project-4',
       icon: <BookOpen className="h-6 w-6" />,
+    },
+    {
+      id: 'project-5',
+      title: 'Project 5',
+      subtitle: 'Fun With Diffusion Models!',
+      description: 'Exploring diffusion sampling loops, classifier-free guidance, and creative edits using DeepFloyd IF with reproducible workflows.',
+      path: '/project-5',
+      icon: <Sparkles className="h-6 w-6" />,
     }
     // Future projects can be added here
   ];
