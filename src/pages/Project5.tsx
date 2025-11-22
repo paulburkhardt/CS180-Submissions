@@ -124,6 +124,11 @@ import classCondSamplingAlgo from '@/assets/project5/B/2.6_sampling_algo.png';
 import classCondEpoch1 from '@/assets/project5/B/2.6_epoch1.png';
 import classCondEpoch5 from '@/assets/project5/B/2.6_epoch5.png';
 import classCondEpoch10 from '@/assets/project5/B/2.6_epoch10.png';
+import noSchedulerEpoch1 from '@/assets/project5/B/2.6_no_scheduler_epoch1.png';
+import noSchedulerEpoch5 from '@/assets/project5/B/2.6_no_scheduler_epoch5.png';
+import noSchedulerEpoch10 from '@/assets/project5/B/2.6_no_scheduler_epoch10.png';
+import noSchedulerLossComp from '@/assets/project5/B/2.6_no_scheduler_loss_curve_comp.png';
+
 
 const Project5 = () => {
   const [activeSection, setActiveSection] = useState('');
@@ -1262,6 +1267,61 @@ def visual_anagrams(image, prompt_embeds_1, prompt_embeds_2, uncond_prompt_embed
                   {renderImageTile(classCondEpoch1, 'Epoch 1', 'Early class-conditioned training')}
                   {renderImageTile(classCondEpoch5, 'Epoch 5', 'Digits becoming class-specific')}
                   {renderImageTile(classCondEpoch10, 'Epoch 10', 'Clean, controllable generation')}
+                </div>
+              </div>
+
+              <div className="bg-white border rounded-2xl p-6 mt-6">
+                <h5 className="font-semibold text-gray-900 mb-3">Removing the Learning Rate Scheduler</h5>
+                <p className="text-gray-700 mb-4 leading-relaxed">
+                  To maintain performance without the exponential learning rate scheduler, I reduced the constant learning rate from 1e-2 to 2e-3.
+                </p>
+                <p className="text-gray-700 mb-4 leading-relaxed">
+                  The original scheduler started with a high learning rate (1e-2) for fast initial convergence, then decayed it (γ ≈ 0.794 per epoch) to allow the model to fine-tune and stabilize in later epochs.
+                </p>
+                <p className="text-gray-700 mb-4 leading-relaxed">
+                  Without this decay, a constant moderate learning rate (5e-3) caused training instability in later epochs - the optimizer continued taking relatively large steps that prevented the model from settling into a good solution, leading to degraded sample quality at epoch 10 despite lower training loss.
+                </p>
+
+                <div className="bg-gray-50 rounded-xl p-4 mb-4">
+                  <h6 className="font-semibold text-gray-900 mb-2">What Changed:</h6>
+                  <ul className="list-disc list-inside text-gray-700 space-y-1">
+                    <li>Removed exponential learning rate scheduler</li>
+                    <li>Used constant learning rate of 2e-3 (instead of starting at 1e-3 with decay)</li>
+                    <li>Maintained same training duration (20 epochs)</li>
+                  </ul>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <h6 className="font-semibold text-gray-900 mb-3">Loss Curve Comparison</h6>
+                    <p className="text-gray-700 mb-3 text-sm">
+                      The comparison shows both the full training curve and a zoomed view of the first 200 iterations. The no-scheduler version converges more slowly initially but maintains steady progress:
+                    </p>
+                    {renderImageTile(
+                      noSchedulerLossComp,
+                      'Loss curve comparison',
+                      'Training loss with and without scheduler (full + zoomed first 200 iterations)'
+                    )}
+                  </div>
+
+                  <div>
+                    <h6 className="font-semibold text-gray-900 mb-3">Sample Quality Comparison</h6>
+                    <p className="text-gray-700 mb-3 text-sm">
+                      Despite the simpler training procedure, the no-scheduler version achieves comparable sample quality:
+                    </p>
+                    <div className="space-y-4">
+                      {renderImageTile(noSchedulerEpoch1, 'No-scheduler Epoch 1', 'Early training without scheduler')}
+                      {renderImageTile(noSchedulerEpoch5, 'No-scheduler Epoch 5', 'Mid-training without scheduler')}
+                      {renderImageTile(noSchedulerEpoch10, 'No-scheduler Epoch 10', 'Final results without scheduler')}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-green-50 border border-green-200 rounded-xl p-4 mt-4">
+                  <h6 className="font-semibold text-green-900 mb-2">Results</h6>
+                  <p className="text-green-800 text-sm leading-relaxed">
+                    By using a lower constant learning rate of 2e-3, the model trades off slower initial convergence for better stability throughout training, maintains consistent sample quality across all epochs, avoids the late-stage instability that occurs with higher constant learning rates, and achieves comparable final performance to the scheduled version.
+                  </p>
                 </div>
               </div>
 
