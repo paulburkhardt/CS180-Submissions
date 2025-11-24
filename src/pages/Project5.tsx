@@ -816,7 +816,7 @@ def iterative_denoise_cfg(im_noisy, i_start, prompt_embeds, uncond_prompt_embeds
           <div className="bg-white border rounded-2xl p-6 shadow-sm space-y-6">
             <h4 className="text-xl font-semibold text-gray-900">Key Pieces of the Flip-Illusion Routine</h4>
             <ul className="list-disc list-inside text-gray-700 space-y-2">
-              <li>Run the CFG denoiser twice—once with each prompt—and keep both conditional/unconditional noise estimates.</li>
+              <li>Run the CFG denoiser twice, once with each prompt, and keep both conditional/unconditional noise estimates.</li>
               <li>Flip the latent horizontally for the second pass, then unflip its guidance term so features meet in the middle.</li>
               <li>Average the two guidance signals before the DDPM projection so the image reads coherently upright and upside down.</li>
             </ul>
@@ -1345,7 +1345,7 @@ def visual_anagrams(image, prompt_embeds_1, prompt_embeds_2, uncond_prompt_embed
             <Card className="p-6">
               <h3 className="text-xl font-semibold text-gray-900 mb-3">Part A: The Power of Pretrained Models</h3>
               <p className="text-gray-700 leading-relaxed">
-                Working with DeepFloyd IF showed me how sophisticated diffusion models have become. From simple prompt embeddings to complex techniques like CFG, inpainting, and visual anagrams, these models are incredibly versatile. The iterative denoising process is elegant—each step refines the image, building up from noise to photorealistic results.
+                Working with DeepFloyd IF showed me how sophisticated even simple diffusion models are. From simple prompt embeddings to complex techniques like CFG, inpainting, and visual anagrams, these models are incredibly versatile. The iterative denoising process is elegant: each step refines the image, building up from noise to photorealistic results.
               </p>
             </Card>
 
