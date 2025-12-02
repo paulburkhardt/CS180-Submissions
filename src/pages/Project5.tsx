@@ -1012,7 +1012,7 @@ def visual_anagrams(image, prompt_embeds_1, prompt_embeds_2, uncond_prompt_embed
           </div>
 
           <div className="bg-gray-50 border rounded-2xl p-6">
-            <h4 className="text-xl font-semibold text-gray-900 mb-4">The Denoising Problem</h4>
+            <h4 className="text-xl font-semibold text-gray-900 mb-4">1.2.1 Training a Single-Step Denoiser</h4>
             <p className="text-gray-700 mb-4 leading-relaxed">
               The goal is straightforward: given a noisy image <code className="bg-gray-200 px-2 py-1 rounded">z = x + σε</code>, train a UNet to predict the clean image <code className="bg-gray-200 px-2 py-1 rounded">x</code>. I implemented a UNet with downsampling and upsampling blocks, trained it on MNIST digits with <code className="bg-gray-200 px-2 py-1 rounded">σ = 0.5</code>, and watched it learn to denoise over 5 epochs.
             </p>
@@ -1054,28 +1054,26 @@ def visual_anagrams(image, prompt_embeds_1, prompt_embeds_2, uncond_prompt_embed
               </div>
 
               <div>
-                <h5 className="font-semibold text-gray-900 mb-3">After Epoch 1</h5>
+                <h5 className="font-semibold text-gray-900 mb-3">Sample Results on Test Set</h5>
+                <p className="text-gray-700 mb-3">
+                  After training, the model successfully denoises test set digits. The results show clean reconstructions from noisy inputs:
+                </p>
                 {renderImageTile(
-                  partB1Epoch1,
-                  'Denoising results after epoch 1',
-                  'Test set results after 1 epoch of training'
+                  partB1SampleResults,
+                  'Denoising results on test set',
+                  'Test set denoising results after training'
                 )}
-                <div>
-                  <h5 className="font-semibold text-gray-900 mb-3 mt-6">After Epoch 5</h5>
-                  {renderImageTile(
-                    partB1Epoch5,
-                    'Denoising results after epoch 5',
-                    'Test set results after 5 epochs of training'
-                  )}
-                </div>
               </div>
             </div>
           </div>
 
           <div className="bg-gray-50 border rounded-2xl p-6">
-            <h4 className="text-xl font-semibold text-gray-900 mb-4">Out-of-Distribution Testing</h4>
+            <h4 className="text-xl font-semibold text-gray-900 mb-4">1.2.2 Out-of-Distribution Testing</h4>
             <p className="text-gray-700 mb-4 leading-relaxed">
-              {"Since the model was trained exclusively on σ = 0.5, I tested how it generalizes to other noise levels. Interestingly, it performs reasonably well even on noise levels it never saw during training, though performance degrades at the extremes (σ -> 1.0)."}
+              Our denoiser was trained on MNIST digits noised with σ = 0.5. Let's see how the denoiser performs on different σ's that it wasn't trained for. I visualized the denoiser results on test set digits with varying levels of noise σ.
+            </p>
+            <p className="text-gray-700 mb-4 leading-relaxed">
+              Interestingly, the model performs reasonably well even on noise levels it never saw during training, though performance degrades at the extremes (σ → 1.0). The same test images are shown with different noise levels to demonstrate how the model generalizes:
             </p>
             <div className="space-y-4">
               {renderImageTile(oodSigma0, 'σ = 0.0', 'Clean digits (no noise)')}
@@ -1085,6 +1083,55 @@ def visual_anagrams(image, prompt_embeds_1, prompt_embeds_2, uncond_prompt_embed
               {renderImageTile(oodSigma06, 'σ = 0.6', 'Medium-high noise')}
               {renderImageTile(oodSigma08, 'σ = 0.8', 'High noise level')}
               {renderImageTile(oodSigma10, 'σ = 1.0', 'Maximum noise')}
+            </div>
+          </div>
+
+          <div className="bg-gray-50 border rounded-2xl p-6">
+            <h4 className="text-xl font-semibold text-gray-900 mb-4">1.2.3 Denoising Pure Noise</h4>
+            <p className="text-gray-700 mb-4 leading-relaxed">
+              To make denoising a generative task, we'd like to be able to denoise pure, random Gaussian noise. We can think of this as starting with a blank canvas <code className="bg-gray-200 px-2 py-1 rounded">z ∼ N(0, σ²)</code> where <code className="bg-gray-200 px-2 py-1 rounded">σ = 0.5</code> and denoising it to get a clean image <code className="bg-gray-200 px-2 py-1 rounded">x</code>.
+            </p>
+            <p className="text-gray-700 mb-4 leading-relaxed">
+              I repeated the same training process as in part 1.2.1, but input pure noise <code className="bg-gray-200 px-2 py-1 rounded">z ∼ N(0, 0.5²)</code> and denoised it for 5 epochs. Below are the results after 1 and 5 epochs:
+            </p>
+
+            <div className="space-y-6">
+              <div>
+                <h5 className="font-semibold text-gray-900 mb-3">After Epoch 1</h5>
+                <p className="text-gray-700 mb-3">
+                  Early in training, the model produces blurry, averaged-looking digits:
+                </p>
+                {renderImageTile(
+                  partB1Epoch1,
+                  'Denoising pure noise after epoch 1',
+                  'Pure noise denoising results after 1 epoch'
+                )}
+              </div>
+
+              <div>
+                <h5 className="font-semibold text-gray-900 mb-3">After Epoch 5</h5>
+                <p className="text-gray-700 mb-3">
+                  After 5 epochs, the outputs become clearer but still show averaging behavior:
+                </p>
+                {renderImageTile(
+                  partB1Epoch5,
+                  'Denoising pure noise after epoch 5',
+                  'Pure noise denoising results after 5 epochs'
+                )}
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <h5 className="font-semibold text-blue-900 mb-3">Observed Patterns</h5>
+                <p className="text-blue-800 text-sm leading-relaxed mb-3">
+                  When denoising pure noise, the model generates outputs that look like <strong>averaged or blurred versions of multiple digits</strong>. The generated images don't clearly represent specific digits (0-9), but rather appear as superpositions or centroids of the training distribution.
+                </p>
+                <p className="text-blue-800 text-sm leading-relaxed mb-3">
+                  <strong>Why does this happen?</strong> With an MSE loss, the model learns to predict the point that minimizes the sum of squared distances to all training examples. This is closely related to the idea of a <strong>centroid in clustering</strong>. When given pure noise (which contains no information about which digit to generate), the model's best MSE-minimizing prediction is the <strong>mean of all possible digits</strong> in the training set.
+                </p>
+                <p className="text-blue-800 text-sm leading-relaxed">
+                  Since the model has no conditioning signal to tell it which specific digit to generate, it hedges its bets by outputting something that looks like an average across all digits: a blurry, ambiguous shape that minimizes expected squared error across the entire training distribution.
+                </p>
+              </div>
             </div>
           </div>
         </div>
