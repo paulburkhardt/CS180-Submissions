@@ -96,6 +96,7 @@ import unetOperations from '@/assets/project5/B/1.1_Standard UNet Operations  .p
 import noisingVisualization from '@/assets/project5/B/1.2_vis_of_noising.png';
 import partB1TrainingLoss from '@/assets/project5/B/1.2.1_loss_curve.png';
 import partB1SampleResults from '@/assets/project5/B/1.2.1_sample_results.png';
+import partB1PureNoiseLoss from '@/assets/project5/B/1.2.3_loss_curve.png';
 import partB1Epoch1 from '@/assets/project5/B/1.2.3_sample_res_epoch1.png';
 import partB1Epoch5 from '@/assets/project5/B/1.2.3_sample_res_epoch5.png';
 import oodSigma0 from '@/assets/project5/B/1.2.2_sigma=0.png';
@@ -1096,6 +1097,18 @@ def visual_anagrams(image, prompt_embeds_1, prompt_embeds_2, uncond_prompt_embed
             </p>
 
             <div className="space-y-6">
+              <div>
+                <h5 className="font-semibold text-gray-900 mb-3">Training Loss Curve</h5>
+                <p className="text-gray-700 mb-3">
+                  The training loss curve shows how the model learns to denoise pure noise over 5 epochs:
+                </p>
+                {renderImageTile(
+                  partB1PureNoiseLoss,
+                  'Training loss curve for pure noise denoising',
+                  'Loss curve over 5 epochs when training to denoise pure noise'
+                )}
+              </div>
+
               <div>
                 <h5 className="font-semibold text-gray-900 mb-3">After Epoch 1</h5>
                 <p className="text-gray-700 mb-3">
