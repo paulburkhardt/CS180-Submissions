@@ -451,15 +451,10 @@ const Project5 = () => {
             'Campanile corrupted at t ∈ {250, 500, 750}',
           )}
 
-          <div className="bg-gray-900 text-gray-100 text-sm rounded-xl p-4 overflow-x-auto">
-            <pre className="font-mono whitespace-pre">
-              {`def forward(im, t):
-    with torch.no_grad():
-        alpha_bar_t = alphas_cumprod[t]
-        epsilon = torch.randn_like(im)
-        im_noisy = torch.sqrt(alpha_bar_t) * im + torch.sqrt(1 - alpha_bar_t) * epsilon
-    return im_noisy`}
-            </pre>
+          <div className="bg-white border rounded-xl p-4">
+            <p className="text-gray-700 text-sm leading-relaxed">
+              <strong>Implementation approach:</strong> The forward process follows the DDPM formulation where we compute the noisy image as a weighted combination of the original image and Gaussian noise. The weights are determined by the cumulative product of alphas at timestep <code className="bg-gray-200 px-1 rounded">t</code>.
+            </p>
           </div>
         </div>
       </section>
@@ -501,79 +496,18 @@ const Project5 = () => {
           {renderImageTile(iterativeComparisons, 'Iterative vs single-step vs Gaussian', 'Final outputs across three strategies')}
 
           <div className="bg-white border rounded-2xl p-6 shadow-sm space-y-6">
-            <h4 className="text-xl font-semibold text-gray-900">How the Notebook Cells Were Filled In</h4>
+            <h4 className="text-xl font-semibold text-gray-900">Implementation Approach</h4>
             <ul className="list-disc list-inside text-gray-700 space-y-2">
-              <li><strong>Schedule</strong>: build <code>strided_timesteps</code> marching 990 → 0 in steps of 30, then pass it to the scheduler so the variance helper stays synchronized.</li>
-              <li><strong>DDPM Update</strong>: for each step compute <code>α</code>/<code>β</code>, recover <code>x₀</code>, project to the previous timestep, and add the learned variance term.</li>
-              <li><strong>Baselines</strong>: reuse the one-step denoiser and a Gaussian blur to benchmark against the iterative result.</li>
+              <li><strong>Schedule</strong>: Built <code>strided_timesteps</code> marching from 990 → 0 in steps of 30, then passed to the scheduler to keep variance sampling synchronized.</li>
+              <li><strong>DDPM Update</strong>: For each step, computed α/β ratios, recovered x₀ estimate, projected to the previous timestep, and added the learned variance term.</li>
+              <li><strong>Baselines</strong>: Compared against one-step denoising and Gaussian blur to benchmark iterative quality.</li>
             </ul>
 
-            <div className="bg-gray-900 text-gray-100 text-sm rounded-xl p-4 overflow-x-auto space-y-4">
-              <pre className="font-mono whitespace-pre-wrap">
-                {`# Timesteps & scheduler
-steps = list(range(990, 0, -30)) + [0]
-stage_1.scheduler.set_timesteps(timesteps=steps)`}
-              </pre>
-              <pre className="font-mono whitespace-pre-wrap">
-                {`# Core DDPM loop
-def add_variance(pred_var, t, image):
-    sigma = stage_1.scheduler._get_variance(t, predicted_variance=pred_var)
-    return image + torch.exp(0.5 * sigma) * torch.randn_like(image)
-
-def iterative_denoise(im_noisy, i_start, prompt_embeds, timesteps):
-    image = im_noisy
-    with torch.no_grad():
-        for i in range(i_start, len(timesteps) - 1):
-            t, prev_t = timesteps[i], timesteps[i + 1]
-            alpha_t = alphas_cumprod[t]
-            alpha_prev = alphas_cumprod[prev_t]
-            alpha = alpha_t / alpha_prev
-            beta = 1 - alpha
-
-            model_out = stage_1.unet(
-                image.half().cuda(),
-                torch.tensor(t, device='cuda'),
-                encoder_hidden_states=prompt_embeds.half().cuda(),
-                return_dict=False
-            )[0]
-
-            noise_est, pred_var = torch.split(model_out, image.shape[1], dim=1)
-            x0 = (image - torch.sqrt(1 - alpha_t) * noise_est) / torch.sqrt(alpha_t)
-            x_prev = (
-                torch.sqrt(alpha_prev) * beta / (1 - alpha_t) * x0
-                + torch.sqrt(alpha) * (1 - alpha_prev) / (1 - alpha_t) * image
-            )
-            image = add_variance(pred_var, t, x_prev)
-
-    return image.cpu().float().detach().numpy()`}
-              </pre>
-              <pre className="font-mono whitespace-pre-wrap">
-                {`# Final comparisons
-prompt_embeds = prompt_embeds_dict["a high quality photo"]
-i_start = 10
-t = steps[i_start]
-im_noisy = forward(test_im, t).half().to(device)
-
-clean_iter = iterative_denoise(im_noisy, i_start, prompt_embeds, steps)
-
-with torch.no_grad():
-    alpha_t = alphas_cumprod[t]
-    noise_est = stage_1.unet(
-        im_noisy.half().cuda(),
-        torch.tensor(t, device='cuda'),
-        encoder_hidden_states=prompt_embeds.half().cuda(),
-        return_dict=False
-    )[0][:, :3].cpu().float()
-    clean_one_step = (
-        im_noisy.cpu().float() - torch.sqrt(1 - alpha_t) * noise_est
-    ) / torch.sqrt(alpha_t)
-
-blur_filtered = TF.gaussian_blur(
-    im_noisy.cpu().float(), kernel_size=[5, 5], sigma=[2.0, 2.0]
-)
-
-# These arrays back the comparison mosaic shown above.`}
-              </pre>
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+              <h5 className="font-semibold text-blue-900 mb-2">Key Concept</h5>
+              <p className="text-blue-800 text-sm leading-relaxed">
+                The iterative denoiser follows the DDPM reverse process. At each timestep, we estimate the noise using the UNet, solve for x₀, then compute the previous-timestep estimate using the posterior mean formula. Variance injection helps maintain diversity.
+              </p>
             </div>
           </div>
         </div>
@@ -598,60 +532,19 @@ blur_filtered = TF.gaussian_blur(
           {renderImageTile(cfgSamples, 'CFG samples (γ = 7)', 'Five CFG-guided samples conditioned on "a high quality photo"')}
 
           <div className="bg-white border rounded-2xl p-6 shadow-sm space-y-6">
-            <h4 className="text-xl font-semibold text-gray-900">How γ = 7 Guidance Was Implemented</h4>
+            <h4 className="text-xl font-semibold text-gray-900">Implementation Approach for CFG (γ = 7)</h4>
             <ul className="list-disc list-inside text-gray-700 space-y-2">
-              <li>Reuse the same timestep stride as the unconditional loop so variance sampling stays aligned.</li>
-              <li>Run the U-Net twice (conditioned + unconditional) and blend the noise terms with γ = 7.</li>
-              <li>Project back to <em>t − 30</em>, inject learned variance, and keep tensors on CUDA/Half for parity with the notebook.</li>
+              <li>Reused the same timestep stride as the unconditional loop for consistent variance sampling.</li>
+              <li>Ran the U-Net twice per step: once with the text prompt, once unconditionally.</li>
+              <li>Blended noise predictions: <code className="bg-gray-200 px-1 rounded">ε_guided = ε_uncond + γ(ε_cond - ε_uncond)</code></li>
+              <li>Projected back using the DDPM posterior mean and injected learned variance.</li>
             </ul>
 
-            <div className="bg-gray-900 text-gray-100 text-sm rounded-xl p-4 overflow-x-auto">
-              <pre className="font-mono whitespace-pre-wrap">
-                {`# Prompt embeddings used for CFG
-prompt_embeds = prompt_embeds_dict["a high quality photo"]
-uncond_prompt_embeds = prompt_embeds_dict[""]
-
-
-def iterative_denoise_cfg(im_noisy, i_start, prompt_embeds, uncond_prompt_embeds, timesteps, scale=7):
-    image = im_noisy
-
-    with torch.no_grad():
-        for i in range(i_start, len(timesteps) - 1):
-            t, prev_t = timesteps[i], timesteps[i + 1]
-
-            alpha_t = alphas_cumprod[t]
-            alpha_prev = alphas_cumprod[prev_t]
-            alpha = alpha_t / alpha_prev
-            beta = 1 - alpha
-
-            t_tensor = torch.tensor(t, device="cuda")
-            cond_out = stage_1.unet(
-                image.half().cuda(),
-                t_tensor,
-                encoder_hidden_states=prompt_embeds.half().cuda(),
-                return_dict=False
-            )[0]
-            uncond_out = stage_1.unet(
-                image.half().cuda(),
-                t_tensor,
-                encoder_hidden_states=uncond_prompt_embeds.half().cuda(),
-                return_dict=False
-            )[0]
-
-            noise_cond, pred_var = torch.split(cond_out, image.shape[1], dim=1)
-            noise_uncond, _ = torch.split(uncond_out, image.shape[1], dim=1)
-            guided_noise = noise_uncond + scale * (noise_cond - noise_uncond)
-
-            x0 = (image - torch.sqrt(1 - alpha_t) * guided_noise) / torch.sqrt(alpha_t)
-            x_prev = (
-                torch.sqrt(alpha_prev) * beta / (1 - alpha_t) * x0
-                + torch.sqrt(alpha) * (1 - alpha_prev) / (1 - alpha_t) * image
-            )
-
-            image = add_variance(pred_var, t, x_prev)
-
-    return image.cpu().float().detach().numpy()`}
-              </pre>
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+              <h5 className="font-semibold text-blue-900 mb-2">CFG Intuition</h5>
+              <p className="text-blue-800 text-sm leading-relaxed">
+                Classifier-free guidance amplifies the difference between conditional and unconditional predictions. Higher γ values push the output more strongly toward the conditioned prompt, sharpening details but risking artifacts at extreme values.
+              </p>
             </div>
           </div>
         </div>
@@ -734,57 +627,19 @@ def iterative_denoise_cfg(im_noisy, i_start, prompt_embeds, uncond_prompt_embeds
           </div>
 
           <div className="bg-white border rounded-2xl p-6 shadow-sm space-y-6">
-            <h4 className="text-xl font-semibold text-gray-900">How the Inpainting Loop Works</h4>
+            <h4 className="text-xl font-semibold text-gray-900">Inpainting Approach</h4>
             <ul className="list-disc list-inside text-gray-700 space-y-2">
-              <li>Start from pure noise, reusing the CFG loop (γ = 7) to stay consistent with earlier sampling.</li>
-              <li>For each stride, blend conditional/unconditional predictions and recover <code>x₀</code> before stepping to the previous timestep.</li>
-              <li>Reinject the noisy source outside the binary mask so only masked pixels get regenerated.</li>
+              <li>Started sampling from pure noise inside the masked region.</li>
+              <li>Applied CFG-guided denoising (γ = 7) at each timestep.</li>
+              <li>At each step, blended the denoised result with the noisy original: <code className="bg-gray-200 px-1 rounded">x = mask * x_denoised + (1-mask) * x_noisy_orig</code></li>
+              <li>The mask boundary gets smoothly integrated as both regions denoise together.</li>
             </ul>
 
-            <div className="bg-gray-900 text-gray-100 text-sm rounded-xl p-4 overflow-x-auto">
-              <pre className="font-mono whitespace-pre-wrap">
-                {`def inpaint(original_image, mask, prompt_embeds, uncond_prompt_embeds, timesteps, scale=7):
-    image = torch.randn_like(original_image).to(device).half()
-
-    with torch.no_grad():
-        for i in range(len(timesteps) - 1):
-            t, prev_t = timesteps[i], timesteps[i + 1]
-
-            alpha_t = alphas_cumprod[t]
-            alpha_prev = alphas_cumprod[prev_t]
-            alpha = alpha_t / alpha_prev
-            beta = 1 - alpha
-
-            t_tensor = torch.tensor(t, device="cuda")
-            cond_out = stage_1.unet(
-                image.half().cuda(),
-                t_tensor,
-                encoder_hidden_states=prompt_embeds.half().cuda(),
-                return_dict=False
-            )[0]
-            uncond_out = stage_1.unet(
-                image.half().cuda(),
-                t_tensor,
-                encoder_hidden_states=uncond_prompt_embeds.half().cuda(),
-                return_dict=False
-            )[0]
-
-            noise_cond, pred_var = torch.split(cond_out, image.shape[1], dim=1)
-            noise_uncond, _ = torch.split(uncond_out, image.shape[1], dim=1)
-            guided_noise = noise_uncond + scale * (noise_cond - noise_uncond)
-
-            x0 = (image - torch.sqrt(1 - alpha_t) * guided_noise) / torch.sqrt(alpha_t)
-            x_prev = (
-                torch.sqrt(alpha_prev) * beta / (1 - alpha_t) * x0
-                + torch.sqrt(alpha) * (1 - alpha_prev) / (1 - alpha_t) * image
-            )
-            x_prev = add_variance(pred_var, t, x_prev)
-
-            noisy_original = forward(original_image, t).half().to(device)
-            image = mask * x_prev + (1 - mask) * noisy_original
-
-    return image.cpu().float().detach().numpy()`}
-              </pre>
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+              <h5 className="font-semibold text-blue-900 mb-2">Key Insight</h5>
+              <p className="text-blue-800 text-sm leading-relaxed">
+                Inpainting works by allowing the diffusion model to freely generate inside the mask while anchoring the content outside. By re-noising the original at each step and blending, the model naturally harmonizes the generated region with its surroundings.
+              </p>
             </div>
           </div>
         </div>
@@ -815,75 +670,18 @@ def iterative_denoise_cfg(im_noisy, i_start, prompt_embeds, uncond_prompt_embeds
           </div>
 
           <div className="bg-white border rounded-2xl p-6 shadow-sm space-y-6">
-            <h4 className="text-xl font-semibold text-gray-900">Key Pieces of the Flip-Illusion Routine</h4>
+            <h4 className="text-xl font-semibold text-gray-900">Visual Anagrams Approach</h4>
             <ul className="list-disc list-inside text-gray-700 space-y-2">
-              <li>Run the CFG denoiser twice, once with each prompt, and keep both conditional/unconditional noise estimates.</li>
-              <li>Flip the latent horizontally for the second pass, then unflip its guidance term so features meet in the middle.</li>
-              <li>Average the two guidance signals before the DDPM projection so the image reads coherently upright and upside down.</li>
+              <li>Ran CFG denoising twice per step: once with prompt A on the upright image, once with prompt B on the flipped image.</li>
+              <li>Unflipped the second noise estimate to match the original orientation.</li>
+              <li>Averaged both CFG-guided noise predictions before the DDPM update.</li>
             </ul>
 
-            <div className="bg-gray-900 text-gray-100 text-sm rounded-xl p-4 overflow-x-auto">
-              <pre className="font-mono whitespace-pre-wrap">
-                {`import numpy as np
-
-def visual_anagrams(image, prompt_embeds_1, prompt_embeds_2, uncond_prompt_embeds, timesteps, scale=7):
-    with torch.no_grad():
-        for i in range(len(timesteps) - 1):
-            t, prev_t = timesteps[i], timesteps[i + 1]
-
-            alpha_t = alphas_cumprod[t]
-            alpha_prev = alphas_cumprod[prev_t]
-            alpha = alpha_t / alpha_prev
-            beta = 1 - alpha
-
-            t_tensor = torch.tensor(t, device="cuda")
-            cond1 = stage_1.unet(
-                image.half().cuda(),
-                t_tensor,
-                encoder_hidden_states=prompt_embeds_1.half().cuda(),
-                return_dict=False
-            )[0]
-            uncond1 = stage_1.unet(
-                image.half().cuda(),
-                t_tensor,
-                encoder_hidden_states=uncond_prompt_embeds.half().cuda(),
-                return_dict=False
-            )[0]
-
-            noise1, pred_var = torch.split(cond1, image.shape[1], dim=1)
-            noise1_uncond, _ = torch.split(uncond1, image.shape[1], dim=1)
-            eps1 = noise1_uncond + scale * (noise1 - noise1_uncond)
-
-            flipped = torch.flip(image, dims=[2])
-            cond2 = stage_1.unet(
-                flipped.half().cuda(),
-                t_tensor,
-                encoder_hidden_states=prompt_embeds_2.half().cuda(),
-                return_dict=False
-            )[0]
-            uncond2 = stage_1.unet(
-                flipped.half().cuda(),
-                t_tensor,
-                encoder_hidden_states=uncond_prompt_embeds.half().cuda(),
-                return_dict=False
-            )[0]
-
-            noise2, _ = torch.split(cond2, image.shape[1], dim=1)
-            noise2_uncond, _ = torch.split(uncond2, image.shape[1], dim=1)
-            eps2 = torch.flip(noise2_uncond + scale * (noise2 - noise2_uncond), dims=[2])
-
-            eps = 0.5 * (eps1 + eps2)
-
-            x0 = (image - torch.sqrt(1 - alpha_t) * eps) / torch.sqrt(alpha_t)
-            image = add_variance(
-                pred_var,
-                t,
-                torch.sqrt(alpha_prev) * beta / (1 - alpha_t) * x0
-                + torch.sqrt(alpha) * (1 - alpha_prev) / (1 - alpha_t) * image
-            )
-
-    return image.cpu().float().detach().numpy()`}
-              </pre>
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+              <h5 className="font-semibold text-blue-900 mb-2">Core Idea</h5>
+              <p className="text-blue-800 text-sm leading-relaxed">
+                By averaging noise estimates from two different orientations with different prompts, the final image satisfies <em>both</em> conditions simultaneously. When viewed upright it matches prompt A; when flipped 180°, it matches prompt B.
+              </p>
             </div>
           </div>
         </div>
@@ -901,72 +699,19 @@ def visual_anagrams(image, prompt_embeds_1, prompt_embeds_2, uncond_prompt_embed
           </div>
 
           <div className="bg-white border rounded-2xl p-6 shadow-sm space-y-6">
-            <h4 className="text-xl font-semibold text-gray-900">Frequency-Blended Hybrids</h4>
+            <h4 className="text-xl font-semibold text-gray-900">Hybrid Images Approach</h4>
             <ul className="list-disc list-inside text-gray-700 space-y-2">
-              <li>Generate two CFG-guided noise estimates from distinct prompts while staying on the same timestep schedule.</li>
-              <li>Low-pass one guidance map (wide Gaussian blur) and keep the complementary high frequencies from the other.</li>
-              <li>Combine the filtered signals before the DDPM projection so one scene dominates coarse structure, the other fine detail.</li>
+              <li>Generated CFG-guided noise estimates from two distinct prompts at each timestep.</li>
+              <li>Applied low-pass filtering (Gaussian blur) to one noise estimate for coarse structure.</li>
+              <li>Extracted high frequencies from the second estimate: <code className="bg-gray-200 px-1 rounded">ε_high = ε₂ - blur(ε₂)</code></li>
+              <li>Combined: <code className="bg-gray-200 px-1 rounded">ε_final = lowpass(ε₁) + highpass(ε₂)</code></li>
             </ul>
 
-            <div className="bg-gray-900 text-gray-100 text-sm rounded-xl p-4 overflow-x-auto">
-              <pre className="font-mono whitespace-pre-wrap">
-                {`def make_hybrids(image, prompt_embeds_1, prompt_embeds_2, uncond_prompt_embeds, timesteps, scale=7):
-    with torch.no_grad():
-        for i in range(len(timesteps) - 1):
-            t, prev_t = timesteps[i], timesteps[i + 1]
-
-            alpha_t = alphas_cumprod[t]
-            alpha_prev = alphas_cumprod[prev_t]
-            alpha = alpha_t / alpha_prev
-            beta = 1 - alpha
-
-            t_tensor = torch.tensor(t, device="cuda")
-            cond1 = stage_1.unet(
-                image.half().cuda(),
-                t_tensor,
-                encoder_hidden_states=prompt_embeds_1.half().cuda(),
-                return_dict=False
-            )[0]
-            uncond1 = stage_1.unet(
-                image.half().cuda(),
-                t_tensor,
-                encoder_hidden_states=uncond_prompt_embeds.half().cuda(),
-                return_dict=False
-            )[0]
-            noise1, pred_var = torch.split(cond1, image.shape[1], dim=1)
-            noise1_uncond, _ = torch.split(uncond1, image.shape[1], dim=1)
-            eps1 = noise1_uncond + scale * (noise1 - noise1_uncond)
-
-            cond2 = stage_1.unet(
-                image.half().cuda(),
-                t_tensor,
-                encoder_hidden_states=prompt_embeds_2.half().cuda(),
-                return_dict=False
-            )[0]
-            uncond2 = stage_1.unet(
-                image.half().cuda(),
-                t_tensor,
-                encoder_hidden_states=uncond_prompt_embeds.half().cuda(),
-                return_dict=False
-            )[0]
-            noise2, _ = torch.split(cond2, image.shape[1], dim=1)
-            noise2_uncond, _ = torch.split(uncond2, image.shape[1], dim=1)
-            eps2 = noise2_uncond + scale * (noise2 - noise2_uncond)
-
-            eps_low = TF.gaussian_blur(eps1, kernel_size=33, sigma=2)
-            eps_high = eps2 - TF.gaussian_blur(eps2, kernel_size=33, sigma=2)
-            eps = eps_low + eps_high
-
-            x0 = (image - torch.sqrt(1 - alpha_t) * eps) / torch.sqrt(alpha_t)
-            image = add_variance(
-                pred_var,
-                t,
-                torch.sqrt(alpha_prev) * beta / (1 - alpha_t) * x0
-                + torch.sqrt(alpha) * (1 - alpha_prev) / (1 - alpha_t) * image
-            )
-
-    return image.cpu().float().detach().numpy()`}
-              </pre>
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+              <h5 className="font-semibold text-blue-900 mb-2">Perceptual Effect</h5>
+              <p className="text-blue-800 text-sm leading-relaxed">
+                The human visual system perceives low frequencies first at a distance and high frequencies up close. By combining low frequencies from one prompt with high frequencies from another, the resulting image appears as one scene from afar and another up close.
+              </p>
             </div>
           </div>
         </div>
